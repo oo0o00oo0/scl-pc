@@ -4,7 +4,7 @@ const Button = ({ children }: { children: React.ReactNode }) => (
       border: "orange solid 2px",
     }}
   >
-    {children} 123
+    {children}
   </button>
 );
 export default Button;
