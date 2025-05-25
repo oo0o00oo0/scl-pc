@@ -13,7 +13,7 @@ import {
   Vec3,
 } from "playcanvas";
 import { useModel } from "@playcanvas/react/hooks";
-import { plotPositionData } from "../data/data";
+import { plotPositionData } from "../../data/data";
 
 const LabelsShape = ({
   avaiableIds,

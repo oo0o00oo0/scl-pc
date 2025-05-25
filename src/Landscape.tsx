@@ -6,6 +6,8 @@ import { GSplat } from "./CustomGSplat";
 // import { GSplat } from "@playcanvas/react/components";
 import { useSplat } from "./hooks/use-asset";
 
+// hello subby
+
 type GSplatComponent = {
   instance: {
     sorter: {
