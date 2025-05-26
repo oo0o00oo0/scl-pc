@@ -19,16 +19,18 @@ const LabelsShape = ({
   avaiableIds,
   setActiveUnit,
   activeUnit,
+  setActiveCameraTarget,
+  setActiveCameraPosition,
 }: {
   avaiableIds: string[];
+  setActiveCameraTarget: (target: Vec3) => void;
+  setActiveCameraPosition: (position: Vec3) => void;
   setActiveUnit: (id: string | null) => void;
   activeUnit: string | null;
 }) => {
   return (
     <Entity name="billboard">
       {plotPositionData.map((label) => {
-        // If activeUnit exists, only show that label
-        // Otherwise, show all labels that are in availableIds
         const shouldShow = activeUnit
           ? label.name === activeUnit && avaiableIds.includes(label.name)
           : avaiableIds.includes(label.name);
@@ -39,6 +41,8 @@ const LabelsShape = ({
             label={label}
             activeUnit={activeUnit}
             setActiveUnit={setActiveUnit}
+            setActiveCameraTarget={setActiveCameraTarget}
+            setActiveCameraPosition={setActiveCameraPosition}
           />
         );
       })}
@@ -50,27 +54,34 @@ const Billboard = ({
   label,
   setActiveUnit,
   activeUnit,
+  setActiveCameraTarget,
+  setActiveCameraPosition,
 }: {
   label: any;
   setActiveUnit: (id: string | null) => void;
   activeUnit: string | null;
+  setActiveCameraTarget: (target: Vec3) => void;
+  setActiveCameraPosition: (position: Vec3) => void;
 }) => {
   const { asset: model } = useModel("test2.glb");
 
-  // const app = useApp();
-
   const handleModelClick = (data: any) => {
-    console.log("handleModelClick", data);
     if (!activeUnit) {
+      setActiveCameraTarget(data.position);
       setActiveUnit(data.id);
     } else {
+      setActiveCameraPosition(new Vec3(0, 0, 0));
       setActiveUnit(null);
     }
   };
 
   if (!model) return null;
   return (
-    <Entity position={[label.position[0], 0.5, label.position[2]]}>
+    <Entity
+      scale={[0, 0, 0]}
+      enabled={false}
+      position={[label.position[0], 0.7, label.position[2]]}
+    >
       <ScriptComponent
         name={label.name}
         script={TestScript}
@@ -83,11 +94,9 @@ const Billboard = ({
 
 class TestScript extends Script {
   callback: (data: any) => void = () => {};
-
   private _models: any[] | null = null;
   label: any;
   private useScreenSpaceScale: boolean = false;
-  private size: Vec3 = new Vec3(0.5, 0.5, 0.5);
   camera: any;
   private material: StandardMaterial | null = null;
   private bgMaterial: StandardMaterial | null = null;
@@ -95,18 +104,13 @@ class TestScript extends Script {
   name: string = "";
 
   initialize() {
-    this.app.on("update", this.updateFromCamera, this);
-
     if (!this.entity.children[0]) return;
-
-    // this.entity.layer = UILayer.id;
 
     this.camera = this.app.root.children[0];
     this._models = this.entity.children[0].children;
     this.material = new StandardMaterial();
     this.bgMaterial = new StandardMaterial();
 
-    this.bgMaterial.diffuse.set(0, 0, 0);
     this.bgMaterial.emissive.set(1, 1, 1);
     this.bgMaterial.blendType = BLEND_NORMAL;
     this.bgMaterial.useTonemap = false;
@@ -119,13 +123,16 @@ class TestScript extends Script {
     this.material.useLighting = false;
     this.material.useSkybox = false;
     this.material.cull = 0;
-    // this.material.depthTest = false;
-    // this.material.depthWrite = false;
 
+    this.applyBillboardTransform();
     this.applyMaterial();
+    this.entity.enabled = true;
+    console.log("initialize", this.entity);
 
     this.entity.on("click", () => {
-      if (this.callback) this.callback({ id: this.name });
+      if (this.callback) {
+        this.callback({ id: this.name, position: this.entity.getPosition() });
+      }
     });
   }
 
@@ -153,10 +160,8 @@ class TestScript extends Script {
     });
   }
 
-  updateFromCamera() {
-    // if (!this.entity || !this.entity.enabled || !this.camera) return;
+  applyBillboardTransform() {
     const cameraPosition = this.camera.getPosition();
-    // console.log("updateFromCamera", cameraPosition);
 
     this.entity.lookAt(cameraPosition, Vec3.UP);
     this.entity.rotateLocal(-90, 0, 0);
@@ -174,6 +179,10 @@ class TestScript extends Script {
       scale,
       scale * -1,
     );
+  }
+
+  update() {
+    this.applyBillboardTransform();
   }
 }
 

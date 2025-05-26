@@ -7,7 +7,8 @@ const LogSceneState = forwardRef((_, ref) => {
   const logCameraPosition = () => {
     if (!app) return;
     const camera = app.root.findByName("camera");
-    console.log(camera?.getPosition());
+    console.log("camera", camera);
+    // console.log(camera?.getPosition(), camera?.getTarget());
   };
 
   const logSceneState = () => {

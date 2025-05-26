@@ -5,7 +5,12 @@ import { useEffect, useRef } from "react";
 import CameraControlsScript from "./scripts/camera-controls";
 import { Vec3 } from "playcanvas";
 
-const CameraControls = () => {
+const CameraControls = (
+  { activeCameraTarget, activeCameraPosition }: {
+    activeCameraTarget: Vec3 | null;
+    activeCameraPosition: Vec3 | null;
+  },
+) => {
   const entityRef = useRef<any>(null);
 
   useEffect(() => {
@@ -14,28 +19,23 @@ const CameraControls = () => {
       const cameraControlsScript = scriptComponent?.get(CameraControlsScript);
       console.log("cameraControlsScript", cameraControlsScript.focus);
 
-      if (cameraControlsScript) {
-        const intervalId = setInterval(() => {
-          const target = new Vec3(
-            Math.random() * 10 - 5 * 2,
-            0,
-            Math.random() * 10 - 5,
+      if (activeCameraTarget) {
+        setTimeout(() => {
+          cameraControlsScript.focus(
+            activeCameraTarget,
           );
-
-          const position = new Vec3(
-            (Math.random() * 10 - 5) * 3,
-            5,
-            (Math.random() * 10 - 5) * 3,
+        }, 500);
+      }
+      if (activeCameraPosition) {
+        setTimeout(() => {
+          cameraControlsScript.focus(
+            new Vec3(0, 0, 0),
+            activeCameraPosition,
           );
-          cameraControlsScript.focus(target, position);
-        }, 3000);
-
-        return () => {
-          clearInterval(intervalId);
-        };
+        }, 500);
       }
     }
-  }, []);
+  }, [activeCameraTarget, activeCameraPosition]);
 
   return (
     <Entity
