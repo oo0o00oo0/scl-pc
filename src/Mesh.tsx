@@ -9,7 +9,6 @@ const Mesh = ({ src, ...props }: { src: string } & any) => {
     // emissive: "red",
     // emissiveIntensity: 10,
   });
-  console.log(material);
   return (
     <Entity {...props}>
       <Render material={material} asset={model} type={"asset"} />

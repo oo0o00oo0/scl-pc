@@ -2,7 +2,6 @@ import { Entity } from "@playcanvas/react";
 import { Camera, Script } from "@playcanvas/react/components";
 
 import CameraControlsScript from "./scripts/camera-controls";
-
 const CameraControls = () => {
   return (
     <Entity

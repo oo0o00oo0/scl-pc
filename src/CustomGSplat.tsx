@@ -7,24 +7,21 @@ import vertex from "./shaders/vert.vert?raw";
 interface GsplatProps {
   asset: Asset;
   swirl: number;
+  id: number;
 }
 
-export const GSplat: FC<GsplatProps> = ({ asset, swirl }) => {
+export const GSplat: FC<GsplatProps> = ({ asset, swirl, id }) => {
   const parent: PcEntity = useParent();
   const assetRef = useRef<PcEntity | null>(null);
   const localTime = useRef(0);
   const app = useApp();
   useEffect(() => {
-    console.log("swirl", swirl);
     const material = assetRef.current?.gsplat?.material;
     material?.setParameter("uSplatSize", 1.0);
 
-    // Set the entity visibility based on swirl
     if (assetRef.current) {
       assetRef.current.enabled = true; // Make sure it's visible
     }
-
-    // Create a proxy object for GSAP to animate
     const uniforms = {
       splatOpacity: swirl ? 0 : 1,
     };
@@ -47,7 +44,7 @@ export const GSplat: FC<GsplatProps> = ({ asset, swirl }) => {
         app.autoRender = false;
       },
     });
-  }, [app, swirl]);
+  }, [app, id, swirl]);
 
   useLayoutEffect(() => {
     if (asset) {

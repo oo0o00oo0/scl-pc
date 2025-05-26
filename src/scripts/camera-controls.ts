@@ -145,6 +145,7 @@ class CameraControls extends Script {
   // ---------------------------------------------------------------------------
 
   public initialize(): void {
+    console.log("initialize");
     // Bind handlers once.
     this._onWheel = this._onWheel.bind(this);
     this._onKeyDown = this._onKeyDown.bind(this);

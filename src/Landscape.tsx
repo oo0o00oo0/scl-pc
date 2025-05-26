@@ -19,23 +19,22 @@ type GSplatComponent = {
 const Landscape = ({
   id,
   swirl,
-  setProgress,
-  setLoaded,
+  updateProgress,
   url,
 }: {
   id: number;
   swirl: any;
-  setProgress: (id: string, progress: string) => void;
+  updateProgress: (id: number, progress: number) => void;
   url: string;
-  setLoaded: (loaded: boolean) => void;
 }) => {
   const app = useApp();
+
   const { data: splat } = useSplat(url);
 
   const gsplatRef = useRef<React.ElementRef<typeof Entity>>(null);
 
   useEffect(() => {
-    // app.autoRender = false;
+    app.autoRender = false;
 
     const splatAssets = app.assets.filter(
       (a) => (a.type as string) === "gsplat",
@@ -44,11 +43,9 @@ const Landscape = ({
     if (!splatAssets.length) return;
 
     const splatAsset = splatAssets[id];
-    console.log("splatAsset", id, ":", splatAsset);
     splatAsset.on("progress", (received, length) => {
-      const percent = (Math.min(1, received / length) * 100).toFixed(0);
-
-      setProgress(id, percent);
+      const percent = Math.min(1, received / length) * 100;
+      updateProgress(id, percent);
     });
 
     if (splat) {
@@ -63,15 +60,14 @@ const Landscape = ({
 
         gsplatInstance.sorter.on("updated", () => {
           app.renderNextFrame = true;
-          console.log("updated");
         });
       }
     }
-  }, [splat, app, setProgress]);
+  }, [splat, app, updateProgress, id]);
 
   return (
     <Entity name="splat" ref={gsplatRef}>
-      <GSplat swirl={swirl} asset={splat as Asset} />
+      <GSplat id={id} swirl={swirl} asset={splat as Asset} />
     </Entity>
   );
 };
