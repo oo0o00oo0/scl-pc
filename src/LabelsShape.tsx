@@ -14,35 +14,45 @@ import {
 } from "playcanvas";
 import { useModel } from "@playcanvas/react/hooks";
 import { plotPositionData } from "../../data/data";
+import { useEffect } from "react";
+import { useState } from "react";
 
 const LabelsShape = ({
   avaiableIds,
-  setActiveUnit,
+  handleClickLabel,
   activeUnit,
-  setActiveCameraTarget,
-  setActiveCameraPosition,
 }: {
   avaiableIds: string[];
-  setActiveCameraTarget: (target: Vec3) => void;
-  setActiveCameraPosition: (position: Vec3) => void;
-  setActiveUnit: (id: string | null) => void;
+  handleClickLabel: (data: {
+    id: string;
+    position: Vec3;
+  }) => void;
   activeUnit: string | null;
 }) => {
+  const [delayedUnits, setDelayedUnits] = useState<string[]>([]);
+
+  useEffect(() => {
+    if (avaiableIds) {
+      setTimeout(() => {
+        setDelayedUnits(avaiableIds);
+      }, 1000);
+    } else {
+      setDelayedUnits([]);
+    }
+  }, [avaiableIds]);
+
   return (
     <Entity name="billboard">
       {plotPositionData.map((label) => {
         const shouldShow = activeUnit
-          ? label.name === activeUnit && avaiableIds.includes(label.name)
-          : avaiableIds.includes(label.name);
+          ? label.name === activeUnit && delayedUnits.includes(label.name)
+          : delayedUnits.includes(label.name);
 
         return shouldShow && (
           <Billboard
             key={label.name}
             label={label}
-            activeUnit={activeUnit}
-            setActiveUnit={setActiveUnit}
-            setActiveCameraTarget={setActiveCameraTarget}
-            setActiveCameraPosition={setActiveCameraPosition}
+            handleClickLabel={handleClickLabel}
           />
         );
       })}
@@ -52,28 +62,15 @@ const LabelsShape = ({
 
 const Billboard = ({
   label,
-  setActiveUnit,
-  activeUnit,
-  setActiveCameraTarget,
-  setActiveCameraPosition,
+  handleClickLabel,
 }: {
   label: any;
-  setActiveUnit: (id: string | null) => void;
-  activeUnit: string | null;
-  setActiveCameraTarget: (target: Vec3) => void;
-  setActiveCameraPosition: (position: Vec3) => void;
+  handleClickLabel: (data: {
+    id: string;
+    position: Vec3;
+  }) => void;
 }) => {
   const { asset: model } = useModel("test2.glb");
-
-  const handleModelClick = (data: any) => {
-    if (!activeUnit) {
-      setActiveCameraTarget(data.position);
-      setActiveUnit(data.id);
-    } else {
-      setActiveCameraPosition(new Vec3(0, 0, 0));
-      setActiveUnit(null);
-    }
-  };
 
   if (!model) return null;
   return (
@@ -85,7 +82,7 @@ const Billboard = ({
       <ScriptComponent
         name={label.name}
         script={TestScript}
-        callback={handleModelClick}
+        callback={handleClickLabel}
       />
       <Render asset={model} type="asset" />
     </Entity>
@@ -127,7 +124,6 @@ class TestScript extends Script {
     this.applyBillboardTransform();
     this.applyMaterial();
     this.entity.enabled = true;
-    console.log("initialize", this.entity);
 
     this.entity.on("click", () => {
       if (this.callback) {

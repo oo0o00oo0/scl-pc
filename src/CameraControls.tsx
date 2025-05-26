@@ -3,39 +3,32 @@ import { Camera, Script } from "@playcanvas/react/components";
 import { useEffect, useRef } from "react";
 
 import CameraControlsScript from "./scripts/camera-controls";
-import { Vec3 } from "playcanvas";
+import { CamState } from "../../state/store";
 
 const CameraControls = (
-  { activeCameraTarget, activeCameraPosition }: {
-    activeCameraTarget: Vec3 | null;
-    activeCameraPosition: Vec3 | null;
+  { camState }: {
+    camState: CamState;
   },
 ) => {
+  const { activeCameraPosition, activeCameraTarget, delay = 0 } = camState;
   const entityRef = useRef<any>(null);
 
   useEffect(() => {
     if (entityRef.current) {
       const scriptComponent = entityRef.current.script;
       const cameraControlsScript = scriptComponent?.get(CameraControlsScript);
-      console.log("cameraControlsScript", cameraControlsScript.focus);
 
-      if (activeCameraTarget) {
-        setTimeout(() => {
-          cameraControlsScript.focus(
-            activeCameraTarget,
-          );
-        }, 500);
-      }
-      if (activeCameraPosition) {
-        setTimeout(() => {
-          cameraControlsScript.focus(
-            new Vec3(0, 0, 0),
-            activeCameraPosition,
-          );
-        }, 500);
-      }
+      if (!cameraControlsScript) return;
+
+      console.log("activeCameraTarget", activeCameraTarget);
+      setTimeout(() => {
+        cameraControlsScript.focus(
+          activeCameraTarget,
+          activeCameraPosition,
+        );
+      }, delay);
     }
-  }, [activeCameraTarget, activeCameraPosition]);
+  }, [activeCameraTarget, activeCameraPosition, delay]);
 
   return (
     <Entity
