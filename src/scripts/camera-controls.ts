@@ -18,14 +18,22 @@ const ZOOM_SCALE_SCENE_MULT = 10;
 const MOVEMENT_THRESHOLD = 0.0001; // Adjust this value as needed for sensitivity
 
 /**
- * Calculate the lerp rate.
+ * Quad ease in-out function
+ */
+const easeInOutQuad = (t: number): number =>
+  t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
+
+/**
+ * Calculate the lerp rate with quad easing.
  *
  * @param damping - The damping.
  * @param dt - The delta time (in seconds).
- * @returns The lerp rate.
+ * @returns The lerp rate with quad easing applied.
  */
-const lerpRate = (damping: number, dt: number): number =>
-  1 - Math.pow(damping, dt * 1000);
+const lerpRate = (damping: number, dt: number): number => {
+  const baseRate = 1 - Math.pow(damping, dt * 450);
+  return easeInOutQuad(baseRate);
+};
 
 // -----------------------------------------------------------------------------
 // CameraControls
@@ -140,6 +148,12 @@ class CameraControls extends Script {
   /** Focus transition damping. */
   public focusDamping = 0.97;
 
+  /** Initial look-at target (x, y, z) */
+  public initialTarget = new Vec3(0, 0, 0);
+
+  /** Whether to apply initial focus on startup */
+  public applyInitialFocus = true;
+
   // ---------------------------------------------------------------------------
   // Lifecycle
   // ---------------------------------------------------------------------------
@@ -167,6 +181,11 @@ class CameraControls extends Script {
     this.pitchRange = this._pitchRange ?? this.pitchRange;
     this.zoomMin = this._zoomMin ?? this.zoomMin;
     this.zoomMax = this._zoomMax ?? this.zoomMax;
+
+    if (this.applyInitialFocus) {
+      const currentPosition = this.entity.getPosition();
+      this.focus(this.initialTarget, currentPosition, false);
+    }
   }
 
   public update(dt: number): void {
@@ -612,7 +631,7 @@ class CameraControls extends Script {
     const newPosition = tmpM1.getTranslation();
     const newRotation = tmpM1.getEulerAngles();
     const currentPosition = this.entity.getPosition();
-    const currentRotation = this.entity.getEulerAngles();
+    const currentRotation = this.entity.getRotation();
 
     const hasSignificantMove =
       Math.abs(newPosition.x - currentPosition.x) > MOVEMENT_THRESHOLD ||
