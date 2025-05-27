@@ -1,7 +1,7 @@
 import { Entity } from "@playcanvas/react";
 import { type Asset } from "playcanvas";
 import { useApp } from "@playcanvas/react/hooks";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { GSplat } from "./CustomGSplat";
 // import { GSplat } from "@playcanvas/react/components";
 import { useSplat } from "./hooks/use-asset";
@@ -29,6 +29,8 @@ const Landscape = ({
 }) => {
   const app = useApp();
 
+  const [dataReady, setDataReady] = useState(false);
+
   const { data: splat } = useSplat(url);
 
   const gsplatRef = useRef<React.ElementRef<typeof Entity>>(null);
@@ -46,6 +48,9 @@ const Landscape = ({
     splatAsset.on("progress", (received, length) => {
       const percent = Math.min(1, received / length) * 100;
       updateProgress(id, percent);
+      if (percent === 100) {
+        setDataReady(true);
+      }
     });
 
     if (splat) {
@@ -63,11 +68,16 @@ const Landscape = ({
         });
       }
     }
-  }, [splat, app, updateProgress, id]);
+  }, [splat, app, updateProgress, id, swirl, url]);
 
   return (
     <Entity name="splat" ref={gsplatRef}>
-      <GSplat id={id} swirl={swirl} asset={splat as Asset} />
+      <GSplat
+        id={id}
+        swirl={swirl}
+        asset={splat as Asset}
+        dataReady={dataReady}
+      />
     </Entity>
   );
 };

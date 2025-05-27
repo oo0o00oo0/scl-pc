@@ -20,7 +20,6 @@ const CameraControls = (
 
       if (!cameraControlsScript) return;
 
-      console.log("activeCameraTarget", activeCameraTarget);
       setTimeout(() => {
         cameraControlsScript.focus(
           activeCameraTarget,

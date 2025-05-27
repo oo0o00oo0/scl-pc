@@ -8,44 +8,49 @@ interface GsplatProps {
   asset: Asset;
   swirl: number;
   id: number;
+  dataReady: boolean;
 }
 
-export const GSplat: FC<GsplatProps> = ({ asset, swirl, id }) => {
+export const GSplat: FC<GsplatProps> = ({ asset, swirl, id, dataReady }) => {
   const parent: PcEntity = useParent();
+
   const assetRef = useRef<PcEntity | null>(null);
-  const localTime = useRef(0);
+
   const app = useApp();
+
   useEffect(() => {
+    if (!dataReady) return;
     const material = assetRef.current?.gsplat?.material;
     material?.setParameter("uSplatSize", 1.0);
+    // material?.setParameter("uTime", localTime.current);
 
-    if (assetRef.current) {
-      assetRef.current.enabled = true; // Make sure it's visible
-    }
     const uniforms = {
       splatOpacity: swirl ? 0 : 1,
     };
 
     gsap.to(uniforms, {
+      onStart: () => {
+        if (!assetRef.current) return;
+        assetRef.current.enabled = true;
+      },
       splatOpacity: swirl ? 1 : 0,
       duration: 0.4,
       ease: "power2.inOut",
       delay: swirl === 1 ? 1 : 0,
-      onStart: () => {
-        app.autoRender = true;
-      },
       onUpdate: () => {
-        material?.setParameter("uTime", localTime.current);
+        app.renderNextFrame = true;
         material?.setParameter("uSplatOpacity", uniforms.splatOpacity);
       },
       onComplete: () => {
-        if (swirl === 0 && assetRef.current) {
+        if (!assetRef.current) return;
+        if (swirl === 0) {
           assetRef.current.enabled = false;
+        } else {
+          assetRef.current.enabled = true;
         }
-        app.autoRender = false;
       },
     });
-  }, [app, id, swirl]);
+  }, [app, id, swirl, dataReady]);
 
   useLayoutEffect(() => {
     if (asset) {

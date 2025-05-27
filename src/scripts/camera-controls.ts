@@ -15,7 +15,7 @@ const tmpP1 = new Plane();
 
 const PASSIVE: AddEventListenerOptions = { passive: false };
 const ZOOM_SCALE_SCENE_MULT = 10;
-const MOVEMENT_THRESHOLD = 0.0001; // Adjust this value as needed for sensitivity
+const MOVEMENT_THRESHOLD = 0.001; // Adjust this value as needed for sensitivity
 
 /**
  * Quad ease in-out function
@@ -533,6 +533,7 @@ class CameraControls extends Script {
     this._origin.add(tmpV1);
 
     if (this._moving) {
+      console.log("moving");
       (this.app as any).renderNextFrame = true;
       this._clampPosition(this._origin);
     }
@@ -631,28 +632,17 @@ class CameraControls extends Script {
     const newPosition = tmpM1.getTranslation();
     const newRotation = tmpM1.getEulerAngles();
     const currentPosition = this.entity.getPosition();
-    const currentRotation = this.entity.getRotation();
+    // const currentRotation = this.entity.getRotation();
 
     const hasSignificantMove =
       Math.abs(newPosition.x - currentPosition.x) > MOVEMENT_THRESHOLD ||
       Math.abs(newPosition.y - currentPosition.y) > MOVEMENT_THRESHOLD ||
-      Math.abs(newPosition.z - currentPosition.z) > MOVEMENT_THRESHOLD ||
-      Math.abs(newRotation.x - currentRotation.x) > MOVEMENT_THRESHOLD ||
-      Math.abs(newRotation.y - currentRotation.y) > MOVEMENT_THRESHOLD ||
-      Math.abs(newRotation.z - currentRotation.z) > MOVEMENT_THRESHOLD;
+      Math.abs(newPosition.z - currentPosition.z) > MOVEMENT_THRESHOLD;
+    // Math.abs(newRotation.x - currentRotation.x) > MOVEMENT_THRESHOLD ||
+    // Math.abs(newRotation.y - currentRotation.y) > MOVEMENT_THRESHOLD ||
+    // Math.abs(newRotation.z - currentRotation.z) > MOVEMENT_THRESHOLD;
 
     if (hasSignificantMove) {
-      // const labels = this.app.root.findByName("billboard");
-      // if (labels) {
-      //   const children = labels.children;
-      //   children.forEach((child: any) => {
-      //     const testScript = child.script.testScript;
-      //     if (testScript && typeof testScript.updateFromCamera === "function") {
-      //       testScript.updateFromCamera(newPosition, newRotation);
-      //     }
-      //   });
-      // }
-
       this.app.renderNextFrame = true;
       this.entity.setPosition(newPosition);
       this.entity.setEulerAngles(newRotation);
