@@ -3,6 +3,7 @@ import { useCallback, useEffect, useState } from "react";
 export const useSplatsLoading = (onID1Loaded: () => void) => {
   const [progress, setProgress] = useState<Record<string, number>>({});
   const [loaded, setLoaded] = useState(false);
+  const [allLoaded, setAllLoaded] = useState(false);
 
   const updateProgress = useCallback(
     (updater: (prev: Record<string, number>) => Record<string, number>) => {
@@ -24,8 +25,14 @@ export const useSplatsLoading = (onID1Loaded: () => void) => {
     }
     if (allLoaded) {
       console.log("allLoaded");
+      setAllLoaded(true);
     }
   }, [progress, loaded, onID1Loaded]);
 
-  return { progress, loaded, setProgress: updateProgress };
+  return {
+    progress,
+    loaded,
+    setProgress: updateProgress,
+    allLoaded,
+  };
 };

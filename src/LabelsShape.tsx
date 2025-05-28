@@ -13,7 +13,6 @@ import {
   Vec3,
 } from "playcanvas";
 import { useModel } from "@playcanvas/react/hooks";
-import { plotPositionData } from "../../data/data";
 import { useEffect } from "react";
 import { useState } from "react";
 
@@ -21,6 +20,10 @@ const LabelsShape = ({
   avaiableIds,
   handleClickLabel,
   activeUnit,
+  url,
+  positionData,
+  scale,
+  isAmenity = false,
 }: {
   avaiableIds: string[];
   handleClickLabel: (data: {
@@ -28,8 +31,14 @@ const LabelsShape = ({
     position: Vec3;
   }) => void;
   activeUnit: string | null;
+  url: string;
+  positionData: any;
+  isAmenity?: boolean;
+  scale: number;
 }) => {
   const [delayedUnits, setDelayedUnits] = useState<string[]>([]);
+
+  console.log(positionData);
 
   useEffect(() => {
     if (avaiableIds) {
@@ -43,13 +52,15 @@ const LabelsShape = ({
 
   return (
     <Entity name="billboard">
-      {plotPositionData.map((label) => {
+      {positionData.map((label: any) => {
         const shouldShow = activeUnit
           ? label.name === activeUnit && delayedUnits.includes(label.name)
           : delayedUnits.includes(label.name);
 
-        return shouldShow && (
+        return (shouldShow || isAmenity) && (
           <Billboard
+            scale={scale}
+            url={url}
             key={label.name}
             label={label}
             handleClickLabel={handleClickLabel}
@@ -63,14 +74,18 @@ const LabelsShape = ({
 const Billboard = ({
   label,
   handleClickLabel,
+  url,
+  scale,
 }: {
   label: any;
   handleClickLabel: (data: {
     id: string;
     position: Vec3;
   }) => void;
+  url: string;
+  scale: number;
 }) => {
-  const { asset: model } = useModel("test2.glb");
+  const { asset: model } = useModel(url);
 
   if (!model) return null;
   return (
@@ -82,6 +97,7 @@ const Billboard = ({
       <ScriptComponent
         name={label.name}
         script={TestScript}
+        scale={scale}
         callback={handleClickLabel}
       />
       <Render asset={model} type="asset" />
@@ -93,6 +109,7 @@ class TestScript extends Script {
   callback: (data: any) => void = () => {};
   private _models: any[] | null = null;
   label: any;
+  scale: number;
   private useScreenSpaceScale: boolean = false;
   camera: any;
   private material: StandardMaterial | null = null;
@@ -162,7 +179,7 @@ class TestScript extends Script {
     this.entity.lookAt(cameraPosition, Vec3.UP);
     this.entity.rotateLocal(-90, 0, 0);
 
-    const baseScale = .3;
+    const baseScale = this.scale;
     let scale = baseScale;
 
     if (this.useScreenSpaceScale) {
