@@ -43,6 +43,7 @@ export const useSplatsLoading = (onID1Loaded: () => void) => {
     },
     [loaded, allLoaded, onID1Loaded],
   );
+  //te
 
   // Remove the useEffect since we're handling the logic in updateProgress
   // useEffect(() => {
