@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 import { Entity } from "@playcanvas/react";
 import {
   Render,
@@ -63,6 +64,7 @@ const Billboard = ({
   const handleModelClick = (data: any) => {
     console.log("clicked", data);
     setSelectedObject(data.id);
+    console.log("Current selected:", selectedObject);
   };
 
   return (
@@ -132,32 +134,23 @@ class TestScript extends Script {
     });
   }
 
-  private updateTexture() {
-    if (!this.material || !this.label?.resource) {
-      console.warn("Cannot update texture: material or label resource missing");
-      return;
-    }
-
-    console.log("Updating texture with resource:", this.label.resource);
-    // this.material.emissiveMap = this.label.resource;
-    // this.material.opacityMap = this.label.resource;
-    this.material.update();
-    this.applyMaterial();
-  }
-
-  private applyMaterial() {
-    if (!this.material || !this._models) return;
+  applyMaterial() {
+    if (!this._models || !this.material) return;
 
     this._models.forEach((model) => {
       const render = model.render as RenderComponent;
       if (render?.meshInstances) {
         render.meshInstances.forEach((mi) => {
-          // @ts-ignore
-          mi.material = this.material;
-          mi.material.update();
+          mi.material = this.material!;
         });
       }
     });
+  }
+
+  updateTexture() {
+    if (!this.material || !this.label?.resource) return;
+    this.material.diffuseMap = this.label.resource;
+    this.material.update();
   }
 
   update() {

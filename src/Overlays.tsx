@@ -7,7 +7,8 @@ import {
 import { Color, Script } from "playcanvas";
 import { Entity } from "@playcanvas/react";
 import { type RenderComponent } from "playcanvas";
-import projectStore from "../state/store";
+import projectStore from "../../state/store";
+
 const backupData = [
   { Plot: "123", Availability: "AVAILABLE" },
   { Plot: "456", Availability: "UNAVAILABLE" },
@@ -24,7 +25,7 @@ declare module "playcanvas" {
 
 const Overlays = () => {
   const { data: model } = useModel("pin.glb");
-  const setStoreState = projectStore((state) => state.setStoreState);
+  const setStoreState = projectStore((state: any) => state.setStoreState);
   const activeUnit = { Plot: "123" };
 
   const handleModelClick = (data: any) => {
@@ -46,23 +47,9 @@ const Overlays = () => {
   );
 };
 
-export default Overlays;
-
 class TestScript extends Script {
   callback: (data: any) => void = () => {};
-
-  private _activePlot: string | null = null;
-  set activePlot(v: string | null) {
-    if (this._activePlot !== v) {
-      this._activePlot = v;
-      this.selectedModel = v;
-
-      if (this._models) this.updateModels(this._models);
-    }
-  }
-  get activePlot() {
-    return this._activePlot;
-  }
+  _activePlot: string | null = null;
 
   selectedModel: string | null = null;
   private readonly selectedColor = new Color(0.42, 0.82, 0.61);
@@ -141,3 +128,5 @@ class TestScript extends Script {
     if (this._activePlot) this.updateModels(this._models);
   }
 }
+
+export default Overlays;

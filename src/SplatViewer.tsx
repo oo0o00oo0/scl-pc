@@ -3,25 +3,20 @@ import { GSplat } from "./CustomGSplat";
 
 import { type Asset } from "playcanvas";
 import { Entity } from "@playcanvas/react";
-import { Camera } from "@playcanvas/react/components";
 import { useSplat } from "./hooks/use-asset";
-import { MotionValue } from "motion/react";
 
-type Splat = {
+type ViewerProps = {
   src: string;
-  fov: number;
-  swirl: MotionValue;
+  fov?: number;
+  swirl: number;
   rotation: [number, number, number];
   position: [number, number, number];
 };
-
-type ViewerProps = Splat;
 
 function SplatViewer({
   src,
   position,
   rotation,
-  fov = 90,
   swirl,
 }: ViewerProps) {
   const { data: splat } = useSplat(src);
@@ -35,7 +30,12 @@ function SplatViewer({
       </Entity> */
       }
       <Entity scale={[2, 2, 2]} rotation={rotation} position={position}>
-        <GSplat asset={splat as Asset} swirl={swirl} />
+        <GSplat
+          asset={splat as Asset}
+          swirl={swirl}
+          id={0}
+          dataReady={!!splat}
+        />
       </Entity>
     </Entity>
   );

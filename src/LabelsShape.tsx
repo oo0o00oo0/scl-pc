@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Entity } from "@playcanvas/react";
 import {
@@ -16,15 +17,7 @@ import { useModel } from "@playcanvas/react/hooks";
 import { useEffect } from "react";
 import { useState } from "react";
 
-const LabelsShape = ({
-  avaiableIds,
-  handleClickLabel,
-  activeUnit,
-  url,
-  positionData,
-  scale,
-  isAmenity = false,
-}: {
+interface LabelsShapeProps {
   avaiableIds: string[];
   handleClickLabel: (data: {
     id: string;
@@ -33,9 +26,19 @@ const LabelsShape = ({
   activeUnit: string | null;
   url: string;
   positionData: any;
-  isAmenity?: boolean;
   scale: number;
-}) => {
+  isAmenity?: boolean;
+}
+
+const LabelsShape = ({
+  avaiableIds,
+  handleClickLabel,
+  activeUnit,
+  url,
+  positionData,
+  scale,
+  isAmenity = false,
+}: LabelsShapeProps) => {
   const [delayedUnits, setDelayedUnits] = useState<string[]>([]);
 
   console.log(positionData);
@@ -109,6 +112,7 @@ class TestScript extends Script {
   callback: (data: any) => void = () => {};
   private _models: any[] | null = null;
   label: any;
+  // @ts-ignore
   scale: number;
   private useScreenSpaceScale: boolean = false;
   camera: any;
@@ -149,27 +153,16 @@ class TestScript extends Script {
     });
   }
 
-  private applyMaterial() {
-    if (!this.material || !this._models) return;
+  applyMaterial() {
+    if (!this._models || !this.material) return;
 
     this._models.forEach((model) => {
-      const children = model.children;
-
-      children.forEach((child: any) => {
-        const render = child.render as RenderComponent;
-        const name = render.entity.name;
-
-        if (render?.meshInstances) {
-          render.meshInstances.forEach((mi: any) => {
-            if (name === "bg") {
-              mi.material = this.material;
-            } else {
-              mi.material = this.bgMaterial;
-            }
-            mi.material.update();
-          });
-        }
-      });
+      const render = model.render as RenderComponent;
+      if (render?.meshInstances) {
+        render.meshInstances.forEach((mi) => {
+          mi.material = this.material!;
+        });
+      }
     });
   }
 
@@ -195,6 +188,7 @@ class TestScript extends Script {
   }
 
   update() {
+    if (!this.entity || !this.entity.enabled || !this.camera) return;
     this.applyBillboardTransform();
   }
 }
