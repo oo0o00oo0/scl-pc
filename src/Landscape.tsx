@@ -49,6 +49,7 @@ const Landscape = ({
       const percent = Math.min(1, received / length) * 100;
       updateProgress(id, percent);
       if (percent === 100) {
+        app.autoRender = false;
         setDataReady(true);
       }
     });
