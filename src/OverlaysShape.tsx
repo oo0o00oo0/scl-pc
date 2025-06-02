@@ -54,8 +54,10 @@ class TestScript extends Script {
   activeDistrict: string | null = null;
 
   private _activeDistrict: string | null = null;
-  private readonly selectedColor = new Color(0.42, 0.82, 0.61);
-  private readonly defaultColor = new Color(0.38, 0.1, 0.62);
+  private readonly selectedColor = new Color(0.01, 0.01, 0.01);
+  private readonly defaultColor = new Color(0.01, 0.01, 0.01);
+  // private readonly selectedColor = new Color(0.42, 0.82, 0.61);
+  // private readonly defaultColor = new Color(0.38, 0.1, 0.62);
   private _models: any[] | null = null;
 
   updateModels(models: any[]) {
@@ -114,13 +116,14 @@ class TestScript extends Script {
           mi.material = mi.material.clone();
           mi.material.name = `${model.name}_material`;
 
-          mi.material.emissive.copy(
-            this.activeDistrict === model.name
-              ? this.selectedColor
-              : this.defaultColor,
-          );
-          mi.material.blendType = 7;
-          mi.material.emissiveIntensity = 0.5;
+          mi.material.emissive = new Color(0.3, 0.3, 0.3);
+          // mi.material.emissive.copy(
+          //   this.activeDistrict === model.name
+          //     ? this.selectedColor
+          //     : this.defaultColor,
+          // );
+          mi.material.blendType = 0;
+          // mi.material.emissiveIntensity = 0.5;
           mi.material.update();
         });
       }

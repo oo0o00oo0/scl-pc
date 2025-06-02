@@ -36,7 +36,8 @@ export const GSplat: FC<GsplatProps> = ({ asset, swirl, id, dataReady }) => {
       splatOpacity: swirl ? 1 : 0,
       duration: 0.4,
       ease: "power2.inOut",
-      delay: swirl === 1 ? 1 : 0,
+      // delay: swirl === 1 ? 1 : 0,
+      delay: swirl === 1 ? .3 : 0,
       onUpdate: () => {
         app.renderNextFrame = true;
         material?.setParameter("uSplatOpacity", uniforms.splatOpacity);
