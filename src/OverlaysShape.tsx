@@ -7,7 +7,7 @@ import {
 } from "@playcanvas/react/components";
 import { Color, RenderComponent, Script } from "playcanvas";
 import { useModel } from "@playcanvas/react/hooks";
-import { diriyahData } from "../../data/diriyahdata";
+import { diriyahModelData } from "../../data/diriyahdata";
 
 interface LabelsShapeProps {
   url: string;
@@ -22,7 +22,7 @@ const OverlaysShape = ({
 }: LabelsShapeProps) => {
   const { asset: model } = useModel(url);
 
-  const values = Object.values(diriyahData);
+  const values = Object.values(diriyahModelData);
   console.log(values);
 
   return (
