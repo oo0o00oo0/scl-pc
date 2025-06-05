@@ -2,7 +2,7 @@ import { type FC, useEffect, useLayoutEffect, useRef } from "react";
 import { type Asset, type Entity as PcEntity } from "playcanvas";
 import { useApp, useParent } from "@playcanvas/react/hooks";
 import gsap from "gsap";
-import vertex from "./shaders/vert.vert?raw";
+import vertex from "../shaders/vert.vert?raw";
 
 interface GsplatProps {
   asset: Asset;

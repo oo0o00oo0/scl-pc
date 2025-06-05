@@ -2,9 +2,9 @@ import { Entity } from "@playcanvas/react";
 import { type Asset } from "playcanvas";
 import { useApp } from "@playcanvas/react/hooks";
 import { useEffect, useRef, useState } from "react";
-import { GSplat } from "./CustomGSplat";
+import { GSplat } from "../atomic/CustomGSplat";
 // import { GSplat } from "@playcanvas/react/components";
-import { useSplat } from "./hooks/use-asset";
+import { useSplat } from "../hooks/use-asset";
 
 // hello subby
 
