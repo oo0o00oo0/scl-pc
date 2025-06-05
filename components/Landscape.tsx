@@ -36,7 +36,7 @@ const Landscape = ({
   const gsplatRef = useRef<React.ElementRef<typeof Entity>>(null);
 
   useEffect(() => {
-    app.autoRender = false;
+    // app.autoRender = false;
 
     const splatAssets = app.assets.filter(
       (a) => (a.type as string) === "gsplat",
@@ -49,7 +49,7 @@ const Landscape = ({
       const percent = Math.min(1, received / length) * 100;
       updateProgress(id, percent);
       if (percent === 100) {
-        app.autoRender = false;
+        // app.autoRender = false;
         setDataReady(true);
       }
     });

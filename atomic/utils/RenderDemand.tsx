@@ -8,7 +8,7 @@ const RenderDemand = forwardRef((_, ref) => {
     return {
       render: () => {
         console.log("render", app.autoRender);
-        app.autoRender = false;
+        // app.autoRender = false;
       },
     };
   });

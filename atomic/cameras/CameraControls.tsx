@@ -14,6 +14,7 @@ const CameraControls = (
     };
   },
 ) => {
+  console.log("camState", camState);
   // const app = useApp();
   // const { activeCameraPosition, activeCameraTarget, delay = 0 } = camState;
   const entityRef = useRef<any>(null);

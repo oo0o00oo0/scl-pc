@@ -11,6 +11,7 @@ export const useShaderMaterial = () => {
 
   const material = useMemo(() => {
     if (!app) return null;
+    console.log("app", app.autoRender);
     const material = new ShaderMaterial({
       uniqueName: "MyShader",
       attributes: {
@@ -39,6 +40,8 @@ export const useShaderMaterial = () => {
             gl_FragColor = vec4(1.0, vUv0.x, vUv0.y, 1.0);
         }`,
     });
+
+    app.renderNextFrame = true;
 
     return material;
   }, [app]);
