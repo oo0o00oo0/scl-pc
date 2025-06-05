@@ -2,7 +2,7 @@ import { type FC, useEffect, useLayoutEffect, useRef } from "react";
 import { type Asset, type Entity as PcEntity } from "playcanvas";
 import { useApp, useParent } from "@playcanvas/react/hooks";
 import gsap from "gsap";
-import vertex from "../shaders/vert.vert?raw";
+import vertex from "../../shaders/vert.vert?raw";
 
 interface GsplatProps {
   asset: Asset;
@@ -22,7 +22,6 @@ export const GSplat: FC<GsplatProps> = ({ asset, swirl, id, dataReady }) => {
     if (!dataReady) return;
     const material = assetRef.current?.gsplat?.material;
     material?.setParameter("uSplatSize", 1.0);
-    // material?.setParameter("uTime", localTime.current);
 
     const uniforms = {
       splatOpacity: swirl ? 0 : 1,
@@ -33,6 +32,7 @@ export const GSplat: FC<GsplatProps> = ({ asset, swirl, id, dataReady }) => {
         if (!assetRef.current) return;
         assetRef.current.enabled = true;
       },
+
       splatOpacity: swirl ? 1 : 0,
       duration: 0.4,
       ease: "power2.inOut",

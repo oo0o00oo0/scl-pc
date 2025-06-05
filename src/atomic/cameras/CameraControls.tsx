@@ -3,8 +3,8 @@ import { Camera, Script } from "@playcanvas/react/components";
 import { useEffect, useRef } from "react";
 import { useApp } from "@playcanvas/react/hooks";
 
-import CameraControlsScript from "./scripts/camera-controls";
-import { CamState } from "../../state/store";
+import CameraControlsScript from "../../scripts/camera-controls";
+import { CamState } from "../../../../state/store";
 
 const CameraControls = (
   { camState }: {

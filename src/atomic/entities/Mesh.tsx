@@ -1,6 +1,6 @@
 import { Entity } from "@playcanvas/react";
 import { Render } from "@playcanvas/react/components";
-import { useModel } from "./hooks/use-asset";
+import { useModel } from "../../hooks/use-asset";
 import { useMaterial } from "@playcanvas/react/hooks";
 const Mesh = ({ src, ...props }: { src: string } & any) => {
   const { data: model } = useModel(src) as any;
