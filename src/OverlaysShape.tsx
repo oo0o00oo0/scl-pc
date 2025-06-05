@@ -24,7 +24,7 @@ const OverlaysShape = ({
 
   const values = Object.values(diriyahModelData);
   console.log(values);
-
+  console.log("activeDistrict::", activeDistrict);
   return (
     <>
       {
@@ -36,12 +36,12 @@ const OverlaysShape = ({
       ))} */
       }
 
-      <Entity position={[0, 2.5, 0]} scale={[1, 1, 1]}>
+      <Entity position={[0, 3.1, 0]} scale={[1, 0.1, 1]}>
         <Render asset={model as any} type={"asset"}>
           <ScriptComponent
             script={TestScript}
             callback={handleModelClick}
-            activeDistrict={activeDistrict}
+            activeDistrict={activeDistrict === "" ? null : activeDistrict}
           />
         </Render>
       </Entity>
@@ -59,8 +59,12 @@ class TestScript extends Script {
   // private readonly selectedColor = new Color(0.42, 0.82, 0.61);
   // private readonly defaultColor = new Color(0.38, 0.1, 0.62);
   private _models: any[] | null = null;
+  private isActive = false;
 
   updateModels(models: any[]) {
+    // Set isActive based on whether any district is currently active
+    this.isActive = this.activeDistrict !== null;
+
     models.forEach((model) => {
       const isSelected = this.activeDistrict === model.name;
 
@@ -71,17 +75,22 @@ class TestScript extends Script {
         let needsUpdate = false;
 
         render.meshInstances.forEach((mi) => {
-          if (!mi.material.emissive.equals(colour)) {
-            if (
-              mi.material.name && mi.material.name !== `${model.name}_material`
-            ) {
-              mi.material = mi.material.clone();
-              mi.material.name = `${model.name}_material`;
-            }
-
-            mi.material.emissive.copy(colour);
-            needsUpdate = true;
+          // Always update when activeDistrict changes, not just when emissive color differs
+          if (
+            mi.material.name && mi.material.name !== `${model.name}_material`
+          ) {
+            mi.material = mi.material.clone();
+            mi.material.name = `${model.name}_material`;
           }
+
+          mi.material.emissive = new Color(0.1, 0.1, 0.1);
+          // Set opacity: 0 if no active district OR if this is the selected district, 0.8 for non-selected when there's an active district
+          console.log(isSelected, model.name);
+          // @ts-ignore
+          mi.material.opacity = (!this.isActive || isSelected) ? 0 : 0.8;
+
+          mi.material.emissive.copy(colour);
+          needsUpdate = true;
         });
 
         if (needsUpdate) {
@@ -115,15 +124,8 @@ class TestScript extends Script {
         render.meshInstances.forEach((mi) => {
           mi.material = mi.material.clone();
           mi.material.name = `${model.name}_material`;
+          mi.material.blendType = 4;
 
-          mi.material.emissive = new Color(0.3, 0.3, 0.3);
-          // mi.material.emissive.copy(
-          //   this.activeDistrict === model.name
-          //     ? this.selectedColor
-          //     : this.defaultColor,
-          // );
-          mi.material.blendType = 0;
-          // mi.material.emissiveIntensity = 0.5;
           mi.material.update();
         });
       }

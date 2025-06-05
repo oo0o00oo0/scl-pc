@@ -41,8 +41,6 @@ const LabelsShape = ({
 }: LabelsShapeProps) => {
   const [delayedUnits, setDelayedUnits] = useState<string[]>([]);
 
-  console.log(positionData);
-
   useEffect(() => {
     if (avaiableIds) {
       setTimeout(() => {
