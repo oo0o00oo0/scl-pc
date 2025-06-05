@@ -1,4 +1,4 @@
-import { type FC, useEffect, useLayoutEffect, useRef } from "react";
+import { useEffect, useLayoutEffect, useRef } from "react";
 import { type Asset, type Entity as PcEntity } from "playcanvas";
 import { useApp, useParent } from "@playcanvas/react/hooks";
 import gsap from "gsap";
@@ -11,7 +11,7 @@ interface GsplatProps {
   dataReady: boolean;
 }
 
-export const GSplat: FC<GsplatProps> = ({ asset, swirl, id, dataReady }) => {
+export const GSplat = ({ asset, swirl, id, dataReady }: GsplatProps) => {
   const parent: PcEntity = useParent();
 
   const assetRef = useRef<PcEntity | null>(null);
