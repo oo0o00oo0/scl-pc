@@ -4,44 +4,44 @@ import { useEffect, useRef } from "react";
 import { useApp } from "@playcanvas/react/hooks";
 
 import CameraControlsScript from "../../scripts/camera-controls";
-import { CamState } from "../../../../state/store";
+// import { CamState } from "../../../../state/store";
 
 const CameraControls = (
   { camState }: {
-    camState: CamState;
+    camState: {
+      activeCameraPosition: [number, number, number];
+      activeCameraTarget: [number, number, number];
+      delay?: number;
+    };
   },
 ) => {
-  const app = useApp();
-  const { activeCameraPosition, activeCameraTarget, delay = 0 } = camState;
+  // const app = useApp();
+  // const { activeCameraPosition, activeCameraTarget, delay = 0 } = camState;
   const entityRef = useRef<any>(null);
 
-  useEffect(() => {
-    if (entityRef.current) {
-      const scriptComponent = entityRef.current.script;
-      const cameraControlsScript = scriptComponent?.get(CameraControlsScript);
+  // useEffect(() => {
+  //   if (entityRef.current) {
+  //     const scriptComponent = entityRef.current.script;
+  //     const cameraControlsScript = scriptComponent?.get(CameraControlsScript);
 
-      if (!cameraControlsScript) return;
+  //     if (!cameraControlsScript) return;
 
-      setTimeout(() => {
-        cameraControlsScript.focus(
-          activeCameraTarget,
-          activeCameraPosition,
-        );
-      }, delay);
+  //     setTimeout(() => {
+  //       cameraControlsScript.focus(
+  //         activeCameraTarget,
+  //         activeCameraPosition,
+  //       );
+  //     }, delay);
 
-      app.autoRender = false;
-    }
-  }, [activeCameraTarget, activeCameraPosition, delay, app]);
+  //     app.autoRender = false;
+  //   }
+  // }, [activeCameraTarget, activeCameraPosition, delay, app]);
 
   return (
     <Entity
       ref={entityRef}
       name="camera"
-      position={[
-        -10.862204551696777,
-        2.429239273071289,
-        -10.834569931030273,
-      ]}
+      position={[10, 10, 10]}
     >
       <Script
         script={CameraControlsScript}
@@ -49,7 +49,7 @@ const CameraControls = (
       <Camera
         nearClip={2}
         farClip={100}
-        clearColor="#1a1a1a"
+        clearColor="#ffffff"
       />
     </Entity>
   );
