@@ -7,7 +7,7 @@ import {
 import { Color, Script } from "playcanvas";
 import { Entity } from "@playcanvas/react";
 import { type RenderComponent } from "playcanvas";
-import projectStore from "../../../../state/store";
+import projectStore from "../../../state/store";
 
 const backupData = [
   { Plot: "123", Availability: "AVAILABLE" },

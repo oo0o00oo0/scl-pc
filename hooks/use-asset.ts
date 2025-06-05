@@ -18,7 +18,7 @@ export const useAsset = (src: string, type: string, props: any) => {
   // Construct a query for the asset
   return useQuery({
     queryKey,
-    queryFn: () => app && fetchAsset({ app, url: src, type, props }),
+    queryFn: () => app && fetchAsset(app, src, type, props),
   });
 };
 

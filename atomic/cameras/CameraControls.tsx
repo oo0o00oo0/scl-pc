@@ -1,7 +1,6 @@
 import { Entity } from "@playcanvas/react";
 import { Camera, Script } from "@playcanvas/react/components";
-import { useEffect, useRef } from "react";
-import { useApp } from "@playcanvas/react/hooks";
+import { useRef } from "react";
 
 import CameraControlsScript from "../../scripts/camera-controls";
 // import { CamState } from "../../../../state/store";
@@ -15,6 +14,7 @@ const CameraControls = (
     };
   },
 ) => {
+  console.log("camState", camState);
   // const app = useApp();
   // const { activeCameraPosition, activeCameraTarget, delay = 0 } = camState;
   const entityRef = useRef<any>(null);

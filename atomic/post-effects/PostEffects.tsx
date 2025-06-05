@@ -1,7 +1,6 @@
 "use client";
 
 import { Script } from "@playcanvas/react/components";
-import { FC } from "react";
 
 // Create a simple camera frame script placeholder
 class CameraFrame {
@@ -32,11 +31,7 @@ const deepMerge = (
   return result;
 };
 
-interface PostEffectsProps {
-  overrides?: Partial<typeof defaultPostSettings>;
-}
-
-const PostEffects: FC<PostEffectsProps> = ({
+const PostEffects = ({
   overrides = {},
 }) => {
   const settings = deepMerge(defaultPostSettings, overrides);
