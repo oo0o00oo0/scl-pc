@@ -23,6 +23,7 @@ varying float vLinearDepth;  // Used for depth pre-pass
 uniform float uSplatSize;    // Overall scaling factor for splat size
 uniform float uSplatOpacity;    // Overall scaling factor for splat size
 uniform float uTime;         // Global time for transitions
+uniform float uGradientMix;  // Blend factor between original color (0.0) and gradient (1.0)
 
 // Vertex attributes:
 // - vertex_position.xy: Corner UV coordinates (range: -1 to 1)
@@ -363,12 +364,7 @@ void main(void) {
     // 5. Read the base color.
   vec4 clr = readColor(source);
 
-    // 6. Optionally, add spherical harmonics lighting.
-    #if SH_BANDS > 0
-        // Compute model-space view direction.
-  vec3 dir = normalize(center.view * mat3(center.modelView));
-  clr.xyz += evalSH(source, dir);
-    #endif
+    // 6. Read base color (spherical harmonics will be applied later during blending)
 
     // 7. Adjust the corner to clip regions with very low alpha.
   clipCorner(corner, clr.w);
@@ -386,17 +382,36 @@ void main(void) {
   vec2 normalizedOffset = normalize(corner.offset) * fixedSize;
   vec2 finalOffset = mix(normalizedOffset, corner.offset, uSplatSize);
 
-  
   // 9. Compute final clip-space position using the blended offset
   gl_Position = center.proj + vec4(finalOffset, 0.0, 0.0);
 
-  // 10. Use original color without blending
-  vec4 colMix = clr;
+    // 10. Create screen-space gradient from left to right and blend with original color
+  // Convert clip space X coordinate (-1 to 1) to screen space (0 to 1)
+  float screenX = (gl_Position.x / gl_Position.w + 1.0) * 0.5;
+
+  // Define gradient colors (you can customize these)
+  vec3 leftColor = vec3(1.0, 0.2, 0.3);   // Red-ish on the left
+  vec3 rightColor = vec3(0.2, 0.3, 1.0);  // Blue-ish on the right
+
+  // Interpolate between left and right colors based on screen X position
+  vec3 gradientColor = mix(leftColor, rightColor, screenX);
+
+  // Get original color (with optional spherical harmonics)
+  vec3 originalColor = clr.rgb;
+  #if SH_BANDS > 0
+    // Compute model-space view direction for SH
+  vec3 dir = normalize(center.view * mat3(center.modelView));
+  originalColor += evalSH(source, dir);
+  #endif
+
+  // Blend between original color and gradient based on uGradientMix
+  vec3 finalColor = mix(originalColor, gradientColor, uGradientMix);
+  vec4 colMix = vec4(finalColor, clr.w); // Keep original alpha
   float tOpacity = colMix.w * uSplatOpacity;
 
     // 11. Output the final UV and color values.
   gaussianUV = corner.uv;
-  gaussianColor = vec4(prepareOutputFromGamma(max(colMix.xyz, 0.0)), mix(uSplatSize,  tOpacity, 1.0));
+  gaussianColor = vec4(prepareOutputFromGamma(max(colMix.xyz, 0.0)), mix(uSplatSize, tOpacity, 1.0));
 
     #ifdef PREPASS_PASS
   vLinearDepth = -center.view.z;

@@ -21,11 +21,13 @@ const Landscape = ({
   swirl,
   updateProgress,
   url,
+  gradientMix,
 }: {
   id: number;
   swirl: any;
   updateProgress: (id: number, progress: number) => void;
   url: string;
+  gradientMix: number;
 }) => {
   const app = useApp();
 
@@ -74,6 +76,7 @@ const Landscape = ({
     <Entity name="splat" ref={gsplatRef}>
       <GSplat
         id={id}
+        gradientMix={gradientMix}
         swirl={swirl}
         asset={splat as Asset}
         dataReady={dataReady}
