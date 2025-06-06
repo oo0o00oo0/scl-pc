@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useLayoutEffect, useMemo } from "react";
 import {
   SEMANTIC_POSITION,
   SEMANTIC_TEXCOORD0,
@@ -6,18 +6,21 @@ import {
 } from "playcanvas";
 import { useApp } from "@playcanvas/react/hooks";
 
+console.log(SEMANTIC_POSITION, SEMANTIC_TEXCOORD0);
+
 export const useShaderMaterial = () => {
   const app = useApp();
 
   const material = useMemo(() => {
     if (!app) return null;
-    console.log("app", app.autoRender);
+
     const material = new ShaderMaterial({
       uniqueName: "MyShader",
       attributes: {
         aPosition: SEMANTIC_POSITION,
         aUv0: SEMANTIC_TEXCOORD0,
       },
+
       vertexGLSL: /* glsl */ `
       attribute vec3 aPosition;
       attribute vec2 aUv0;
@@ -32,12 +35,14 @@ export const useShaderMaterial = () => {
             vUv0 = aUv0;
             gl_Position = matrix_viewProjection * matrix_model * vec4(aPosition, 1.0);
         }`,
+
       fragmentGLSL: /* glsl */ `
       precision mediump float;
       varying vec2 vUv0;
         void main(void) {
 
-            gl_FragColor = vec4(1.0, vUv0.x, vUv0.y, 1.0);
+          gl_FragColor = vec4(1.0, vUv0.x, vUv0.y, 1.0);
+
         }`,
     });
 
@@ -45,6 +50,14 @@ export const useShaderMaterial = () => {
 
     return material;
   }, [app]);
+
+  useLayoutEffect(() => {
+    return () => {
+      if (material) {
+        material.destroy();
+      }
+    };
+  }, [material]);
 
   return material;
 };
