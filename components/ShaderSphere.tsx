@@ -17,9 +17,6 @@ const ShaderSphere = ({ color }: { color: Color }) => {
   const entityRef = useRef<any>(null);
 
   useEffect(() => {
-    // if (material && material.setParameter) {
-    //   material.setParameter("uColor", [color.r, color.g, color.b, 1.0]);
-    // }
     if (entityRef.current) {
       const animScript = entityRef.current.script?.animations as Animations;
       if (animScript) {
@@ -28,18 +25,6 @@ const ShaderSphere = ({ color }: { color: Color }) => {
         );
       }
     }
-    // const interval = setInterval(() => {
-    //   if (entityRef.current) {
-    //     const animScript = entityRef.current.script?.animations as Animations;
-    //     if (animScript) {
-    //       animScript.animateToColor(
-    //         new Color(Math.random(), Math.random(), Math.random()),
-    //       );
-    //     }
-    //   }
-    // }, 6000);
-
-    // return () => clearInterval(interval as any);
   }, [material, color]);
 
   return (

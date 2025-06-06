@@ -18,13 +18,13 @@ type GSplatComponent = {
 
 const Landscape = ({
   id,
-  swirl,
+  opacity,
   updateProgress,
   url,
   gradientMix,
 }: {
   id: number;
-  swirl: any;
+  opacity: number;
   updateProgress: (id: number, progress: number) => void;
   url: string;
   gradientMix: number;
@@ -70,14 +70,14 @@ const Landscape = ({
         });
       }
     }
-  }, [splat, app, updateProgress, id, swirl, url]);
+  }, [splat, app, updateProgress, id, opacity, url]);
 
   return (
     <Entity name="splat" ref={gsplatRef}>
       <GSplat
         id={id}
         gradientMix={gradientMix}
-        swirl={swirl}
+        opacity={opacity}
         asset={splat as Asset}
         dataReady={dataReady}
       />

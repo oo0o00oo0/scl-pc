@@ -395,7 +395,7 @@ void main(void) {
 
   // Normalize depth to a 0-1 range (adjust these values based on your scene)
   float nearDepth = 0.0;   // Closest expected depth
-  float farDepth = 50.0;   // Furthest expected depth
+  float farDepth = 5.0;   // Furthest expected depth
   float normalizedDepth = clamp((viewDepth - nearDepth) / (farDepth - nearDepth), 0.0, 1.0);
 
   // Combine screen X and depth for a 2D gradient
@@ -418,6 +418,7 @@ void main(void) {
 
   // Blend between original color and gradient based on uGradientMix
   vec3 finalColor = mix(originalColor, gradientColor, uGradientMix);
+  // vec3 finalColor = originalColor;
   vec4 colMix = vec4(finalColor, clr.w); // Keep original alpha
   float tOpacity = colMix.w * uSplatOpacity;
 
