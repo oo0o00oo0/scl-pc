@@ -1,24 +1,44 @@
 import { Entity } from "@playcanvas/react";
 import { Render } from "@playcanvas/react/components";
 import { useShaderMaterial } from "@/libs/hooks/use-shaderMaterial";
-import { useApp, useMaterial } from "@playcanvas/react/hooks";
-import { useEffect } from "react";
+import { Script } from "@playcanvas/react/components";
+import Animations from "@/libs/scripts/animations";
+import starterVert from "@/libs/shaders/starter/starter.vert?raw";
+import starterFrag from "@/libs/shaders/starter/starter.frag?raw";
+import { useEffect, useRef } from "react";
+import { Color } from "playcanvas";
 
 const ShaderSphere = () => {
-  const material = useShaderMaterial() as any;
-  const test = useMaterial({});
+  const material = useShaderMaterial({
+    vertexGLSL: starterVert,
+    fragmentGLSL: starterFrag,
+  }) as any;
 
-  const app = useApp();
+  const entityRef = useRef<any>(null);
+
   useEffect(() => {
-    console.log("test", test);
-    console.log("material", material);
-    console.log("app", app.autoRender);
+    if (material && material.setParameter) {
+      material.setParameter("uColor", [1.0, 0.5, 0.0, 1.0]);
+    }
 
-    app.renderNextFrame = true;
-  }, [test, app]);
+    const interval = setInterval(() => {
+      if (entityRef.current) {
+        const animScript = entityRef.current.script?.animations as Animations;
+        if (animScript) {
+          console.log("animating");
+          animScript.animateToColor(
+            new Color(Math.random(), Math.random(), Math.random()),
+          );
+        }
+      }
+    }, 6000);
+
+    return () => clearInterval(interval as any);
+  }, [material]);
 
   return (
-    <Entity>
+    <Entity ref={entityRef}>
+      <Script script={Animations} />
       <Render type="sphere" material={material} />
     </Entity>
   );

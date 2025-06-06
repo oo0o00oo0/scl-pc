@@ -6,9 +6,13 @@ import {
 } from "playcanvas";
 import { useApp } from "@playcanvas/react/hooks";
 
-console.log(SEMANTIC_POSITION, SEMANTIC_TEXCOORD0);
-
-export const useShaderMaterial = () => {
+export const useShaderMaterial = ({
+  vertexGLSL,
+  fragmentGLSL,
+}: {
+  vertexGLSL: string;
+  fragmentGLSL: string;
+}) => {
   const app = useApp();
 
   const material = useMemo(() => {
@@ -20,33 +24,9 @@ export const useShaderMaterial = () => {
         aPosition: SEMANTIC_POSITION,
         aUv0: SEMANTIC_TEXCOORD0,
       },
-
-      vertexGLSL: /* glsl */ `
-      attribute vec3 aPosition;
-      attribute vec2 aUv0;
-
-      uniform mat4 matrix_model;
-      uniform mat4 matrix_viewProjection;
-
-      varying vec2 vUv0;
-
-        void main(void)
-        {
-            vUv0 = aUv0;
-            gl_Position = matrix_viewProjection * matrix_model * vec4(aPosition, 1.0);
-        }`,
-
-      fragmentGLSL: /* glsl */ `
-      precision mediump float;
-      varying vec2 vUv0;
-        void main(void) {
-
-          gl_FragColor = vec4(1.0, vUv0.x, vUv0.y, 1.0);
-
-        }`,
+      vertexGLSL,
+      fragmentGLSL,
     });
-
-    app.renderNextFrame = true;
 
     return material;
   }, [app]);
