@@ -1,13 +1,10 @@
 import { Color, Script } from "playcanvas";
 import type { MeshInstance } from "playcanvas";
+import { lerpRate } from "../utils";
 
 const COLOR_CHANGE_THRESHOLD = 0.001;
 
 const COLOR_DAMPING = 0.95;
-
-const lerpRate = (damping: number, dt: number): number => {
-  return 1 - Math.pow(damping, dt * 60);
-};
 
 class Animations extends Script {
   private meshInstance: MeshInstance | null = null;

@@ -382,20 +382,21 @@ void main(void) {
   // When uSplatSize is 0, use a fixed normalized size for all splats
   // When uSplatSize is 1, use their natural varying sizes
   // float fixedSize = 0.03;
-  float fixedSize = 0.03;
-  vec2 normalizedOffset = normalize(corner.offset) * fixedSize;
-  vec2 finalOffset = mix(normalizedOffset, corner.offset, uSplatSize);
+  // float fixedSize = 0.03;
+  // vec2 normalizedOffset = normalize(corner.offset) * fixedSize;
+  // vec2 finalOffset = mix(normalizedOffset, corner.offset, uSplatSize);
 
   // 9. Compute final clip-space position using the blended offset
-  gl_Position = center.proj + vec4(finalOffset, 0.0, 0.0);
+  gl_Position = center.proj + vec4(corner.offset, 0.0, 0.0);
 
   // 10. Use original color without blending
   vec4 colMix = clr;
+  // float tOpacity = colMix.w * uSplatOpacity;
   float tOpacity = colMix.w * uSplatOpacity;
 
     // 11. Output the final UV and color values.
   gaussianUV = corner.uv;
-  gaussianColor = vec4(prepareOutputFromGamma(max(colMix.xyz, 0.0)), mix(uSplatSize, tOpacity, 1.0));
+  gaussianColor = vec4(prepareOutputFromGamma(max(colMix.xyz, 0.0)), tOpacity);
 
     #ifdef PREPASS_PASS
   vLinearDepth = -center.view.z;

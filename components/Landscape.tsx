@@ -1,11 +1,13 @@
 import { Entity } from "@playcanvas/react";
-import { Entity as PcEntity } from "playcanvas";
+import { Entity as PcEntity, Script } from "playcanvas";
 import { type Asset } from "playcanvas";
 import { useApp } from "@playcanvas/react/hooks";
+import { Script as ScriptComponent } from "@playcanvas/react/components";
 import { useEffect, useRef, useState } from "react";
 import { CustomGSplat } from "../atomic/splats/CustomGSplat";
 // import { GSplat } from "@playcanvas/react/components";
 import { useSplat } from "../hooks/use-asset";
+import LandscapeScript from "../scripts/landscape";
 
 // hello subby
 
@@ -15,6 +17,7 @@ type GSplatComponent = {
       on: (event: string, callback: () => void) => void;
     };
   };
+  material: any; // Add material property
 };
 
 const Landscape = ({
@@ -58,6 +61,8 @@ const Landscape = ({
       const gsplatComponent = entity?.findComponent("gsplat") as
         | GSplatComponent
         | undefined;
+
+      console.log("GSplatComponent", gsplatComponent);
       const gsplatInstance = gsplatComponent?.instance;
 
       if (gsplatInstance) {
@@ -68,7 +73,20 @@ const Landscape = ({
         });
       }
     }
-  }, [splat, app, updateProgress, id, active, url]);
+  }, [splat, app]);
+
+  const scriptRef = useRef<LandscapeScript | null>(null);
+
+  useEffect(() => {
+    const landscapeScript = scriptRef.current as LandscapeScript;
+    if (active) {
+      setTimeout(() => {
+        landscapeScript.animateToOpacity(1, 800);
+      }, 400);
+    } else {
+      landscapeScript.animateToOpacity(0, 800);
+    }
+  }, [active]);
 
   return (
     <Entity name="splat" ref={gsplatRef}>
@@ -78,6 +96,7 @@ const Landscape = ({
         asset={splat as Asset}
         dataReady={dataReady}
       />
+      <ScriptComponent ref={scriptRef} script={LandscapeScript} />
     </Entity>
   );
 };
