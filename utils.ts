@@ -1,3 +1,5 @@
+import { Vec3 } from "playcanvas";
+
 export const lerpRate = (damping: number, dt: number): number => {
   const t = 1 - Math.pow(damping, dt * 60);
   // Fast ease-in-out - much more subtle curve
@@ -16,3 +18,5 @@ export const easeInOutQuad = (t: number): number => {
 export const easeInOutQuart = (t: number): number => {
   return t < 0.5 ? 8 * t * t * t * t : 1 - Math.pow(-2 * t + 2, 4) / 2;
 };
+
+export const sceneCenter = new Vec3(0, 0, 0);

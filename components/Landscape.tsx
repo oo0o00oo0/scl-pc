@@ -3,10 +3,16 @@ import { Entity as PcEntity, Script } from "playcanvas";
 import { type Asset } from "playcanvas";
 import { useApp } from "@playcanvas/react/hooks";
 import { Script as ScriptComponent } from "@playcanvas/react/components";
-import { useEffect, useRef, useState } from "react";
+import {
+  forwardRef,
+  useEffect,
+  useImperativeHandle,
+  useRef,
+  useState,
+} from "react";
 import { CustomGSplat } from "../atomic/splats/CustomGSplat";
 // import { GSplat } from "@playcanvas/react/components";
-import { useSplat } from "../hooks/use-asset";
+import { useSplatWithId } from "../hooks/use-asset";
 import LandscapeScript from "../scripts/landscape";
 
 // hello subby
@@ -20,33 +26,50 @@ type GSplatComponent = {
   material: any; // Add material property
 };
 
-const Landscape = ({
+const Landscape = forwardRef(({
   id,
+  url,
   active,
   updateProgress,
-  url,
 }: {
   id: number;
   active: boolean;
   updateProgress: (id: number, progress: number) => void;
   url: string;
-}) => {
+}, ref) => {
   const app = useApp();
+
+  const scriptRef = useRef<LandscapeScript | null>(null);
 
   const [dataReady, setDataReady] = useState(false);
 
-  const { data: splat } = useSplat(url);
+  const { data: splat } = useSplatWithId(url, id);
 
   const gsplatRef = useRef<PcEntity | null>(null);
+
+  useImperativeHandle(ref, () => ({
+    isLoaded: dataReady,
+    animateIn: () => {
+      const landscapeScript = scriptRef.current as LandscapeScript;
+      landscapeScript.animateToOpacity(1, 500, true);
+    },
+    animateOut: () => {
+      const landscapeScript = scriptRef.current as LandscapeScript;
+      landscapeScript.animateToOpacity(0, 500, true);
+    },
+  }));
 
   useEffect(() => {
     const splatAssets = app.assets.filter(
       (a) => (a.type as string) === "gsplat",
     );
+    console.log("splatAssets", splatAssets);
 
     if (!splatAssets.length) return;
 
-    const splatAsset = splatAssets[id];
+    const splatAsset = splatAssets.find((a) => (a as any).id === id);
+    if (!splatAsset) return;
+
     splatAsset.on("progress", (received, length) => {
       const percent = Math.min(1, received / length) * 100;
       updateProgress(id, percent);
@@ -75,16 +98,12 @@ const Landscape = ({
     }
   }, [splat, app]);
 
-  const scriptRef = useRef<LandscapeScript | null>(null);
-
   useEffect(() => {
     const landscapeScript = scriptRef.current as LandscapeScript;
     if (active) {
-      setTimeout(() => {
-        landscapeScript.animateToOpacity(1, 800);
-      }, 400);
+      landscapeScript.animateToOpacity(1, 500);
     } else {
-      landscapeScript.animateToOpacity(0, 800);
+      landscapeScript.animateToOpacity(0, 500);
     }
   }, [active]);
 
@@ -99,6 +118,6 @@ const Landscape = ({
       <ScriptComponent ref={scriptRef} script={LandscapeScript} />
     </Entity>
   );
-};
+});
 
 export default Landscape;

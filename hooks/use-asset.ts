@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { TEXTURETYPE_RGBP } from "playcanvas";
+import { Asset, TEXTURETYPE_RGBP } from "playcanvas";
 import { useApp } from "@playcanvas/react/hooks";
 import { useQuery } from "@tanstack/react-query";
 import { fetchAsset } from "@playcanvas/react/utils";
@@ -38,6 +38,25 @@ export const useEnvAtlas = (src: string, props = {}) =>
 
 export const useSplat = (src: string, props = {}) =>
   useAsset(src, "gsplat", props);
+
+export const useSplatWithId = (src: string, id: number, props = {}) => {
+  const app = useApp();
+  const queryKey = [app.root?.getGuid(), src, "gsplat", props, id];
+
+  // Construct a query for the asset with custom ID
+  return useQuery({
+    queryKey,
+    queryFn: async () => {
+      if (!app) return null;
+      const asset = await fetchAsset(app, src, "gsplat", props) as Asset;
+      if (asset) {
+        // Set the custom ID on the asset
+        (asset as any).id = id;
+      }
+      return asset;
+    },
+  });
+};
 
 /**
  * Loads a glb asset

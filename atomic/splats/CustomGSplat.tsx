@@ -27,7 +27,9 @@ export const CustomGSplat: FC<GsplatProps> = (
         uniforms: {
           uSplatOpacity: 0,
         },
+        id: id,
       });
+
       parent.addChild(assetRef.current!);
 
       setTimeout(() => {
