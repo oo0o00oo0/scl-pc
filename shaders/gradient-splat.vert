@@ -23,6 +23,7 @@ varying float vLinearDepth;  // Used for depth pre-pass
 uniform float uSplatSize;    // Overall scaling factor for splat size
 uniform float uSplatOpacity;    // Overall scaling factor for splat size
 uniform float uTime;         // Global time for transitions
+uniform float uGradientMix;  // Blend factor between original color (0.0) and gradient (1.0)
 
 // Vertex attributes:
 // - vertex_position.xy: Corner UV coordinates (range: -1 to 1)
@@ -363,18 +364,14 @@ void main(void) {
     // 5. Read the base color.
   vec4 clr = readColor(source);
 
-    // 6. Optionally, add spherical harmonics lighting.
-    #if SH_BANDS > 0
-        // Compute model-space view direction.
-  vec3 dir = normalize(center.view * mat3(center.modelView));
-  clr.xyz += evalSH(source, dir);
-    #endif
+    // 6. Read base color (spherical harmonics will be applied later during blending)
 
     // 7. Adjust the corner to clip regions with very low alpha.
   clipCorner(corner, clr.w);
 
     // 8. Compute animated transition size for the splat.
   vec3 origin = vec3(0.0);
+
   float speed = 1.2;
   float transitionDelay = 0.0;
   vec2 size = transitionInSize(origin, modelCenter, corner, speed, transitionDelay);
@@ -389,8 +386,40 @@ void main(void) {
   // 9. Compute final clip-space position using the blended offset
   gl_Position = center.proj + vec4(finalOffset, 0.0, 0.0);
 
-  // 10. Use original color without blending
-  vec4 colMix = clr;
+      // 10. Create depth-aware gradient from left to right and blend with original color
+  // Convert clip space X coordinate (-1 to 1) to screen space (0 to 1)
+  float screenX = (gl_Position.x / gl_Position.w + 1.0) * 0.5;
+
+  // Get depth information from view space Z (negative values, closer to camera = larger negative)
+  float viewDepth = -center.view.z;  // Make positive (closer = smaller values)
+
+  // Normalize depth to a 0-1 range (adjust these values based on your scene)
+  float nearDepth = 0.0;   // Closest expected depth
+  float farDepth = 5.0;   // Furthest expected depth
+  float normalizedDepth = clamp((viewDepth - nearDepth) / (farDepth - nearDepth), 0.0, 1.0);
+
+  // Combine screen X and depth for a 2D gradient
+  float gradientFactor = mix(screenX * 0.7, normalizedDepth, 0.3); // 70% screen X, 30% depth
+
+  // Define gradient colors (you can customize these)
+  vec3 nearColor = vec3(1.0, 0.2, 0.3);   // Red-ish for near/left
+  vec3 farColor = vec3(0.2, 0.3, 1.0);    // Blue-ish for far/right
+
+  // Interpolate between colors based on combined gradient factor
+  vec3 gradientColor = mix(nearColor, farColor, gradientFactor);
+
+  // Get original color (with optional spherical harmonics)
+  vec3 originalColor = clr.rgb;
+  #if SH_BANDS > 0
+    // Compute model-space view direction for SH
+  vec3 dir = normalize(center.view * mat3(center.modelView));
+  originalColor += evalSH(source, dir);
+  #endif
+
+  // Blend between original color and gradient based on uGradientMix
+  vec3 finalColor = mix(originalColor, gradientColor, uGradientMix);
+  // vec3 finalColor = originalColor;
+  vec4 colMix = vec4(finalColor, clr.w); // Keep original alpha
   float tOpacity = colMix.w * uSplatOpacity;
 
     // 11. Output the final UV and color values.

@@ -6,51 +6,68 @@ import vertex from "../../shaders/vert.vert?raw";
 
 interface GsplatProps {
   asset: Asset;
-  opacity: number;
   id: number;
   dataReady: boolean;
+  active: boolean;
 }
 
-export const GSplat: FC<GsplatProps> = ({ asset, opacity, id, dataReady }) => {
+export const CustomGSplat: FC<GsplatProps> = (
+  { asset, id, dataReady, active },
+) => {
   const parent: PcEntity = useParent();
 
   const assetRef = useRef<PcEntity | null>(null);
 
   const app = useApp();
 
+  // useEffect(() => {
+  //   if (!dataReady) return;
+  //   const material = assetRef.current?.gsplat?.material;
+  // material?.setParameter("uSplatSize", 1.0);
+
+  //   const uniforms = {
+  //     splatOpacity: active ? 0 : 1,
+  //   };
+
+  //   gsap.to(uniforms, {
+  //     onStart: () => {
+  //       if (!assetRef.current) return;
+  //       assetRef.current.enabled = true;
+  //     },
+
+  //     splatOpacity: active ? 1 : 0,
+  //     duration: 0.4,
+  //     ease: "power2.inOut",
+  //     delay: active ? .3 : 0,
+  //     onUpdate: () => {
+  //       app.renderNextFrame = true;
+  //       material?.setParameter("uSplatOpacity", uniforms.splatOpacity);
+  //     },
+  //     onComplete: () => {
+  //       if (!assetRef.current) return;
+  //       if (!active) {
+  //         assetRef.current.enabled = false;
+  //       } else {
+  //         assetRef.current.enabled = true;
+  //       }
+  //     },
+  //   });
+  // }, [app, id, active, dataReady]);
+
   useEffect(() => {
-    if (!dataReady) return;
     const material = assetRef.current?.gsplat?.material;
     material?.setParameter("uSplatSize", 1.0);
+    material?.setParameter("uSplatOpacity", active ? 1 : 0);
 
-    const uniforms = {
-      splatOpacity: opacity ? 0 : 1,
-    };
-
-    gsap.to(uniforms, {
-      onStart: () => {
-        if (!assetRef.current) return;
-        assetRef.current.enabled = true;
-      },
-
-      splatOpacity: opacity ? 1 : 0,
-      duration: 0.4,
-      ease: "power2.inOut",
-      delay: opacity === 1 ? .3 : 0,
-      onUpdate: () => {
-        app.renderNextFrame = true;
-        material?.setParameter("uSplatOpacity", uniforms.splatOpacity);
-      },
-      onComplete: () => {
-        if (!assetRef.current) return;
-        if (opacity === 0) {
-          assetRef.current.enabled = false;
-        } else {
-          assetRef.current.enabled = true;
-        }
-      },
-    });
-  }, [app, id, opacity, dataReady]);
+    if (!assetRef.current || !dataReady) return;
+    if (active) {
+      console.log("active", id);
+      assetRef.current.enabled = true;
+    } else {
+      console.log("inactive", id);
+      assetRef.current.enabled = false;
+    }
+  }, [active, id, dataReady]);
 
   useLayoutEffect(() => {
     if (asset) {

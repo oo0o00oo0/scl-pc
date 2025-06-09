@@ -1,8 +1,9 @@
 import { Entity } from "@playcanvas/react";
+import { Entity as PcEntity } from "playcanvas";
 import { type Asset } from "playcanvas";
 import { useApp } from "@playcanvas/react/hooks";
 import { useEffect, useRef, useState } from "react";
-import { GSplat } from "../atomic/splats/CustomGSplat";
+import { CustomGSplat } from "../atomic/splats/CustomGSplat";
 // import { GSplat } from "@playcanvas/react/components";
 import { useSplat } from "../hooks/use-asset";
 
@@ -18,16 +19,14 @@ type GSplatComponent = {
 
 const Landscape = ({
   id,
-  opacity,
+  active,
   updateProgress,
   url,
-  gradientMix,
 }: {
   id: number;
-  opacity: number;
+  active: boolean;
   updateProgress: (id: number, progress: number) => void;
   url: string;
-  gradientMix: number;
 }) => {
   const app = useApp();
 
@@ -35,11 +34,9 @@ const Landscape = ({
 
   const { data: splat } = useSplat(url);
 
-  const gsplatRef = useRef<React.ElementRef<typeof Entity>>(null);
+  const gsplatRef = useRef<PcEntity | null>(null);
 
   useEffect(() => {
-    // app.autoRender = false;
-
     const splatAssets = app.assets.filter(
       (a) => (a.type as string) === "gsplat",
     );
@@ -57,6 +54,7 @@ const Landscape = ({
 
     if (splat) {
       const entity = gsplatRef.current;
+
       const gsplatComponent = entity?.findComponent("gsplat") as
         | GSplatComponent
         | undefined;
@@ -70,14 +68,13 @@ const Landscape = ({
         });
       }
     }
-  }, [splat, app, updateProgress, id, opacity, url]);
+  }, [splat, app, updateProgress, id, active, url]);
 
   return (
     <Entity name="splat" ref={gsplatRef}>
-      <GSplat
+      <CustomGSplat
         id={id}
-        gradientMix={gradientMix}
-        opacity={opacity}
+        active={active}
         asset={splat as Asset}
         dataReady={dataReady}
       />
