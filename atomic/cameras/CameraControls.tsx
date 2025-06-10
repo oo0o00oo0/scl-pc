@@ -15,9 +15,6 @@ interface CameraConstraints {
   zoomMax?: number;
   /** Scene size - affects movement and zoom speeds. Default: 100 */
   sceneSize?: number;
-  enablePan?: boolean;
-  enableFly?: boolean;
-  enableZoom?: boolean;
 }
 
 const CameraControls = (
@@ -29,6 +26,9 @@ const CameraControls = (
     };
     clearColor: string;
     constraints?: CameraConstraints;
+    enablePan?: boolean;
+    enableFly?: boolean;
+    enableZoom?: boolean;
   },
 ) => {
   const app = useApp();
