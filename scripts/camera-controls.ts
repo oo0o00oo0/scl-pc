@@ -585,6 +585,7 @@ class CameraControls extends Script {
     tmpV1.sub2(start, end);
     this._origin.add(tmpV1);
 
+    this.app.renderNextFrame = true;
     this._lastPosition.copy(pos);
   }
 
