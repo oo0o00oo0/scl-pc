@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Asset, TEXTURETYPE_RGBP } from "playcanvas";
+import {  Asset,TEXTURETYPE_RGBP,} from "playcanvas";
 import { useApp } from "@playcanvas/react/hooks";
 import { useQuery } from "@tanstack/react-query";
 import { fetchAsset } from "@playcanvas/react/utils";

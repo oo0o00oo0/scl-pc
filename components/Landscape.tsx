@@ -12,6 +12,7 @@ import {
 } from "react";
 import { CustomGSplat } from "../atomic/splats/CustomGSplat";
 // import { GSplat } from "@playcanvas/react/components";
+// import { useSplatWithId } from "../hooks/use-asset";
 import { useSplatWithId } from "../hooks/use-asset";
 import LandscapeScript from "../scripts/landscape";
 
@@ -67,8 +68,14 @@ const Landscape = forwardRef(({
 
     if (!splatAssets.length) return;
 
-    const splatAsset = splatAssets.find((a) => (a as any).id === id);
-    if (!splatAsset) return;
+    // splatAssets.forEach((a) => {
+    //   console.log("a", a.id);
+    // });
+    const splatAsset = splatAssets[id];
+    // const splatAsset = splatAssets.find((a) => (a as any).id === id);
+    // console.log("splatAssetttt", splatAsset);
+    // if (!splatAsset) return;
+    // console.log("splatAsset", splatAsset);
 
     splatAsset.on("progress", (received, length) => {
       const percent = Math.min(1, received / length) * 100;
