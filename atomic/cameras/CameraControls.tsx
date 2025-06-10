@@ -15,10 +15,13 @@ interface CameraConstraints {
   zoomMax?: number;
   /** Scene size - affects movement and zoom speeds. Default: 100 */
   sceneSize?: number;
+  enablePan?: boolean;
+  enableFly?: boolean;
+  enableZoom?: boolean;
 }
 
 const CameraControls = (
-  { camState, clearColor, constraints = {} }: {
+  { camState, clearColor, constraints = {}, ...props }: {
     camState: {
       position: Vec3;
       target: Vec3;
@@ -76,7 +79,7 @@ const CameraControls = (
       name="camera"
     >
       <Script
-        enableZoom={false}
+        {...props}
         script={CameraControlsScript}
       />
       <Camera
