@@ -8,13 +8,13 @@ import {
 import { Color, RenderComponent, Script } from "playcanvas";
 import { useModel } from "@playcanvas/react/hooks";
 
-const diriyahModelData = {
-  "1": { x: 0, y: 0, z: 0 },
-  "2": { x: 0, y: 0, z: 0 },
-  "3": { x: 0, y: 0, z: 0 },
-  "4": { x: 0, y: 0, z: 0 },
-  "5": { x: 0, y: 0, z: 0 },
-};
+// const diriyahModelData = {
+//   "1": { x: 0, y: 0, z: 0 },
+//   "2": { x: 0, y: 0, z: 0 },
+//   "3": { x: 0, y: 0, z: 0 },
+//   "4": { x: 0, y: 0, z: 0 },
+//   "5": { x: 0, y: 0, z: 0 },
+// };
 interface LabelsShapeProps {
   url: string;
   handleModelClick: (data: any) => void;
