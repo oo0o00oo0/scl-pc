@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import {  Asset,TEXTURETYPE_RGBP,} from "playcanvas";
+import { Asset, TEXTURETYPE_RGBP } from "playcanvas";
 import { useApp } from "@playcanvas/react/hooks";
 import { useQuery } from "@tanstack/react-query";
 import { fetchAsset } from "@playcanvas/react/utils";
@@ -43,14 +43,60 @@ export const useSplatWithId = (src: string, id: number, props = {}) => {
   const app = useApp();
   const queryKey = [app.root?.getGuid(), src, "gsplat", props, id];
 
-  // Construct a query for the asset with custom ID
+  // Construct a query for the asset with custom ID set before loading
+  return useQuery({
+    queryKey,
+    queryFn: async () => {
+      if (!app) return null;
+
+      try {
+        // Create the asset manually using the correct Asset constructor
+        const asset = new Asset(src, "gsplat", {
+          url: src,
+        }, props);
+
+        // Set the custom ID BEFORE loading starts
+        (asset as any).id = id;
+
+        // Add to asset registry
+        app.assets.add(asset);
+
+        // Return a promise that resolves when the asset is loaded
+        return new Promise((resolve, reject) => {
+          asset.on("load", () => resolve(asset));
+          asset.on("error", (err: any) => reject(err));
+
+          // Start loading the asset
+          app.assets.load(asset);
+        });
+      } catch (error) {
+        console.warn(
+          "Manual asset creation failed, falling back to fetchAsset:",
+          error,
+        );
+        // Fallback to the original method
+        const asset = await fetchAsset(app, src, "gsplat", props) as Asset;
+        if (asset) {
+          (asset as any).id = id;
+        }
+        return asset;
+      }
+    },
+  });
+};
+
+// Alternative approach that uses array indexing but still sets proper IDs
+export const useSplatWithArrayIndex = (src: string, id: number, props = {}) => {
+  const app = useApp();
+  const queryKey = [app.root?.getGuid(), src, "gsplat", props, id];
+
   return useQuery({
     queryKey,
     queryFn: async () => {
       if (!app) return null;
       const asset = await fetchAsset(app, src, "gsplat", props) as Asset;
       if (asset) {
-        // Set the custom ID on the asset
+        // Set the custom ID after loading
         (asset as any).id = id;
       }
       return asset;

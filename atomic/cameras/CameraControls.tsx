@@ -20,16 +20,17 @@ interface CameraConstraints {
 const CameraControls = (
   { camState, clearColor, constraints = {} }: {
     camState: {
-      activeCameraPosition: Vec3;
-      activeCameraTarget: Vec3;
+      position: Vec3;
+      target: Vec3;
       delay?: number;
     };
     clearColor: string;
     constraints?: CameraConstraints;
   },
 ) => {
+  console.log("CAMSTATE", camState);
   const app = useApp();
-  const { activeCameraPosition, activeCameraTarget, delay = 0 } = camState;
+  const { position, target, delay = 0 } = camState;
   const {
     pitchRange = new Vec2(-90, 90),
     zoomMin = .1,
@@ -45,18 +46,15 @@ const CameraControls = (
 
       if (!cameraControlsScript) return;
 
-      // Apply constraints to the script
-      cameraControlsScript.pitchRange.set(-90, -25);
-      // camera.script.cameraControls.pitchRange.set(-90, -25);
-
+      cameraControlsScript.pitchRange.set(pitchRange.x, pitchRange.y);
       cameraControlsScript.zoomMin = zoomMin;
       cameraControlsScript.zoomMax = zoomMax;
       cameraControlsScript.sceneSize = sceneSize;
 
       setTimeout(() => {
         cameraControlsScript.focus(
-          activeCameraTarget,
-          activeCameraPosition,
+          target,
+          position,
         );
       }, delay);
 
@@ -64,8 +62,8 @@ const CameraControls = (
     }
   }, [
     app,
-    activeCameraPosition,
-    activeCameraTarget,
+    position,
+    target,
     delay,
     pitchRange,
     zoomMin,

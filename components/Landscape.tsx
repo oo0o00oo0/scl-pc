@@ -15,6 +15,7 @@ import { CustomGSplat } from "../atomic/splats/CustomGSplat";
 // import { useSplatWithId } from "../hooks/use-asset";
 import { useSplatWithId } from "../hooks/use-asset";
 import LandscapeScript from "../scripts/landscape";
+import { Vec3 } from "playcanvas";
 
 // hello subby
 
@@ -32,13 +33,13 @@ const Landscape = forwardRef(({
   url,
   active,
   updateProgress,
-  position,
+  position = new Vec3(0, 0, 0),
 }: {
   id: number;
   active: boolean;
   updateProgress: (id: number, progress: number) => void;
   url: string;
-  position: [number, number, number];
+  position?: Vec3;
 }, ref) => {
   const app = useApp();
 
@@ -69,14 +70,16 @@ const Landscape = forwardRef(({
 
     if (!splatAssets.length) return;
 
-    // splatAssets.forEach((a) => {
-    //   console.log("a", a.id);
-    // });
-    const splatAsset = splatAssets[id];
-    // const splatAsset = splatAssets.find((a) => (a as any).id === id);
-    // console.log("splatAssetttt", splatAsset);
-    // if (!splatAsset) return;
-    // console.log("splatAsset", splatAsset);
+    // Try to find by custom ID first
+    let splatAsset = splatAssets.find((a) => (a as any).id === id);
+
+    // If not found by ID, fall back to array indexing
+    if (!splatAsset) {
+      console.log("Asset not found by ID, using array index:", id);
+      splatAsset = splatAssets[id];
+    }
+
+    if (!splatAsset) return;
 
     splatAsset.on("progress", (received, length) => {
       const percent = Math.min(1, received / length) * 100;
@@ -106,6 +109,7 @@ const Landscape = forwardRef(({
   }, [splat, app, id, updateProgress]);
 
   useEffect(() => {
+    console.log("ACTIVE", active, id);
     const landscapeScript = scriptRef.current as LandscapeScript;
     if (active) {
       setTimeout(() => {
@@ -117,7 +121,11 @@ const Landscape = forwardRef(({
   }, [active]);
 
   return (
-    <Entity position={position} name="splat" ref={gsplatRef}>
+    <Entity
+      position={[position.x, position.y, position.z]}
+      name="splat"
+      ref={gsplatRef}
+    >
       <CustomGSplat
         id={id}
         active={active}
