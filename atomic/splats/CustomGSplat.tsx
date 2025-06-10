@@ -24,10 +24,10 @@ export const CustomGSplat: FC<GsplatProps> = (
     if (asset) {
       assetRef.current = (asset.resource as any).instantiate({
         vertex,
-        uniforms: {
-          uSplatOpacity: 0,
-        },
-        id: id,
+        // uniforms: {
+        //   uSplatOpacity: 0,
+        // },
+        // id: id,
       });
 
       parent.addChild(assetRef.current!);

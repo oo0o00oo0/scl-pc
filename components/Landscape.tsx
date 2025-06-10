@@ -1,5 +1,5 @@
 import { Entity } from "@playcanvas/react";
-import { Entity as PcEntity, Script } from "playcanvas";
+import { Entity as PcEntity } from "playcanvas";
 import { type Asset } from "playcanvas";
 import { useApp } from "@playcanvas/react/hooks";
 import { Script as ScriptComponent } from "@playcanvas/react/components";
@@ -32,11 +32,13 @@ const Landscape = forwardRef(({
   url,
   active,
   updateProgress,
+  position,
 }: {
   id: number;
   active: boolean;
   updateProgress: (id: number, progress: number) => void;
   url: string;
+  position: [number, number, number];
 }, ref) => {
   const app = useApp();
 
@@ -103,19 +105,21 @@ const Landscape = forwardRef(({
         });
       }
     }
-  }, [splat, app]);
+  }, [splat, app, id, updateProgress]);
 
   useEffect(() => {
     const landscapeScript = scriptRef.current as LandscapeScript;
     if (active) {
-      landscapeScript.animateToOpacity(1, 500);
+      setTimeout(() => {
+        landscapeScript.animateToOpacity(1, 500);
+      }, 200);
     } else {
-      landscapeScript.animateToOpacity(0, 500);
+      landscapeScript.animateToOpacity(0, 0);
     }
   }, [active]);
 
   return (
-    <Entity name="splat" ref={gsplatRef}>
+    <Entity position={position} name="splat" ref={gsplatRef}>
       <CustomGSplat
         id={id}
         active={active}

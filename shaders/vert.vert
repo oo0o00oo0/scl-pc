@@ -14,6 +14,8 @@ varying mediump vec4 gaussianColor;
 varying float id;  // Used for dithering if enabled
 #endif
 
+mediump vec4 discardVec = vec4(0.0, 0.0, 2.0, 1.0);
+
 #ifdef PREPASS_PASS
 varying float vLinearDepth;  // Used for depth pre-pass
 #endif
@@ -339,7 +341,7 @@ void main(void) {
     // 1. Initialize the splat source from vertex attributes and the splatOrder texture.
   SplatSource source;
   if(!initSource(source)) {
-    gl_Position = vec4(0.0, 0.0, 2.0, 1.0);  // Discard vertex if out of range.
+    gl_Position = discardVec;
     return;
   }
 
@@ -349,14 +351,14 @@ void main(void) {
     // 3. Compute the center in view and clip space.
   SplatCenter center;
   if(!initCenter(modelCenter, center)) {
-    gl_Position = vec4(0.0, 0.0, 2.0, 1.0);  // Discard if behind camera.
+    gl_Position = discardVec;
     return;
   }
 
     // 4. Calculate the corner offset of the Gaussian.
   SplatCorner corner;
   if(!initCorner(source, center, corner)) {
-    gl_Position = vec4(0.0, 0.0, 2.0, 1.0);  // Discard if too small or culled.
+    gl_Position = discardVec;
     return;
   }
 
@@ -373,30 +375,20 @@ void main(void) {
     // 7. Adjust the corner to clip regions with very low alpha.
   clipCorner(corner, clr.w);
 
-    // 8. Compute animated transition size for the splat.
-  vec3 origin = vec3(0.0);
-  float speed = 1.2;
-  float transitionDelay = 0.0;
-  vec2 size = transitionInSize(origin, modelCenter, corner, speed, transitionDelay);
-
-  // When uSplatSize is 0, use a fixed normalized size for all splats
-  // When uSplatSize is 1, use their natural varying sizes
-  // float fixedSize = 0.03;
-  // float fixedSize = 0.03;
-  // vec2 normalizedOffset = normalize(corner.offset) * fixedSize;
-  // vec2 finalOffset = mix(normalizedOffset, corner.offset, uSplatSize);
-
-  // 9. Compute final clip-space position using the blended offset
   gl_Position = center.proj + vec4(corner.offset, 0.0, 0.0);
 
   // 10. Use original color without blending
   vec4 colMix = clr;
   // float tOpacity = colMix.w * uSplatOpacity;
-  float tOpacity = colMix.w * uSplatOpacity;
+  // float tOpacity = colMix.w * uSplatOpacity;
 
     // 11. Output the final UV and color values.
   gaussianUV = corner.uv;
-  gaussianColor = vec4(prepareOutputFromGamma(max(colMix.xyz, 0.0)), tOpacity);
+  gaussianColor = vec4(prepareOutputFromGamma(max(clr.xyz, 0.0)), clr.w * uSplatOpacity);
+
+    #ifndef DITHER_NONE
+  id = float(source.id);
+    #endif
 
     #ifdef PREPASS_PASS
   vLinearDepth = -center.view.z;

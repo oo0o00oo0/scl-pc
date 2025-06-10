@@ -1,5 +1,5 @@
-import { Entity as PcEntity, Script } from "playcanvas";
-import { easeInOutQuad, lerpRate } from "../utils";
+import { Script } from "playcanvas";
+import { easeInOutQuad } from "../utils";
 
 class LandscapeScript extends Script {
   private animating: boolean = false;
@@ -11,9 +11,8 @@ class LandscapeScript extends Script {
 
   initialize() {
     this.entity.enabled = false;
-    this.entity.on("gsplat:ready", (_: PcEntity) => {
-      // Don't automatically set opacity to 1 - let the animation system control it
-      // Just initialize the current and target opacity to 0 to match the initial state
+    this.entity.on("gsplat:ready", () => {
+      // Initialize opacity values consistently to 0
       this.currentOpacity = 0;
       this.targetOpacity = 0;
       this.app.renderNextFrame = true;
@@ -51,7 +50,6 @@ class LandscapeScript extends Script {
     const material = gsplatComponent?.material;
 
     if (material?.setParameter) {
-      console.log("setting opacity", this.currentOpacity);
       material.setParameter("uSplatOpacity", this.currentOpacity);
     }
 

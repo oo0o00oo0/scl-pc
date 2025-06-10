@@ -28,9 +28,7 @@ const OverlaysShape = ({
 }: LabelsShapeProps) => {
   const { asset: model } = useModel(url);
 
-  const values = Object.values(diriyahModelData);
-  console.log(values);
-  console.log("activeDistrict::", activeDistrict);
+  // const values = Object.values(diriyahModelData);
   return (
     <>
       {
@@ -91,7 +89,7 @@ class TestScript extends Script {
 
           mi.material.emissive = new Color(0.1, 0.1, 0.1);
           // Set opacity: 0 if no active district OR if this is the selected district, 0.8 for non-selected when there's an active district
-          console.log(isSelected, model.name);
+          // console.log(isSelected, model.name);
           // @ts-ignore
           mi.material.opacity = (!this.isActive || isSelected) ? 0 : 0.8;
 
@@ -116,7 +114,6 @@ class TestScript extends Script {
     this._models = this.entity.children[0].children;
 
     this._models.forEach((model) => {
-      console.log(model.name);
       model.on("click", () => {
         if (this.callback) {
           this.callback({ id: model.name });
