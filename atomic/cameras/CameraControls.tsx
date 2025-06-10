@@ -28,7 +28,6 @@ const CameraControls = (
     constraints?: CameraConstraints;
   },
 ) => {
-  console.log("CAMSTATE", camState);
   const app = useApp();
   const { position, target, delay = 0 } = camState;
   const {

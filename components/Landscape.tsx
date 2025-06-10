@@ -75,7 +75,6 @@ const Landscape = forwardRef(({
 
     // If not found by ID, fall back to array indexing
     if (!splatAsset) {
-      console.log("Asset not found by ID, using array index:", id);
       splatAsset = splatAssets[id];
     }
 
@@ -109,7 +108,6 @@ const Landscape = forwardRef(({
   }, [splat, app, id, updateProgress]);
 
   useEffect(() => {
-    console.log("ACTIVE", active, id);
     const landscapeScript = scriptRef.current as LandscapeScript;
     if (active) {
       setTimeout(() => {
