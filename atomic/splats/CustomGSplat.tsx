@@ -6,7 +6,6 @@ import vertex from "../../shaders/vert.vert?raw";
 interface GsplatProps {
   asset: Asset;
   id: number;
-  dataReady: boolean;
   active: boolean;
 }
 
@@ -23,10 +22,6 @@ export const CustomGSplat: FC<GsplatProps> = (
     if (asset) {
       assetRef.current = (asset.resource as any).instantiate({
         vertex,
-        // uniforms: {
-        //   uSplatOpacity: 0,
-        // },
-        // id: id,
       });
 
       parent.addChild(assetRef.current!);

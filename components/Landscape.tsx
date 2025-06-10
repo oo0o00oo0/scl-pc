@@ -2,7 +2,10 @@ import { Entity } from "@playcanvas/react";
 import { Entity as PcEntity } from "playcanvas";
 import { type Asset } from "playcanvas";
 import { useApp } from "@playcanvas/react/hooks";
-import { Script as ScriptComponent } from "@playcanvas/react/components";
+import {
+  GSplat,
+  Script as ScriptComponent,
+} from "@playcanvas/react/components";
 import {
   forwardRef,
   useEffect,
@@ -28,40 +31,28 @@ type GSplatComponent = {
   material: any; // Add material property
 };
 
-const Landscape = forwardRef(({
+const Landscape = ({
   id,
   url,
   active,
   updateProgress,
   position = new Vec3(0, 0, 0),
+  onReady,
 }: {
   id: number;
   active: boolean;
   updateProgress: (id: number, progress: number) => void;
   url: string;
+  onReady: () => void;
   position?: Vec3;
-}, ref) => {
+}) => {
   const app = useApp();
 
   const scriptRef = useRef<LandscapeScript | null>(null);
 
-  const [dataReady, setDataReady] = useState(false);
-
   const { data: splat } = useSplatWithId(url, id);
 
   const gsplatRef = useRef<PcEntity | null>(null);
-
-  useImperativeHandle(ref, () => ({
-    isLoaded: dataReady,
-    animateIn: () => {
-      const landscapeScript = scriptRef.current as LandscapeScript;
-      landscapeScript.animateToOpacity(1, 500, true);
-    },
-    animateOut: () => {
-      const landscapeScript = scriptRef.current as LandscapeScript;
-      landscapeScript.animateToOpacity(0, 500, true);
-    },
-  }));
 
   useEffect(() => {
     const splatAssets = app.assets.filter(
@@ -70,10 +61,9 @@ const Landscape = forwardRef(({
 
     if (!splatAssets.length) return;
 
-    // Try to find by custom ID first
     let splatAsset = splatAssets.find((a) => (a as any).id === id);
+    console.log("splatAsset", splatAsset);
 
-    // If not found by ID, fall back to array indexing
     if (!splatAsset) {
       splatAsset = splatAssets[id];
     }
@@ -83,12 +73,11 @@ const Landscape = forwardRef(({
     splatAsset.on("progress", (received, length) => {
       const percent = Math.min(1, received / length) * 100;
       updateProgress(id, percent);
-      if (percent === 100) {
-        setDataReady(true);
-      }
     });
 
     if (splat) {
+      onReady();
+      console.log("SPLAT EXIST");
       const entity = gsplatRef.current;
 
       const gsplatComponent = entity?.findComponent("gsplat") as
@@ -128,11 +117,10 @@ const Landscape = forwardRef(({
         id={id}
         active={active}
         asset={splat as Asset}
-        dataReady={dataReady}
       />
       <ScriptComponent ref={scriptRef} script={LandscapeScript} />
     </Entity>
   );
-});
+};
 
 export default Landscape;

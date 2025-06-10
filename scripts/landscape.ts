@@ -85,7 +85,7 @@ class LandscapeScript extends Script {
 
       // If animating to 0, disable entity after setting opacity
       if (this.targetOpacity === 0) {
-        // this.entity.enabled = false;
+        this.entity.enabled = false;
       }
     } else {
       this.startOpacity = this.currentOpacity;
