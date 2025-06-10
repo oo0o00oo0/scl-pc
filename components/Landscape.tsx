@@ -66,7 +66,6 @@ const Landscape = forwardRef(({
     const splatAssets = app.assets.filter(
       (a) => (a.type as string) === "gsplat",
     );
-    console.log("splatAssets", splatAssets);
 
     if (!splatAssets.length) return;
 
@@ -94,7 +93,6 @@ const Landscape = forwardRef(({
         | GSplatComponent
         | undefined;
 
-      console.log("GSplatComponent", gsplatComponent);
       const gsplatInstance = gsplatComponent?.instance;
 
       if (gsplatInstance) {
