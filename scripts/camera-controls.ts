@@ -120,6 +120,8 @@ class CameraControls extends Script {
   public enablePan = true;
   /** Enable fly camera controls. */
   public enableFly = true;
+  /** Enable zoom camera controls. */
+  public enableZoom = true;
 
   /** Rotation speed (°/px). */
   public rotateSpeed = 0.2;
@@ -424,6 +426,7 @@ class CameraControls extends Script {
   }
 
   private _onWheel(event: WheelEvent): void {
+    if (!this.enableZoom) return;
     this._focusing = false;
     event.preventDefault();
     this._zoom(event.deltaY);
@@ -590,6 +593,7 @@ class CameraControls extends Script {
   }
 
   private _zoom(delta: number): void {
+    if (!this.enableZoom) return;
     if (!this.enableOrbit && !this.enablePan) return;
     if (this._flying) return;
     if (!this._camera) return;
