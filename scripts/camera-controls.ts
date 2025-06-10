@@ -317,7 +317,7 @@ class CameraControls extends Script {
     if (!this.enableOrbit || !this.enableFly) {
       return event.button === 1 || event.button === 2;
     }
-    return event.button === 1;
+    return event.button === 1 || event.button === 2;
   }
 
   private _isStartFly(event: PointerEvent): boolean {
@@ -329,7 +329,7 @@ class CameraControls extends Script {
     if (!this.enableOrbit) {
       return event.button === 0;
     }
-    return event.button === 2;
+    return false; // Right mouse now used for panning
   }
 
   private _isStartOrbit(event: PointerEvent): boolean {

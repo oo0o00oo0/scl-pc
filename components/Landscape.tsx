@@ -114,7 +114,7 @@ const Landscape = forwardRef(({
         landscapeScript.animateToOpacity(1, 500);
       }, 200);
     } else {
-      landscapeScript.animateToOpacity(0, 0);
+      landscapeScript.animateToOpacity(0, 100);
     }
   }, [active]);
 
