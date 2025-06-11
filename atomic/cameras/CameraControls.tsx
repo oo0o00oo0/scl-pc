@@ -19,8 +19,6 @@ const defaultCameraConstraints: CameraConstraints = {
   sceneSize: 100,
 };
 
-// const mode = "fly";
-
 const CameraControls = (
   { camState, clearColor }: {
     camState: CamState;
@@ -50,19 +48,6 @@ const CameraControls = (
 
       if (!cameraControlsScript) return;
 
-      if (pitchRange) {
-        cameraControlsScript.pitchRange.set(pitchRange.x, pitchRange.y);
-      }
-      if (zoomMin) {
-        cameraControlsScript.zoomMin = zoomMin;
-      }
-      if (zoomMax) {
-        cameraControlsScript.zoomMax = zoomMax;
-      }
-      if (sceneSize) {
-        cameraControlsScript.sceneSize = sceneSize;
-      }
-
       setTimeout(() => {
         cameraControlsScript.focus(
           target,
@@ -83,6 +68,7 @@ const CameraControls = (
     zoomMax,
     sceneSize,
   ]);
+  console.log("MODE", mode);
 
   return (
     <Entity
@@ -90,10 +76,10 @@ const CameraControls = (
       name="camera"
     >
       <Script
-        // rotateDamping={0.96}
         rotateDamping={damping}
-        // zoomDamping={0.994}
-        // enablePivot={true}
+        zoomMin={zoomMin}
+        zoomMax={zoomMax}
+        pitchRange={pitchRange}
         enableZoom={false}
         enablePan={mode === "fly"}
         enableOrbit={mode === "orbit"}
