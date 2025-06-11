@@ -84,6 +84,8 @@ const CameraControls = (
         zoomMax={zoomMax}
         pitchRange={pitchRange}
         enableZoom={false}
+        enableFly={false}
+        enablePan={false}
         // enablePan={mode === "fly"}
         // enableOrbit={mode === "orbit"}
         script={CameraControlsScript}
