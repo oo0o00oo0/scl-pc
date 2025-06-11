@@ -3,9 +3,14 @@ import { Camera, Script } from "@playcanvas/react/components";
 import { useApp } from "@playcanvas/react/hooks";
 import { useEffect, useRef } from "react";
 
-import CameraControlsScript from "../../scripts/camera-controls";
+// @ts-ignore
+// import { CameraControls as CameraControlsScript } from "playcanvas/scripts/esm/camera-controls.mjs";
+import { CameraControls as CameraControlsScript } from "@/libs/scripts/camera-controls-pc.mjs";
+console.log("CameraControlsScript", CameraControlsScript);
+
 import type { CameraConstraints, CamState } from "@/state/store";
 import { Vec2 } from "playcanvas";
+import { useRenderOnCameraChange } from "@/libs/hooks/use-render-on-camera-change";
 
 const defaultCameraConstraints: CameraConstraints = {
   pitchRange: new Vec2(-90, 90),
@@ -14,6 +19,8 @@ const defaultCameraConstraints: CameraConstraints = {
   sceneSize: 100,
 };
 
+// const mode = "fly";
+
 const CameraControls = (
   { camState, clearColor }: {
     camState: CamState;
@@ -21,12 +28,14 @@ const CameraControls = (
   },
 ) => {
   const app = useApp();
-  const { position, target, delay = 0, cameraConstraints } = camState;
+  const { position, target, delay = 0, cameraConstraints, mode = "orbit" } =
+    camState;
+  const entityRef = useRef<any>(null);
+
+  useRenderOnCameraChange(entityRef.current);
 
   const { pitchRange, zoomMin, zoomMax, sceneSize } = cameraConstraints ||
     defaultCameraConstraints;
-
-  const entityRef = useRef<any>(null);
 
   useEffect(() => {
     if (entityRef.current) {
@@ -69,13 +78,20 @@ const CameraControls = (
     sceneSize,
   ]);
 
+  console.log("MODE", mode);
+
   return (
     <Entity
       ref={entityRef}
       name="camera"
     >
       <Script
-        enableZoom={false}
+        rotateDamping={0.96}
+        // zoomDamping={0.994}
+        // enablePivot={true}
+        // enableZoom={false}
+        enablePan={mode === "fly"}
+        enableOrbit={mode === "orbit"}
         script={CameraControlsScript}
       />
       <Camera

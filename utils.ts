@@ -1,7 +1,7 @@
 import { Vec3 } from "playcanvas";
 
 export const lerpRate = (damping: number, dt: number): number => {
-  const t = 1 - Math.pow(damping, dt * 60);
+  const t = 1 - Math.pow(damping, dt * 1);
   // Fast ease-in-out - much more subtle curve
   return t < 0.5 ? 2 * t * t : 1 - 2 * (1 - t) * (1 - t);
 };

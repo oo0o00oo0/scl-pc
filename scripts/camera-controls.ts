@@ -104,6 +104,8 @@ class CameraControls extends Script {
 
   private _focusing = false;
 
+  private _pivoting = false;
+
   // We need a stable reference for removeEventListener.
   private readonly _onWindowResize = () => this._checkAspectRatio();
 
@@ -155,6 +157,9 @@ class CameraControls extends Script {
 
   /** Whether to apply initial focus on startup */
   public applyInitialFocus = true;
+
+  /** Enable pivot camera controls. */
+  public enablePivot = false;
 
   // ---------------------------------------------------------------------------
   // Lifecycle
@@ -355,6 +360,7 @@ class CameraControls extends Script {
     const startMousePan = this._isStartMousePan(event);
     const startFly = this._isStartFly(event);
     const startOrbit = this._isStartOrbit(event);
+    const startPivot = this.enablePivot && event.button === 0;
 
     if (startTouchPan) {
       // two‑finger pan
@@ -376,6 +382,9 @@ class CameraControls extends Script {
     if (startOrbit) {
       this._orbiting = true;
     }
+    if (startPivot) {
+      this._pivoting = true;
+    }
   }
 
   private _onPointerMove(event: PointerEvent): void {
@@ -386,6 +395,8 @@ class CameraControls extends Script {
     if (this._pointerEvents.size === 1) {
       if (this._panning) {
         this._pan(tmpVa.set(event.clientX, event.clientY));
+      } else if (this._pivoting) {
+        this._look(event);
       } else if (this._orbiting || this._flying) {
         this._look(event);
       }
@@ -417,6 +428,7 @@ class CameraControls extends Script {
     }
     if (this._orbiting) this._orbiting = false;
     if (this._panning) this._panning = false;
+    if (this._pivoting) this._pivoting = false;
     if (this._flying) {
       this._focusDir(tmpV1);
       this._origin.add(tmpV1);
@@ -624,7 +636,12 @@ class CameraControls extends Script {
 
     this._angles.x = math.lerp(this._angles.x, this._dir.x, ar);
     this._angles.y = math.lerp(this._angles.y, this._dir.y, ar);
-    this._position.lerp(this._position, this._origin, am);
+    if (this._pivoting) {
+      // In pivot mode, keep position fixed, only update angles
+      this._position.copy(this.entity.getPosition());
+    } else {
+      this._position.lerp(this._position, this._origin, am);
+    }
     this._baseTransform.setTRS(
       this._position,
       tmpQ1.setFromEulerAngles(this._angles),
