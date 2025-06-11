@@ -46,6 +46,10 @@ const CameraControls = (
       const scriptComponent = entityRef.current.script;
       const cameraControlsScript = scriptComponent?.get(CameraControlsScript);
 
+      cameraControlsScript.on("clamp:angles", (angles: Vec2) => {
+        angles.y = Math.max(-60, Math.min(70, angles.y));
+      });
+
       if (!cameraControlsScript) return;
 
       setTimeout(() => {
@@ -68,7 +72,6 @@ const CameraControls = (
     zoomMax,
     sceneSize,
   ]);
-  console.log("MODE", mode);
 
   return (
     <Entity
@@ -81,12 +84,12 @@ const CameraControls = (
         zoomMax={zoomMax}
         pitchRange={pitchRange}
         enableZoom={false}
-        enablePan={mode === "fly"}
-        enableOrbit={mode === "orbit"}
+        // enablePan={mode === "fly"}
+        // enableOrbit={mode === "orbit"}
         script={CameraControlsScript}
       />
       <Camera
-        nearClip={2}
+        nearClip={0.1}
         farClip={100}
         clearColor={clearColor}
       />

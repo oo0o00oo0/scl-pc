@@ -85,6 +85,8 @@ class TestScript extends Script {
     this.applyMaterial();
     this.entity.enabled = true;
 
+    if (!this.entity) return;
+
     this.entity.on("click", () => {
       if (this.callback) {
         this.callback({ id: this.name, position: this.entity.getPosition() });
@@ -99,10 +101,10 @@ class TestScript extends Script {
       const children = model.children;
 
       children.forEach((child: any) => {
-        const render = child.render as RenderComponent;
-        const name = render.entity.name;
+        if (child && child.render && child.render.meshInstances) {
+          const render = child.render as RenderComponent;
+          const name = render.entity.name;
 
-        if (render?.meshInstances) {
           render.meshInstances.forEach((mi: any) => {
             if (name === "bg") {
               mi.material = this.material;

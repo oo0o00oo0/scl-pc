@@ -30,7 +30,12 @@ const EPSILON = 0.0001;
  * @param {number} dt - The delta time.
  * @returns {number} - The lerp rate.
  */
-const lerpRate = (damping, dt) => 1 - Math.pow(damping, dt * 1000);
+// const lerpRate = (damping, dt) => 1 - Math.pow(damping, dt * 1000);
+export const lerpRate = (damping, dt) => {
+  const t = 1 - Math.pow(damping, dt * 600);
+  // Fast ease-in-out - much more subtle curve
+  return t < 0.5 ? 2 * t * t : 1 - 2 * (1 - t) * (1 - t);
+};
 
 class CameraControls extends Script {
   /**
@@ -341,9 +346,7 @@ class CameraControls extends Script {
     this._onContextMenu = this._onContextMenu.bind(this);
 
     if (!this.entity.camera) {
-      throw new Error(
-        "CameraControls script requires a camera component",
-      );
+      throw new Error("CameraControls script requires a camera component");
     }
     this.attach(this.entity.camera);
 
@@ -495,8 +498,7 @@ class CameraControls extends Script {
    * @returns {number} - The clamped value.
    */
   _clampZoom(value) {
-    const min = (this._camera?.nearClip ?? 0) +
-      this.zoomMin * this.sceneSize;
+    const min = (this._camera?.nearClip ?? 0) + this.zoomMin * this.sceneSize;
     const max = this.zoomMax <= this.zoomMin
       ? Infinity
       : this.zoomMax * this.sceneSize;
@@ -524,8 +526,7 @@ class CameraControls extends Script {
       return true;
     }
     if (!this.enableOrbit && !this.enableFly) {
-      return event.button === 0 || event.button === 1 ||
-        event.button === 2;
+      return event.button === 0 || event.button === 1 || event.button === 2;
     }
     if (!this.enableOrbit || !this.enableFly) {
       return event.button === 1 || event.button === 2;
@@ -543,13 +544,11 @@ class CameraControls extends Script {
       return false;
     }
     if (!this.enableOrbit && !this.enablePan) {
-      return event.button === 0 || event.button === 1 ||
-        event.button === 2;
+      return event.button === 0 || event.button === 1 || event.button === 2;
     }
     if (!this.enableOrbit) {
       return event.button === 0;
     }
-
     return event.button === 2;
   }
 
@@ -563,8 +562,7 @@ class CameraControls extends Script {
       return false;
     }
     if (!this.enableFly && !this.enablePan) {
-      return event.button === 0 || event.button === 1 ||
-        event.button === 2;
+      return event.button === 0 || event.button === 1 || event.button === 2;
     }
     return event.button === 0;
   }
@@ -611,14 +609,13 @@ class CameraControls extends Script {
    * @param {PointerEvent} event - The pointer event.
    */
   _onPointerDown(event) {
-    console.log("EVENT", event);
     if (!this._camera) {
       return;
     }
-    if (this.enableOrbit && event.button === 2) {
-      // Block right mouse in orbit mode
-      return;
-    }
+    // if (this.enableOrbit && event.button === 2) {
+    //   // Block right mouse in orbit mode
+    //   return;
+    // }
     this._element.setPointerCapture(event.pointerId);
     this._pointerEvents.set(event.pointerId, event);
 
@@ -631,7 +628,6 @@ class CameraControls extends Script {
       this._cancelSmoothTransform();
       this._focusing = false;
     }
-    console.log(event.button);
 
     if (startTouchPan) {
       // start touch pan
@@ -691,9 +687,7 @@ class CameraControls extends Script {
       // pinch zoom
       const pinchDist = this._getPinchDist();
       if (this._lastPinchDist > 0) {
-        this._zoom(
-          (this._lastPinchDist - pinchDist) * this.zoomPinchSens,
-        );
+        this._zoom((this._lastPinchDist - pinchDist) * this.zoomPinchSens);
       }
       this._lastPinchDist = pinchDist;
     }
@@ -974,14 +968,12 @@ class CameraControls extends Script {
    * @param {number} dt - The delta time.
    */
   _smoothTransform(dt) {
-    const ar = dt === -1 ? 1 : lerpRate(
-      this._focusing ? this.focusDamping : this.rotateDamping,
-      dt,
-    );
-    const am = dt === -1 ? 1 : lerpRate(
-      this._focusing ? this.focusDamping : this.moveDamping,
-      dt,
-    );
+    const ar = dt === -1
+      ? 1
+      : lerpRate(this._focusing ? this.focusDamping : this.rotateDamping, dt);
+    const am = dt === -1
+      ? 1
+      : lerpRate(this._focusing ? this.focusDamping : this.moveDamping, dt);
     this._angles.x = math.lerpAngle(
       this._angles.x % 360,
       this._dir.x % 360,
@@ -1039,24 +1031,24 @@ class CameraControls extends Script {
    * @param {boolean} [smooth] - Whether to smooth the focus.
    */
   focus(point, start, smooth = true) {
+    console.log("FOCUS", point, start, smooth);
     if (!this._camera) {
       return;
     }
-    if (this._flying) {
-      if (this._dragging) {
-        return;
-      }
-      if (!this._switchToOrbit()) {
-        return;
-      }
-    }
+    // if (this._flying) {
+    //   if (this._dragging) {
+    //     return;
+    //   }
+    //   if (!this._switchToOrbit()) {
+    //     return;
+    //   }
+    // }
 
     if (start) {
       tmpV1.sub2(start, point);
-      const elev = Math.atan2(
-        tmpV1.y,
-        Math.sqrt(tmpV1.x * tmpV1.x + tmpV1.z * tmpV1.z),
-      ) * math.RAD_TO_DEG;
+      const elev =
+        Math.atan2(tmpV1.y, Math.sqrt(tmpV1.x * tmpV1.x + tmpV1.z * tmpV1.z)) *
+        math.RAD_TO_DEG;
       const azim = Math.atan2(tmpV1.x, tmpV1.z) * math.RAD_TO_DEG;
       this._clampAngles(this._dir.set(-elev, azim));
 
