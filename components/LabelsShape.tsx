@@ -40,6 +40,8 @@ const LabelsShape = ({
   isAmenity = false,
 }: LabelsShapeProps) => {
   const [delayedUnits, setDelayedUnits] = useState<string[]>([]);
+  console.log("activeUnit", activeUnit);
+  console.log("delayedUnits", delayedUnits);
 
   useEffect(() => {
     if (avaiableIds) {

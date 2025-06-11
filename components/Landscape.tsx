@@ -2,20 +2,9 @@ import { Entity } from "@playcanvas/react";
 import { Entity as PcEntity } from "playcanvas";
 import { type Asset } from "playcanvas";
 import { useApp } from "@playcanvas/react/hooks";
-import {
-  GSplat,
-  Script as ScriptComponent,
-} from "@playcanvas/react/components";
-import {
-  forwardRef,
-  useEffect,
-  useImperativeHandle,
-  useRef,
-  useState,
-} from "react";
+import { Script as ScriptComponent } from "@playcanvas/react/components";
+import { useEffect, useRef } from "react";
 import { CustomGSplat } from "../atomic/splats/CustomGSplat";
-// import { GSplat } from "@playcanvas/react/components";
-// import { useSplatWithId } from "../hooks/use-asset";
 import { useSplatWithId } from "../hooks/use-asset";
 import LandscapeScript from "../scripts/landscape";
 import { Vec3 } from "playcanvas";
