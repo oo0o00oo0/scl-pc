@@ -55,7 +55,7 @@ const Billboard = ({
   selectedObject: any;
   setSelectedObject: (id: string) => void;
 }) => {
-  const { asset: model } = useModel("test2.glb");
+  const { asset: model } = useModel("/test2.glb");
   const { asset: texture, loading: labelLoading } = useTexture(label.texture);
 
   const app = useApp();

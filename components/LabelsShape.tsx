@@ -52,7 +52,7 @@ const LabelsShape = ({
       setDelayedUnits([]);
     }
   }, [avaiableIds]);
-
+  console.log("isAmenity", isAmenity);
   return (
     <Entity name="billboard">
       {positionData.map((label: any) => {
