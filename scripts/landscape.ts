@@ -77,7 +77,6 @@ class LandscapeScript extends Script {
       const material = gsplatComponent?.material;
 
       if (material?.setParameter) {
-        console.log("setting opacity", this.currentOpacity);
         material.setParameter("uSplatOpacity", this.currentOpacity);
       }
 

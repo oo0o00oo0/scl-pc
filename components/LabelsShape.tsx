@@ -54,9 +54,7 @@ const LabelsShape = ({
   return (
     <Entity name="billboard">
       {positionData.map((label: any) => {
-        const shouldShow = activeUnit
-          ? label.name === activeUnit && delayedUnits.includes(label.name)
-          : delayedUnits.includes(label.name);
+        const shouldShow = avaiableIds.includes(label.name);
 
         return (shouldShow || isAmenity) && (
           <Billboard
@@ -141,6 +139,7 @@ class TestScript extends Script {
     this.material.cull = 0;
 
     this.applyBillboardTransform();
+    console.log("applyMaterial");
     this.applyMaterial();
     this.entity.enabled = true;
 
@@ -152,15 +151,26 @@ class TestScript extends Script {
   }
 
   applyMaterial() {
-    if (!this._models || !this.material) return;
+    if (!this.material || !this._models) return;
 
     this._models.forEach((model) => {
-      const render = model.render as RenderComponent;
-      if (render?.meshInstances) {
-        render.meshInstances.forEach((mi) => {
-          mi.material = this.material!;
-        });
-      }
+      const children = model.children;
+
+      children.forEach((child: any) => {
+        const render = child.render as RenderComponent;
+        const name = render.entity.name;
+
+        if (render?.meshInstances) {
+          render.meshInstances.forEach((mi: any) => {
+            if (name === "bg") {
+              mi.material = this.material;
+            } else {
+              mi.material = this.bgMaterial;
+            }
+            mi.material.update();
+          });
+        }
+      });
     });
   }
 

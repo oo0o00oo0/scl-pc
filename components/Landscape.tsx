@@ -62,7 +62,6 @@ const Landscape = ({
     if (!splatAssets.length) return;
 
     let splatAsset = splatAssets.find((a) => (a as any).id === id);
-    console.log("splatAsset", splatAsset);
 
     if (!splatAsset) {
       splatAsset = splatAssets[id];
@@ -77,7 +76,6 @@ const Landscape = ({
 
     if (splat) {
       onReady();
-      console.log("SPLAT EXIST");
       const entity = gsplatRef.current;
 
       const gsplatComponent = entity?.findComponent("gsplat") as

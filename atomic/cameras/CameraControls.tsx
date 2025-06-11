@@ -35,10 +35,18 @@ const CameraControls = (
 
       if (!cameraControlsScript) return;
 
-      cameraControlsScript.pitchRange.set(pitchRange.x, pitchRange.y);
-      cameraControlsScript.zoomMin = zoomMin;
-      cameraControlsScript.zoomMax = zoomMax;
-      cameraControlsScript.sceneSize = sceneSize;
+      if (pitchRange) {
+        cameraControlsScript.pitchRange.set(pitchRange.x, pitchRange.y);
+      }
+      if (zoomMin) {
+        cameraControlsScript.zoomMin = zoomMin;
+      }
+      if (zoomMax) {
+        cameraControlsScript.zoomMax = zoomMax;
+      }
+      if (sceneSize) {
+        cameraControlsScript.sceneSize = sceneSize;
+      }
 
       setTimeout(() => {
         cameraControlsScript.focus(
