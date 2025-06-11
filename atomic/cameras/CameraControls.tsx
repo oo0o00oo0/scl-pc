@@ -32,7 +32,7 @@ const CameraControls = (
     delay = 0,
     cameraConstraints,
     damping = 0.96,
-    mode = "orbit",
+    // mode = "orbit",
   } = camState;
   const entityRef = useRef<any>(null);
 
