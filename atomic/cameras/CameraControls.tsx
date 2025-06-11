@@ -78,15 +78,14 @@ const CameraControls = (
     sceneSize,
   ]);
 
-  console.log("MODE", mode);
-
   return (
     <Entity
       ref={entityRef}
       name="camera"
     >
       <Script
-        rotateDamping={0.96}
+        // rotateDamping={0.96}
+        rotateDamping={0}
         // zoomDamping={0.994}
         // enablePivot={true}
         enableZoom={false}
