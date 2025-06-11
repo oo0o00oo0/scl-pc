@@ -89,7 +89,7 @@ const CameraControls = (
         rotateDamping={0.96}
         // zoomDamping={0.994}
         // enablePivot={true}
-        // enableZoom={false}
+        enableZoom={false}
         enablePan={mode === "fly"}
         enableOrbit={mode === "orbit"}
         script={CameraControlsScript}
