@@ -28,8 +28,14 @@ const CameraControls = (
   },
 ) => {
   const app = useApp();
-  const { position, target, delay = 0, cameraConstraints, mode = "orbit" } =
-    camState;
+  const {
+    position,
+    target,
+    delay = 0,
+    cameraConstraints,
+    damping = 0.96,
+    mode = "orbit",
+  } = camState;
   const entityRef = useRef<any>(null);
 
   useRenderOnCameraChange(entityRef.current);
@@ -85,7 +91,7 @@ const CameraControls = (
     >
       <Script
         // rotateDamping={0.96}
-        rotateDamping={0}
+        rotateDamping={damping}
         // zoomDamping={0.994}
         // enablePivot={true}
         enableZoom={false}
