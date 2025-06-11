@@ -14,63 +14,6 @@ import {
   Vec3,
 } from "playcanvas";
 import { useModel } from "@playcanvas/react/hooks";
-import { useEffect } from "react";
-import { useState } from "react";
-
-interface LabelsShapeProps {
-  avaiableIds: string[];
-  handleClickLabel: (data: {
-    id: string;
-    position: Vec3;
-  }) => void;
-  activeUnit: string | null;
-  url: string;
-  positionData: any;
-  scale: number;
-  isAmenity?: boolean;
-}
-
-const LabelsShape = ({
-  avaiableIds,
-  handleClickLabel,
-  activeUnit,
-  url,
-  positionData,
-  scale,
-  isAmenity = false,
-}: LabelsShapeProps) => {
-  const [delayedUnits, setDelayedUnits] = useState<string[]>([]);
-  console.log("activeUnit", activeUnit);
-  console.log("delayedUnits", delayedUnits);
-
-  useEffect(() => {
-    if (avaiableIds) {
-      setTimeout(() => {
-        setDelayedUnits(avaiableIds);
-      }, 1000);
-    } else {
-      setDelayedUnits([]);
-    }
-  }, [avaiableIds]);
-  console.log("isAmenity", isAmenity);
-  return (
-    <Entity name="billboard">
-      {positionData.map((label: any) => {
-        const shouldShow = avaiableIds.includes(label.name);
-
-        return (shouldShow || isAmenity) && (
-          <Billboard
-            scale={scale}
-            url={url}
-            key={label.name}
-            label={label}
-            handleClickLabel={handleClickLabel}
-          />
-        );
-      })}
-    </Entity>
-  );
-};
 
 const Billboard = ({
   label,
@@ -91,9 +34,7 @@ const Billboard = ({
   if (!model) return null;
   return (
     <Entity
-      scale={[0, 0, 0]}
-      enabled={false}
-      position={[label.position[0], 0.7, label.position[2]]}
+      position={[label.position[0], label.position[1], label.position[2]]}
     >
       <ScriptComponent
         name={label.name}
@@ -141,7 +82,6 @@ class TestScript extends Script {
     this.material.cull = 0;
 
     this.applyBillboardTransform();
-    console.log("applyMaterial");
     this.applyMaterial();
     this.entity.enabled = true;
 
@@ -203,4 +143,4 @@ class TestScript extends Script {
   }
 }
 
-export default LabelsShape;
+export default Billboard;
