@@ -75,6 +75,7 @@ const CameraControls = (
       name="camera"
     >
       <Script
+        enableZoom={false}
         script={CameraControlsScript}
       />
       <Camera
