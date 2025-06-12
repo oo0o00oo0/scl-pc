@@ -51,7 +51,6 @@ const CameraControls = (
       if (!cameraControlsScript) return;
 
       const clampAnglesHandler = (angles: Vec2) => {
-        console.log("azimouthRange", azimouthRange);
         angles.y = Math.max(
           azimouthRange.x,
           Math.min(azimouthRange.y, angles.y),
