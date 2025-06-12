@@ -24,7 +24,7 @@ const defaultCamState: CamState = {
 
 const CameraControls = (
   { camState = defaultCamState, clearColor }: {
-    camState?: CamState;
+    camState: CamState | null;
     clearColor: string;
   },
 ) => {

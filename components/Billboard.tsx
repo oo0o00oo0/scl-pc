@@ -37,13 +37,14 @@ const Billboard = ({
   const scriptRef = useRef<TestScript>(null);
 
   useEffect(() => {
+    if (!model) return;
     console.log("Active", active);
     if (active) {
       scriptRef.current?.setActive(true);
     } else {
       scriptRef.current?.setActive(false);
     }
-  }, [active]);
+  }, [active, model]);
 
   if (!model) return null;
   return (
