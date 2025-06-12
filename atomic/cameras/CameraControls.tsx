@@ -6,22 +6,25 @@ import { useEffect, useRef } from "react";
 // @ts-ignore
 import { CameraControls as CameraControlsScript } from "@/libs/scripts/camera-controls-pc.mjs";
 
-import type { CamState } from "@/state/store";
-import { Vec2 } from "playcanvas";
+import type { CameraConstraints, CamState } from "@/state/store";
+import { Vec2, Vec3 } from "playcanvas";
 import { useRenderOnCameraChange } from "@/libs/hooks/use-render-on-camera-change";
 
-// const defaultCameraConstraints: CameraConstraints = {
-//   pitchRange: new Vec2(-90, 90),
-//   azimouthRange: new Vec2(-10, 10),
+const defaultCameraConstraints: CameraConstraints = {
+  pitchRange: new Vec2(-90, 90),
+  azimouthRange: new Vec2(-10, 10),
+};
 
-//   zoomMin: 0.1,
-//   zoomMax: 0.4,
-//   sceneSize: 100,
-// };
+const defaultCamState: CamState = {
+  position: new Vec3(1, 1, 1),
+  target: new Vec3(0, 0, 0),
+  delay: 0,
+  cameraConstraints: defaultCameraConstraints,
+};
 
 const CameraControls = (
-  { camState, clearColor }: {
-    camState: CamState;
+  { camState = defaultCamState, clearColor }: {
+    camState?: CamState;
     clearColor: string;
   },
 ) => {
@@ -33,10 +36,8 @@ const CameraControls = (
     cameraConstraints,
     // damping = 0.96,
     // mode = "orbit",
-  } = camState;
+  } = camState || defaultCamState;
   const entityRef = useRef<any>(null);
-
-  console.log("RENDER CAMERA");
 
   useRenderOnCameraChange(entityRef.current);
 
@@ -47,22 +48,17 @@ const CameraControls = (
       const scriptComponent = entityRef.current.script;
       const cameraControlsScript = scriptComponent?.get(CameraControlsScript);
 
-      cameraControlsScript.on("clamp:angles", (angles: Vec2) => {
+      if (!cameraControlsScript) return;
+
+      const clampAnglesHandler = (angles: Vec2) => {
         console.log("azimouthRange", azimouthRange);
         angles.y = Math.max(
-          0,
-          Math.min(90, angles.y),
+          azimouthRange.x,
+          Math.min(azimouthRange.y, angles.y),
         );
-      });
+      };
 
-      // cameraControlsScript.on("clamp:angles", (angles: Vec2) => {
-      //   angles.y = Math.max(
-      //     azimouthRange.x,
-      //     Math.min(azimouthRange.y, angles.y),
-      //   );
-      // });
-
-      if (!cameraControlsScript) return;
+      cameraControlsScript.on("clamp:angles", clampAnglesHandler);
 
       setTimeout(() => {
         cameraControlsScript.focus(
@@ -71,7 +67,14 @@ const CameraControls = (
         );
       }, delay);
 
-      app.autoRender = false;
+      if (azimouthRange.x === Infinity) {
+        cameraControlsScript.off("clamp:angles", clampAnglesHandler);
+      }
+
+      // Cleanup: remove the handler
+      return () => {
+        cameraControlsScript.off("clamp:angles", clampAnglesHandler);
+      };
     }
   }, [
     app,
@@ -80,6 +83,7 @@ const CameraControls = (
     target,
     delay,
     pitchRange,
+    azimouthRange,
   ]);
 
   return (

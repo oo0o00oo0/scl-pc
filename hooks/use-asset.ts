@@ -51,7 +51,7 @@ export const useSplatWithId = (
   return useQuery({
     queryKey,
     queryFn: async () => {
-      console.log("CALL USE ASSET, id", id, src.split("/").pop());
+      // console.log("CALL USE ASSET, id", id, src.split("/").pop());
       if (!app) return null;
 
       //TODO MAKES QUERY EVERY TIME, FIX THIS
@@ -66,7 +66,6 @@ export const useSplatWithId = (
         (asset as any).id = id;
 
         // Add to asset registry
-        console.log("ADDING ASSET", asset);
         app.assets.add(asset);
 
         // Return a promise that resolves when the asset is loaded
