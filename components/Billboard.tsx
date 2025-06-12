@@ -14,12 +14,14 @@ import {
   Vec3,
 } from "playcanvas";
 import { useModel } from "@playcanvas/react/hooks";
+import { useEffect, useRef } from "react";
 
 const Billboard = ({
   label,
   handleClickLabel,
   url,
   scale,
+  active,
 }: {
   label: any;
   handleClickLabel: (data: {
@@ -28,8 +30,20 @@ const Billboard = ({
   }) => void;
   url: string;
   scale: number;
+  active: boolean;
 }) => {
   const { asset: model } = useModel(url);
+
+  const scriptRef = useRef<TestScript>(null);
+
+  useEffect(() => {
+    console.log("Active", active);
+    if (active) {
+      scriptRef.current?.setActive(true);
+    } else {
+      scriptRef.current?.setActive(false);
+    }
+  }, [active]);
 
   if (!model) return null;
   return (
@@ -37,8 +51,10 @@ const Billboard = ({
       position={[label.position[0], label.position[1], label.position[2]]}
     >
       <ScriptComponent
+        active={active}
         name={label.name}
         script={TestScript}
+        ref={scriptRef}
         scale={scale}
         callback={handleClickLabel}
       />
@@ -63,6 +79,7 @@ class TestScript extends Script {
   initialize() {
     if (!this.entity.children[0]) return;
 
+    this.entity.enabled = false;
     this.camera = this.app.root.children[0];
     this._models = this.entity.children[0].children;
     this.material = new StandardMaterial();
@@ -83,7 +100,6 @@ class TestScript extends Script {
 
     this.applyBillboardTransform();
     this.applyMaterial();
-    this.entity.enabled = true;
 
     if (!this.entity) return;
 
@@ -116,6 +132,11 @@ class TestScript extends Script {
         }
       });
     });
+  }
+
+  public setActive(active: boolean) {
+    this.entity.enabled = active;
+    this.app.renderNextFrame = true;
   }
 
   applyBillboardTransform() {
