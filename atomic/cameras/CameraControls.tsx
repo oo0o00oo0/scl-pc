@@ -4,11 +4,7 @@ import { useApp } from "@playcanvas/react/hooks";
 import { useEffect, useRef } from "react";
 
 // @ts-ignore
-// import { CameraControls as CameraControlsScript } from "playcanvas/scripts/esm/camera-controls.mjs";
 import { CameraControls as CameraControlsScript } from "@/libs/scripts/camera-controls-pc.mjs";
-// import CameraControlsScript from "../../scripts/camera-controls";
-
-console.log("CameraControlsScript", CameraControlsScript);
 
 import type { CameraConstraints, CamState } from "@/state/store";
 import { Vec2 } from "playcanvas";
@@ -33,7 +29,7 @@ const CameraControls = (
     target,
     delay = 0,
     cameraConstraints,
-    damping = 0.96,
+    // damping = 0.96,
     // mode = "orbit",
   } = camState;
   const entityRef = useRef<any>(null);
@@ -48,9 +44,9 @@ const CameraControls = (
       const scriptComponent = entityRef.current.script;
       const cameraControlsScript = scriptComponent?.get(CameraControlsScript);
 
-      // cameraControlsScript.on("clamp:angles", (angles: Vec2) => {
-      //   angles.y = Math.max(-60, Math.min(70, angles.y));
-      // });
+      cameraControlsScript.on("clamp:angles", (angles: Vec2) => {
+        angles.y = Math.max(-60, Math.min(70, angles.y));
+      });
 
       if (!cameraControlsScript) return;
 

@@ -28,11 +28,13 @@ const Landscape = ({
   position = new Vec3(0, 0, 0),
   rotation = new Vec3(0, 0, 0),
   onReady,
+  load = false,
 }: {
   id: number;
-  active: boolean;
+  active: number | null;
   updateProgress: (id: number, progress: number) => void;
   url: string;
+  load: boolean;
   onReady: () => void;
   position?: Vec3;
   rotation?: Vec3;
@@ -41,7 +43,7 @@ const Landscape = ({
 
   const scriptRef = useRef<LandscapeScript | null>(null);
 
-  const { data: splat } = useSplatWithId(url, id);
+  const { data: splat } = useSplatWithId(url, id, {}, load);
 
   const gsplatRef = useRef<PcEntity | null>(null);
 
@@ -66,7 +68,6 @@ const Landscape = ({
     });
 
     if (splat) {
-      onReady();
       const entity = gsplatRef.current;
 
       const gsplatComponent = entity?.findComponent("gsplat") as
@@ -81,22 +82,29 @@ const Landscape = ({
         gsplatInstance.sorter.on("updated", () => {
           app.renderNextFrame = true;
         });
+        setTimeout(() => {
+          onReady();
+          // if (scriptRef.current) {
+          //   scriptRef.current.animateToOpacity(1, 1000);
+          // }
+        }, 100);
       }
     }
   }, [splat, app, id, updateProgress]);
 
   useEffect(() => {
-    const landscapeScript = scriptRef.current as LandscapeScript;
-    if (active) {
-      setTimeout(() => {
-        landscapeScript.animateToOpacity(1, 500);
-      }, 200);
-    } else {
-      landscapeScript.animateToOpacity(0, 100);
-    }
-  }, [active]);
+    if (!splat) return;
 
-  console.log(rotation);
+    const landscapeScript = scriptRef.current as LandscapeScript;
+    if (active === id) {
+      setTimeout(() => {
+        landscapeScript.animateToOpacity(1, 1000);
+      }, 1500);
+    } else {
+      landscapeScript.animateToOpacity(0, 1000);
+    }
+  }, [active, id, splat]);
+
   return (
     <Entity
       rotation={[rotation.x, rotation.y, rotation.z]}
@@ -106,7 +114,6 @@ const Landscape = ({
     >
       <CustomGSplat
         id={id}
-        active={active}
         asset={splat as Asset}
       />
       <ScriptComponent ref={scriptRef} script={LandscapeScript} />

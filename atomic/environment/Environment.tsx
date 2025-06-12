@@ -82,7 +82,6 @@ class EnvAnimationScript extends Script {
   }
 
   setSkyboxRotationY(angleDegrees: number) {
-    console.log("setSkyboxRotationY", angleDegrees);
     const angleRad = angleDegrees;
     const quat = new Quat();
     quat.setFromAxisAngle(Vec3.UP, angleRad);

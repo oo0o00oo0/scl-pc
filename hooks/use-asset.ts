@@ -39,11 +39,15 @@ export const useEnvAtlas = (src: string, props = {}) =>
 export const useSplat = (src: string, props = {}) =>
   useAsset(src, "gsplat", props);
 
-export const useSplatWithId = (src: string, id: number, props = {}) => {
+export const useSplatWithId = (
+  src: string,
+  id: number,
+  props = {},
+  shouldLoad = true,
+) => {
   const app = useApp();
   const queryKey = [app.root?.getGuid(), src, "gsplat", props, id];
 
-  // Construct a query for the asset with custom ID set before loading
   return useQuery({
     queryKey,
     queryFn: async () => {
@@ -82,6 +86,7 @@ export const useSplatWithId = (src: string, id: number, props = {}) => {
         return asset;
       }
     },
+    enabled: shouldLoad,
   });
 };
 

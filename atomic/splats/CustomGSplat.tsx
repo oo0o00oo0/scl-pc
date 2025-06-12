@@ -6,7 +6,6 @@ import vertex from "../../shaders/vert.vert?raw";
 interface GsplatProps {
   asset: Asset;
   id: number;
-  active: boolean;
 }
 
 export const CustomGSplat: FC<GsplatProps> = (
