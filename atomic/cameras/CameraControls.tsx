@@ -6,16 +6,18 @@ import { useEffect, useRef } from "react";
 // @ts-ignore
 import { CameraControls as CameraControlsScript } from "@/libs/scripts/camera-controls-pc.mjs";
 
-import type { CameraConstraints, CamState } from "@/state/store";
+import type { CamState } from "@/state/store";
 import { Vec2 } from "playcanvas";
 import { useRenderOnCameraChange } from "@/libs/hooks/use-render-on-camera-change";
 
-const defaultCameraConstraints: CameraConstraints = {
-  pitchRange: new Vec2(-90, 90),
-  zoomMin: 0.1,
-  zoomMax: 0.4,
-  sceneSize: 100,
-};
+// const defaultCameraConstraints: CameraConstraints = {
+//   pitchRange: new Vec2(-90, 90),
+//   azimouthRange: new Vec2(-10, 10),
+
+//   zoomMin: 0.1,
+//   zoomMax: 0.4,
+//   sceneSize: 100,
+// };
 
 const CameraControls = (
   { camState, clearColor }: {
@@ -34,10 +36,11 @@ const CameraControls = (
   } = camState;
   const entityRef = useRef<any>(null);
 
+  console.log("RENDER CAMERA");
+
   useRenderOnCameraChange(entityRef.current);
 
-  const { pitchRange, zoomMin, zoomMax, sceneSize } = cameraConstraints ||
-    defaultCameraConstraints;
+  const { pitchRange, azimouthRange } = cameraConstraints;
 
   useEffect(() => {
     if (entityRef.current) {
@@ -45,8 +48,19 @@ const CameraControls = (
       const cameraControlsScript = scriptComponent?.get(CameraControlsScript);
 
       cameraControlsScript.on("clamp:angles", (angles: Vec2) => {
-        angles.y = Math.max(-60, Math.min(70, angles.y));
+        console.log("azimouthRange", azimouthRange);
+        angles.y = Math.max(
+          0,
+          Math.min(90, angles.y),
+        );
       });
+
+      // cameraControlsScript.on("clamp:angles", (angles: Vec2) => {
+      //   angles.y = Math.max(
+      //     azimouthRange.x,
+      //     Math.min(azimouthRange.y, angles.y),
+      //   );
+      // });
 
       if (!cameraControlsScript) return;
 
@@ -66,9 +80,6 @@ const CameraControls = (
     target,
     delay,
     pitchRange,
-    zoomMin,
-    zoomMax,
-    sceneSize,
   ]);
 
   return (
