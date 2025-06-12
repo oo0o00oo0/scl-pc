@@ -26,6 +26,7 @@ const Landscape = ({
   active,
   updateProgress,
   position = new Vec3(0, 0, 0),
+  rotation = new Vec3(0, 0, 0),
   onReady,
 }: {
   id: number;
@@ -34,6 +35,7 @@ const Landscape = ({
   url: string;
   onReady: () => void;
   position?: Vec3;
+  rotation?: Vec3;
 }) => {
   const app = useApp();
 
@@ -94,8 +96,10 @@ const Landscape = ({
     }
   }, [active]);
 
+  console.log(rotation);
   return (
     <Entity
+      rotation={[rotation.x, rotation.y, rotation.z]}
       position={[position.x, position.y, position.z]}
       name="splat"
       ref={gsplatRef}

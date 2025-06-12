@@ -612,10 +612,10 @@ class CameraControls extends Script {
     if (!this._camera) {
       return;
     }
-    // if (this.enableOrbit && event.button === 2) {
-    //   // Block right mouse in orbit mode
-    //   return;
-    // }
+    if (this.enableOrbit && event.button === 2) {
+      // Block right mouse in orbit mode
+      return;
+    }
     this._element.setPointerCapture(event.pointerId);
     this._pointerEvents.set(event.pointerId, event);
 
@@ -717,6 +717,7 @@ class CameraControls extends Script {
    * @param {WheelEvent} event - The wheel event.
    */
   _onWheel(event) {
+    return;
     event.preventDefault();
     this._zoom(event.deltaY);
   }
@@ -1031,18 +1032,17 @@ class CameraControls extends Script {
    * @param {boolean} [smooth] - Whether to smooth the focus.
    */
   focus(point, start, smooth = true) {
-    console.log("FOCUS", point, start, smooth);
     if (!this._camera) {
       return;
     }
-    // if (this._flying) {
-    //   if (this._dragging) {
-    //     return;
-    //   }
-    //   if (!this._switchToOrbit()) {
-    //     return;
-    //   }
-    // }
+    if (this._flying) {
+      if (this._dragging) {
+        return;
+      }
+      if (!this._switchToOrbit()) {
+        return;
+      }
+    }
 
     if (start) {
       tmpV1.sub2(start, point);
