@@ -24,6 +24,7 @@ const Landscape = ({
   id,
   url,
   active,
+  currentScene,
   updateProgress,
   position = new Vec3(0, 0, 0),
   rotation = new Vec3(0, 0, 0),
@@ -32,6 +33,7 @@ const Landscape = ({
 }: {
   id: number;
   active: number | null;
+  currentScene: number | null;
   updateProgress: (id: number, progress: number) => void;
   url: string;
   load: boolean;
@@ -82,12 +84,13 @@ const Landscape = ({
         gsplatInstance.sorter.on("updated", () => {
           app.renderNextFrame = true;
         });
-        setTimeout(() => {
-          onReady();
-          // if (scriptRef.current) {
-          //   scriptRef.current.animateToOpacity(1, 1000);
-          // }
-        }, 100);
+
+        // set new scene ready
+        if (currentScene === id) {
+          setTimeout(() => {
+            onReady();
+          }, 200);
+        }
       }
     }
   }, [splat, app, id, updateProgress]);
@@ -99,7 +102,7 @@ const Landscape = ({
     if (active === id) {
       setTimeout(() => {
         landscapeScript.animateToOpacity(1, 1000);
-      }, 1500);
+      }, 0);
     } else {
       landscapeScript.animateToOpacity(0, 1000);
     }
