@@ -49,6 +49,7 @@ const Landscape = ({
 
   const gsplatRef = useRef<PcEntity | null>(null);
 
+  // Effect for progress tracking
   useEffect(() => {
     const splatAssets = app.assets.filter(
       (a) => (a.type as string) === "gsplat",
@@ -84,17 +85,35 @@ const Landscape = ({
         gsplatInstance.sorter.on("updated", () => {
           app.renderNextFrame = true;
         });
-
-        // set new scene ready
-        if (currentScene === id) {
-          setTimeout(() => {
-            onReady();
-          }, 200);
-        }
       }
     }
+
+    return () => {
+      if (splatAsset) {
+        splatAsset.off("progress");
+      }
+    };
   }, [splat, app, id, updateProgress]);
 
+  // Separate effect for handling onReady
+  useEffect(() => {
+    if (!splat || currentScene !== id) return;
+
+    const entity = gsplatRef.current;
+    const gsplatComponent = entity?.findComponent("gsplat") as
+      | GSplatComponent
+      | undefined;
+    const gsplatInstance = gsplatComponent?.instance;
+
+    if (gsplatInstance) {
+      const timeoutId = setTimeout(() => {
+        onReady();
+      }, 200);
+      return () => clearTimeout(timeoutId);
+    }
+  }, [splat, currentScene, id, onReady]);
+
+  // Effect for opacity animation
   useEffect(() => {
     if (!splat) return;
 
