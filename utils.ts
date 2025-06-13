@@ -20,3 +20,9 @@ export const easeInOutQuart = (t: number): number => {
 };
 
 export const sceneCenter = new Vec3(0, 0, 0);
+
+export const flatternPOIS = (poi: any) => {
+  return Object.entries(poi).flatMap(([scene, items]) =>
+    (items as any[]).map((item: any) => ({ ...item, scene }))
+  );
+};
