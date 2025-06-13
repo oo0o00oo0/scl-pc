@@ -104,6 +104,7 @@ class TestScript extends Script {
     if (!this.entity) return;
 
     this.entity.on("click", () => {
+      console.log("CLICKED");
       if (this.callback) {
         this.callback({ id: this.name, position: this.entity.getPosition() });
       }
