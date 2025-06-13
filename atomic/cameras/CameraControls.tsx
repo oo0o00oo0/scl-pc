@@ -64,7 +64,7 @@ const CameraControls = (
           target,
           position,
         );
-      }, delay);
+      }, 0);
 
       if (azimouthRange.x === Infinity) {
         cameraControlsScript.off("clamp:angles", clampAnglesHandler);
