@@ -717,7 +717,7 @@ class CameraControls extends Script {
    * @param {WheelEvent} event - The wheel event.
    */
   _onWheel(event) {
-    // return;
+    return;
     event.preventDefault();
     this._zoom(event.deltaY);
   }
