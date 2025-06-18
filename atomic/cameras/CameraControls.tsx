@@ -6,6 +6,7 @@ import { useEffect, useRef } from "react";
 // @ts-ignore
 import { CameraControls as CameraControlsScript } from "@/libs/scripts/camera-controls-pc.mjs";
 
+// @ts-ignore
 import type { CameraConstraints, CamState } from "@/state/store";
 import { Vec2, Vec3 } from "playcanvas";
 import { useRenderOnCameraChange } from "@/libs/hooks/use-render-on-camera-change";

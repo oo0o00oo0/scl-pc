@@ -7,6 +7,7 @@ import {
 import { Color, Script } from "playcanvas";
 import { Entity } from "@playcanvas/react";
 import { type RenderComponent } from "playcanvas";
+// @ts-ignore
 import projectStore from "../../../state/store";
 
 const backupData = [
