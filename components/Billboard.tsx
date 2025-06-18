@@ -115,7 +115,6 @@ class TestScript extends Script {
   applyMaterial() {
     const immediateLayer = this.app.scene.layers.getLayerByName("Immediate");
 
-    console.log(immediateLayer);
     if (!this.material || !this._models) return;
 
     this._models.forEach((model) => {
@@ -169,7 +168,6 @@ class TestScript extends Script {
   }
 
   update() {
-    console.log("update");
     if (!this.entity || !this.entity.enabled || !this.camera) return;
     this.applyBillboardTransform();
   }
