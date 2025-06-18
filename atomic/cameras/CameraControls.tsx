@@ -2,7 +2,7 @@ import { Entity } from "@playcanvas/react";
 import { Camera, Script } from "@playcanvas/react/components";
 import { useApp } from "@playcanvas/react/hooks";
 import { useEffect, useRef } from "react";
-
+//
 // @ts-ignore
 import { CameraControls as CameraControlsScript } from "@/libs/scripts/camera-controls-pc.mjs";
 
@@ -102,7 +102,7 @@ const CameraControls = (
       />
       <Camera
         nearClip={0.1}
-        farClip={100}
+        farClip={1000}
         clearColor={clearColor}
       />
     </Entity>

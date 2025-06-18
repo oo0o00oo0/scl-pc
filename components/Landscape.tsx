@@ -32,8 +32,8 @@ const Landscape = ({
   load = false,
 }: {
   id: number;
-  active: number | null;
-  currentScene: number | null;
+  active: number[] | null;
+  currentScene: number[] | null;
   updateProgress: (id: number, progress: number) => void;
   url: string;
   load: boolean;
@@ -97,7 +97,7 @@ const Landscape = ({
 
   // Separate effect for handling onReady
   useEffect(() => {
-    if (!splat || currentScene !== id) return;
+    if (!splat || !currentScene?.includes(id)) return;
 
     const entity = gsplatRef.current;
     const gsplatComponent = entity?.findComponent("gsplat") as
@@ -118,7 +118,8 @@ const Landscape = ({
     if (!splat) return;
 
     const landscapeScript = scriptRef.current as LandscapeScript;
-    if (active === id) {
+    console.log("active", active, id);
+    if (active && active?.includes(id)) {
       setTimeout(() => {
         landscapeScript.animateToOpacity(1, 1000);
       }, 0);
