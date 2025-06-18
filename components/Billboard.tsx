@@ -80,7 +80,7 @@ class TestScript extends Script {
   initialize() {
     if (!this.entity.children[0]) return;
 
-    this.entity.enabled = false;
+    this.entity.enabled = true;
     this.camera = this.app.root.children[0];
     this._models = this.entity.children[0].children;
     this.material = new StandardMaterial();
