@@ -122,26 +122,30 @@ const Landscape = ({
   }, [currentSceneId, id, splat]);
 
   useEffect(() => {
-    const handleUnload = () => {
-      console.log("unload", id);
+    let didUnload = false;
 
+    const handleUnload = () => {
       const splatAssets = app.assets.filter(
         (a) => (a.type as string) === "gsplat",
       );
-
       let splatAsset = splatAssets.find((a) => (a as any).id === id);
-
-      if (splatAsset) {
-        console.log("unload", splatAsset);
+      if (splatAsset && splatAsset.loaded) {
         splatAsset.unload();
+        app.renderNextFrame = true;
+        didUnload = true;
+        console.log("unloaded", splatAsset);
       }
-
-      app.renderNextFrame = true;
     };
 
     if (!load) {
       handleUnload();
     }
+
+    return () => {
+      if (!didUnload) {
+        handleUnload();
+      }
+    };
   }, [load, id, app]);
 
   return (
