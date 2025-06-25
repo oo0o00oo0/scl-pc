@@ -2,10 +2,11 @@ import { Entity } from "@playcanvas/react";
 import { Camera, Script } from "@playcanvas/react/components";
 import { useApp } from "@playcanvas/react/hooks";
 import { useEffect, useRef } from "react";
-
+//
 // @ts-ignore
 import { CameraControls as CameraControlsScript } from "@/libs/scripts/camera-controls-pc.mjs";
 
+// @ts-ignore
 import type { CameraConstraints, CamState } from "@/state/store";
 import { Vec2, Vec3 } from "playcanvas";
 import { useRenderOnCameraChange } from "@/libs/hooks/use-render-on-camera-change";
@@ -101,7 +102,7 @@ const CameraControls = (
       />
       <Camera
         nearClip={0.1}
-        farClip={100}
+        farClip={1000}
         clearColor={clearColor}
       />
     </Entity>

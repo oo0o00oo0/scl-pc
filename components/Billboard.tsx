@@ -73,13 +73,14 @@ class TestScript extends Script {
   camera: any;
   private material: StandardMaterial | null = null;
   private bgMaterial: StandardMaterial | null = null;
-  color: Color = new Color(0.12, 0.24, 0.43);
+  // color: Color = new Color(0.12, 0.24, 0.43);
+  color: Color = new Color(0.24, 0.30, 0.30);
   name: string = "";
 
   initialize() {
     if (!this.entity.children[0]) return;
 
-    this.entity.enabled = false;
+    this.entity.enabled = true;
     this.camera = this.app.root.children[0];
     this._models = this.entity.children[0].children;
     this.material = new StandardMaterial();
@@ -112,6 +113,8 @@ class TestScript extends Script {
   }
 
   applyMaterial() {
+    const immediateLayer = this.app.scene.layers.getLayerByName("Immediate");
+
     if (!this.material || !this._models) return;
 
     this._models.forEach((model) => {
@@ -120,6 +123,8 @@ class TestScript extends Script {
       children.forEach((child: any) => {
         if (child && child.render && child.render.meshInstances) {
           const render = child.render as RenderComponent;
+          render.layers = [immediateLayer?.id || 0];
+
           const name = render.entity.name;
 
           render.meshInstances.forEach((mi: any) => {
@@ -144,6 +149,7 @@ class TestScript extends Script {
     const cameraPosition = this.camera.getPosition();
 
     this.entity.lookAt(cameraPosition, Vec3.UP);
+    // this.entity.rotateLocal(-90, 0, 0);
     this.entity.rotateLocal(-90, 0, 0);
 
     const baseScale = this.scale;
@@ -157,7 +163,7 @@ class TestScript extends Script {
     this.entity.setLocalScale(
       scale,
       scale,
-      scale * -1,
+      scale,
     );
   }
 

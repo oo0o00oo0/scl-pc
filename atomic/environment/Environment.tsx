@@ -5,13 +5,18 @@ import { useEffect, useRef } from "react";
 import { Quat, Script, Vec3 } from "playcanvas";
 import { Script as ScriptPC } from "@playcanvas/react/components";
 import { easeInOutQuad } from "@/libs/utils";
-import projectStore from "@/state/store";
-
-const Environment = ({ url }: { url: string }) => {
+// @ts-ignore
+const tempActiveScene = {
+  skyboxPosition: 0,
+};
+const Environment = (
+  { url, activeScene }: { url: string; activeScene?: any },
+) => {
   const { asset } = useEnvAtlas(url);
   const scriptRef = useRef<EnvAnimationScript>(null);
   const app = useApp();
-  const activeScene = projectStore((state) => state.activeScene);
+  // @ts-ignore
+  // const activeScene = projectStore((state) => state.activeScene);
 
   useEffect(() => {
     // let t = 0;

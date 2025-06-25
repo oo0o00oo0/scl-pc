@@ -18,6 +18,7 @@ export const useAsset = (src: string, type: string, props: any) => {
   // Construct a query for the asset
   return useQuery({
     queryKey,
+    // @ts-ignore
     queryFn: () => app && fetchAsset(app, src, type, props),
   });
 };
@@ -82,6 +83,7 @@ export const useSplatWithId = (
           error,
         );
         // Fallback to the original method
+        // @ts-ignore
         const asset = await fetchAsset(app, src, "gsplat", props) as Asset;
         if (asset) {
           (asset as any).id = id;
@@ -102,6 +104,7 @@ export const useSplatWithArrayIndex = (src: string, id: number, props = {}) => {
     queryKey,
     queryFn: async () => {
       if (!app) return null;
+      // @ts-ignore
       const asset = await fetchAsset(app, src, "gsplat", props) as Asset;
       if (asset) {
         // Set the custom ID after loading
