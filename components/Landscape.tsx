@@ -23,21 +23,19 @@ type GSplatComponent = {
 const Landscape = ({
   id,
   url,
-  active,
-  currentScene,
+  currentSceneId,
   updateProgress,
+  onReady,
   position = new Vec3(0, 0, 0),
   rotation = new Vec3(0, 0, 0),
-  onReady,
   load = false,
 }: {
   id: number;
-  active: number | null;
-  currentScene: number | null;
+  currentSceneId: number | null;
   updateProgress: (id: number, progress: number) => void;
   url: string;
   load: boolean;
-  onReady: () => void;
+  onReady: (id: number) => void;
   position?: Vec3;
   rotation?: Vec3;
 }) => {
@@ -49,7 +47,6 @@ const Landscape = ({
 
   const gsplatRef = useRef<PcEntity | null>(null);
 
-  // Effect for progress tracking
   useEffect(() => {
     const splatAssets = app.assets.filter(
       (a) => (a.type as string) === "gsplat",
@@ -97,7 +94,7 @@ const Landscape = ({
 
   // Separate effect for handling onReady
   useEffect(() => {
-    if (!splat || currentScene !== id) return;
+    if (!splat) return;
 
     const entity = gsplatRef.current;
     const gsplatComponent = entity?.findComponent("gsplat") as
@@ -107,25 +104,25 @@ const Landscape = ({
 
     if (gsplatInstance) {
       const timeoutId = setTimeout(() => {
-        onReady();
-      }, 200);
+        onReady(id);
+      });
       return () => clearTimeout(timeoutId);
     }
-  }, [splat, currentScene, id, onReady]);
+  }, [splat, id, onReady]);
 
   // Effect for opacity animation
   useEffect(() => {
     if (!splat) return;
 
     const landscapeScript = scriptRef.current as LandscapeScript;
-    if (active === id) {
+    if (currentSceneId === id) {
       setTimeout(() => {
         landscapeScript.animateToOpacity(1, 1000);
-      }, 0);
+      }, 1000);
     } else {
       landscapeScript.animateToOpacity(0, 1000);
     }
-  }, [active, id, splat]);
+  }, [currentSceneId, id, splat]);
 
   return (
     <Entity
