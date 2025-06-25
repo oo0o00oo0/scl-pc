@@ -9,15 +9,12 @@ import { useSplatWithId } from "../hooks/use-asset";
 import LandscapeScript from "../scripts/landscape";
 import { Vec3 } from "playcanvas";
 
-// hello subby
-
 type GSplatComponent = {
   instance: {
     sorter: {
       on: (event: string, callback: () => void) => void;
     };
   };
-  material: any; // Add material property
 };
 
 const Landscape = ({
@@ -123,6 +120,29 @@ const Landscape = ({
       landscapeScript.animateToOpacity(0, 1000);
     }
   }, [currentSceneId, id, splat]);
+
+  useEffect(() => {
+    const handleUnload = () => {
+      console.log("unload", id);
+
+      const splatAssets = app.assets.filter(
+        (a) => (a.type as string) === "gsplat",
+      );
+
+      let splatAsset = splatAssets.find((a) => (a as any).id === id);
+
+      if (splatAsset) {
+        console.log("unload", splatAsset);
+        splatAsset.unload();
+      }
+
+      app.renderNextFrame = true;
+    };
+
+    if (!load) {
+      handleUnload();
+    }
+  }, [load, id, app]);
 
   return (
     <Entity

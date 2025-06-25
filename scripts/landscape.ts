@@ -12,7 +12,6 @@ class LandscapeScript extends Script {
   initialize() {
     this.entity.enabled = false;
     this.entity.on("gsplat:ready", () => {
-      // Initialize opacity values consistently to 0
       this.currentOpacity = 0;
       this.targetOpacity = 0;
       this.app.renderNextFrame = true;
@@ -61,10 +60,9 @@ class LandscapeScript extends Script {
     durationMs: number = 1000,
     instant: boolean = false,
   ): void {
-    this.targetOpacity = Math.max(0, Math.min(1, targetOpacity)); // Clamp between 0 and 1
-    this.animationDuration = Math.max(16, durationMs); // Minimum 16ms (1 frame at 60fps)
+    this.targetOpacity = Math.max(0, Math.min(1, targetOpacity));
+    this.animationDuration = Math.max(16, durationMs);
 
-    // Enable entity to ensure update() runs
     if (!this.entity.enabled) {
       this.entity.enabled = true;
     }
@@ -82,7 +80,6 @@ class LandscapeScript extends Script {
 
       this.app.renderNextFrame = true;
 
-      // If animating to 0, disable entity after setting opacity
       if (this.targetOpacity === 0) {
         this.entity.enabled = false;
       }
@@ -100,18 +97,6 @@ class LandscapeScript extends Script {
   public isAnimating(): boolean {
     return this.animating;
   }
-
-  // animateIn() {
-  //   this.entity.enabled = true;
-  //   this.animateToOpacity(1);
-  //   this.app.autoRender = false;
-  // }
-
-  // animateOut() {
-  //   this.animateToOpacity(0);
-  //   // Don't disable entity immediately - let animation complete
-  //   this.app.autoRender = false;
-  // }
 }
 
 export default LandscapeScript;
