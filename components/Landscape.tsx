@@ -121,32 +121,31 @@ const Landscape = ({
     }
   }, [currentSceneId, id, splat]);
 
-  useEffect(() => {
-    let didUnload = false;
+  // useEffect(() => {
+  //   let didUnload = false;
 
-    const handleUnload = () => {
-      const splatAssets = app.assets.filter(
-        (a) => (a.type as string) === "gsplat",
-      );
-      let splatAsset = splatAssets.find((a) => (a as any).id === id);
-      if (splatAsset && splatAsset.loaded) {
-        splatAsset.unload();
-        app.renderNextFrame = true;
-        didUnload = true;
-        console.log("unloaded", splatAsset);
-      }
-    };
+  //   const handleUnload = () => {
+  //     const splatAssets = app.assets.filter(
+  //       (a) => (a.type as string) === "gsplat",
+  //     );
+  //     let splatAsset = splatAssets.find((a) => (a as any).id === id);
+  //     if (splatAsset && splatAsset.loaded) {
+  //       splatAsset.unload();
+  //       app.renderNextFrame = true;
+  //       didUnload = true;
+  //     }
+  //   };
 
-    if (!load) {
-      handleUnload();
-    }
+  //   if (!load) {
+  //     handleUnload();
+  //   }
 
-    return () => {
-      if (!didUnload) {
-        handleUnload();
-      }
-    };
-  }, [load, id, app]);
+  //   return () => {
+  //     if (!didUnload) {
+  //       handleUnload();
+  //     }
+  //   };
+  // }, [load, id, app]);
 
   return (
     <Entity
