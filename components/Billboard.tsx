@@ -162,7 +162,7 @@ class TestScript extends Script {
     this.entity.setLocalScale(
       scale,
       scale,
-      scale,
+      scale * -1,
     );
   }
 
