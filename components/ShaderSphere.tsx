@@ -16,21 +16,21 @@ const ShaderSphere = ({ color }: { color: Color }) => {
 
   const entityRef = useRef<any>(null);
 
-  // useEffect(() => {
-  //   if (entityRef.current) {
-  //     const animScript = entityRef.current.script?.animations as Animations;
-  //     if (animScript) {
-  //       animScript.animateToColor(
-  //         // new Color(color.r, color.g, color.b),
-  //         new Color(1, 0, 0),
-  //       );
-  //     }
-  //   }
-  // }, [material, color]);
+  useEffect(() => {
+    if (entityRef.current) {
+      const animScript = entityRef.current.script?.animations as Animations;
+      if (animScript) {
+        animScript.animateToColor(
+          // new Color(color.r, color.g, color.b),
+          new Color(1, 0, 0),
+        );
+      }
+    }
+  }, [material, color]);
 
   return (
     <Entity scale={[10, 10, 10]} ref={entityRef}>
-      {/* <Script script={Animations} /> */}
+      <Script script={Animations} />
       <Render type="box" material={material} />
     </Entity>
   );
