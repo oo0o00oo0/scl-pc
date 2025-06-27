@@ -1,5 +1,4 @@
 import { Vec3 } from "playcanvas";
-import { getSceneConnections } from "@/data/scene-navigation";
 
 export const lerpRate = (damping: number, dt: number): number => {
   const t = 1 - Math.pow(damping, dt * 1);
@@ -26,17 +25,4 @@ export const flatternPOIS = (poi: any) => {
   return Object.entries(poi).flatMap(([scene, items]) =>
     (items as any[]).map((item: any) => ({ ...item, scene }))
   );
-};
-
-export const checkSceneTree = (scene: any, activeScene: any) => {
-  if (!activeScene) return false;
-
-  const sceneConnections = getSceneConnections(activeScene?.name ?? "").map((
-    scene,
-  ) => scene.link);
-
-  console.log("CHECKING SCENE TREE", activeScene);
-
-  // return activeScene.state === "ready" &&
-  return activeScene.id === scene.id || sceneConnections.includes(scene.name);
 };

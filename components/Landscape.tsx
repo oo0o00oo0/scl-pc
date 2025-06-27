@@ -38,7 +38,7 @@ const Landscape = ({
 }) => {
   const app = useApp();
 
-  console.log("RENDERLANDSCAPE", id);
+  // console.log("RENDERLANDSCAPE", id);
 
   const scriptRef = useRef<LandscapeScript | null>(null);
 
