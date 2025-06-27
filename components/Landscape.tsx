@@ -36,15 +36,12 @@ const Landscape = ({
   position?: Vec3;
   rotation?: Vec3;
 }) => {
+  const scriptRef = useRef<LandscapeScript | null>(null);
+  const gsplatRef = useRef<PcEntity | null>(null);
+
   const app = useApp();
 
-  // console.log("RENDERLANDSCAPE", id);
-
-  const scriptRef = useRef<LandscapeScript | null>(null);
-
   const { data: splat } = useSplatWithId(url, id, {}, load);
-
-  const gsplatRef = useRef<PcEntity | null>(null);
 
   useEffect(() => {
     const splatAssets = app.assets.filter(
@@ -122,6 +119,8 @@ const Landscape = ({
       landscapeScript.animateToOpacity(0, 1000);
     }
   }, [currentSceneId, id, splat]);
+
+  //TODO - HANDLE UNLOADING
 
   // useEffect(() => {
   //   let didUnload = false;

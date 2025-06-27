@@ -73,8 +73,7 @@ class TestScript extends Script {
   camera: any;
   private material: StandardMaterial | null = null;
   private bgMaterial: StandardMaterial | null = null;
-  // color: Color = new Color(0.12, 0.24, 0.43);
-  color: Color = new Color(0.24, 0.30, 0.30);
+  color: Color = new Color(0.12, 0.24, 0.43);
   name: string = "";
 
   initialize() {
