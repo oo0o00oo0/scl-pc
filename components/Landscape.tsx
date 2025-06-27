@@ -38,6 +38,8 @@ const Landscape = ({
 }) => {
   const app = useApp();
 
+  console.log("RENDERLANDSCAPE", id);
+
   const scriptRef = useRef<LandscapeScript | null>(null);
 
   const { data: splat } = useSplatWithId(url, id, {}, load);
