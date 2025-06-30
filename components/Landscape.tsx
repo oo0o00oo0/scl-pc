@@ -112,6 +112,7 @@ const Landscape = ({
 
     const landscapeScript = scriptRef.current as LandscapeScript;
     if (currentSceneId === id) {
+      console.log("SET ON");
       setTimeout(() => {
         landscapeScript.animateToOpacity(1, 1000);
       }, 1000);

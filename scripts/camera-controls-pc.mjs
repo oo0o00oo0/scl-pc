@@ -243,6 +243,14 @@ class CameraControls extends Script {
 
   /**
    * @attribute
+   * @title Enable Zoom
+   * @description Enable zoom camera controls.
+   * @type {boolean}
+   */
+  enableZoom = true;
+
+  /**
+   * @attribute
    * @title Focus Damping
    * @description The damping applied when calling {@link CameraControls#focus}. A higher value means
    * more damping. A value of 0 means no damping.
@@ -717,7 +725,10 @@ class CameraControls extends Script {
    * @param {WheelEvent} event - The wheel event.
    */
   _onWheel(event) {
-    return;
+    if (!this.enableZoom) {
+      return;
+    }
+
     event.preventDefault();
     this._zoom(event.deltaY);
   }

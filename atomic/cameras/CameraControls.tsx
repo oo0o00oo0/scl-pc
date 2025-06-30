@@ -93,7 +93,7 @@ const CameraControls = (
     >
       <Script
         pitchRange={pitchRange}
-        enableZoom={false}
+        enableZoom={true}
         enableFly={false}
         enablePan={false}
         enableOrbit={true}
