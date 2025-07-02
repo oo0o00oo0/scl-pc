@@ -1,14 +1,15 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useModel } from "../../hooks/use-asset";
 import {
   Render,
   Script as ScriptComponent,
 } from "@playcanvas/react/components";
-import { Color, Script } from "playcanvas";
+import { BLEND_NORMAL, Color, Script } from "playcanvas";
 import { Entity } from "@playcanvas/react";
 import { type RenderComponent } from "playcanvas";
+import { useAppStore } from "@/state/appStore";
+import { useModel } from "@playcanvas/react/hooks";
+
 // @ts-ignore
-import projectStore from "../../../state/store";
 
 const backupData = [
   { Plot: "123", Availability: "AVAILABLE" },
@@ -20,28 +21,30 @@ declare module "playcanvas" {
     emissive: Color;
     blendType: number;
     emissiveIntensity: number;
+    opacity: number;
     update(): void;
   }
 }
 
 const Overlays = () => {
-  const { data: model } = useModel("pin.glb");
-  const setStoreState = projectStore((state: any) => state.setStoreState);
-  const activeUnit = { Plot: "123" };
+  const { asset: model } = useModel("/models/overlays.glb");
+
+  const selectedUnit = useAppStore((state: any) => state.selectedUnit);
+
+  // const setStoreState = useAppStore((state: any) => state.setStoreState);
 
   const handleModelClick = (data: any) => {
-    setStoreState({ activeZone: data });
+    console.log("CLICKED", data, selectedUnit);
+    // setStoreState({ selectedUnit: data });
   };
 
-  const activePlot = activeUnit?.Plot ?? null;
-
   return (
-    <Entity scale={[-100, -100, 100]}>
-      <Render asset={model as any} type={"box"}>
+    <Entity scale={[-1, 1, -1]}>
+      <Render asset={model as any} type={"asset"}>
         <ScriptComponent
           script={TestScript}
           callback={handleModelClick}
-          activePlot={activePlot}
+          activePlot={selectedUnit?.unit}
         />
       </Render>
     </Entity>
@@ -50,38 +53,38 @@ const Overlays = () => {
 
 class TestScript extends Script {
   callback: (data: any) => void = () => {};
-  _activePlot: string | null = null;
 
-  selectedModel: string | null = null;
-  private readonly selectedColor = new Color(0.42, 0.82, 0.61);
-  private readonly defaultColor = new Color(0.38, 0.1, 0.62);
-  private readonly unavailableColor = new Color(
-    0.38,
-    0.1,
-    0.62 * Math.random(),
-  );
+  private readonly selectedColor = new Color(0.90, 0.91, 0.92);
+  // private readonly defaultColor = new Color(0, 0, 0);
   private _models: any[] | null = null;
+  private _activePlot: string | null = null;
+
+  set activePlot(v: string | null) {
+    if (this._activePlot !== v) {
+      this._activePlot = v;
+
+      if (this._models) this.updateModels(this._models);
+    }
+  }
+  get activePlot() {
+    return this._activePlot;
+  }
 
   updateModels(models: any[]) {
+    console.log("UPDATING MODELS", this._activePlot);
     models.forEach((model) => {
-      const isSelected = this.selectedModel === model.name;
+      const isSelected = this.activePlot === model.name.split(".")[1];
 
       const render = model.render as RenderComponent;
-      const data = backupData.find((item) => item.Plot === model.name);
-      const enabled = data?.Availability === "AVAILABLE";
 
-      const colour = isSelected
-        ? this.selectedColor
-        : enabled
-        ? this.defaultColor
-        : this.unavailableColor;
+      model.enabled = true;
 
       if (render?.meshInstances) {
         let needsUpdate = false;
 
         render.meshInstances.forEach((mi) => {
-          if (!mi.material.emissive.equals(colour)) {
-            mi.material.emissive.copy(colour);
+          if (mi.material.opacity !== (isSelected ? 0.7 : 0.0)) {
+            mi.material.opacity = isSelected ? 0.7 : 0.0;
             needsUpdate = true;
           }
         });
@@ -95,7 +98,6 @@ class TestScript extends Script {
   }
 
   initialize() {
-    // Renders mesh's on top of the splat
     const immediateLayer = this.app.scene.layers.getLayerByName("Immediate");
     this._models = this.entity.children[0].children;
 
@@ -105,22 +107,22 @@ class TestScript extends Script {
 
         if (this.callback) this.callback(name);
 
-        this.selectedModel = name;
+        this.activePlot = name.split(".")[1];
         this.updateModels(this._models!);
       });
 
       const render = model.render as RenderComponent;
-      const data = backupData.find((item) => item.Plot === model.name);
-      const enabled = data?.Availability === "AVAILABLE";
 
       if (immediateLayer && render?.meshInstances) {
         render.layers = [immediateLayer.id];
         render.meshInstances.forEach((mi) => {
-          mi.material.emissive.copy(
-            enabled ? this.defaultColor : this.unavailableColor,
-          );
-          mi.material.blendType = 7;
-          mi.material.emissiveIntensity = 0.5;
+          // mi.material.emissive.copy(
+          //   enabled ? this.defaultColor : this.unavailableColor,
+          // );
+          mi.material.emissive.copy(this.selectedColor);
+
+          mi.material.opacity = 0.0;
+          mi.material.blendType = BLEND_NORMAL;
           mi.material.update();
         });
       }
