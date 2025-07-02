@@ -2,7 +2,12 @@ import { Entity } from "@playcanvas/react";
 import { Render } from "@playcanvas/react/components";
 import { useMaterial } from "@playcanvas/react/hooks";
 
-const AxisHelper = ({ size }: { size: [number, number, number] }) => {
+const AxisHelper = (
+  { position, size }: {
+    position: [number, number, number];
+    size: [number, number, number];
+  },
+) => {
   const xMaterial = useMaterial({
     emissive: "red",
   });
@@ -16,7 +21,7 @@ const AxisHelper = ({ size }: { size: [number, number, number] }) => {
   });
 
   return (
-    <Entity scale={size}>
+    <Entity position={position} scale={size}>
       <Entity scale={[100, 0.25, 0.25]}>
         <Render type="box" material={xMaterial} />
       </Entity>

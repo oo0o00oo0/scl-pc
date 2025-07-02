@@ -54,7 +54,8 @@ const Overlays = () => {
 class TestScript extends Script {
   callback: (data: any) => void = () => {};
 
-  private readonly selectedColor = new Color(0.90, 0.91, 0.92);
+  // private readonly selectedColor = new Color(0.90, 0.91, 0.92);
+  private readonly selectedColor = new Color(0.24, 0.30, 0.30);
   // private readonly defaultColor = new Color(0, 0, 0);
   private _models: any[] | null = null;
   private _activePlot: string | null = null;
@@ -73,7 +74,7 @@ class TestScript extends Script {
   updateModels(models: any[]) {
     console.log("UPDATING MODELS", this._activePlot);
     models.forEach((model) => {
-      const isSelected = this.activePlot === model.name.split(".")[1];
+      const isSelected = this.activePlot === model.name;
 
       const render = model.render as RenderComponent;
 
@@ -107,7 +108,8 @@ class TestScript extends Script {
 
         if (this.callback) this.callback(name);
 
-        this.activePlot = name.split(".")[1];
+        console.log(name);
+        this.activePlot = name;
         this.updateModels(this._models!);
       });
 

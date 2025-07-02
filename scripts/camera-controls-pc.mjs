@@ -32,6 +32,7 @@ const EPSILON = 0.0001;
  */
 // const lerpRate = (damping, dt) => 1 - Math.pow(damping, dt * 1000);
 export const lerpRate = (damping, dt) => {
+  // const t = 1 - Math.pow(damping, dt * 600);
   const t = 1 - Math.pow(damping, dt * 600);
   // Fast ease-in-out - much more subtle curve
   return t < 0.5 ? 2 * t * t : 1 - 2 * (1 - t) * (1 - t);
