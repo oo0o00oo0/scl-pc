@@ -38,18 +38,19 @@ const Overlays = () => {
     filters,
   );
 
+  const residencePopup = useAppStore((state: any) => state.residencePopup);
   const { data } = response;
-
   const selectedUnit = useAppStore((state: any) => state.selectedUnit);
 
   const handleModelClick = (unitName: any) => {
-    if (pathname === "/residences") {
+    if (pathname === "/residences" && !residencePopup.isOpen) {
       const unit = data.find((unit: any) =>
         unit.unit.replace(" ", "") === unitName
       );
       setStoreState({ selectedUnit: unit });
     }
   };
+
   if (data.length === 0) return null;
 
   return (
@@ -60,6 +61,7 @@ const Overlays = () => {
           script={TestScript}
           callback={handleModelClick}
           activePlot={selectedUnit?.unit.replace(" ", "")}
+          disable={residencePopup.isOpen}
         />
       </Render>
     </Entity>
@@ -75,12 +77,20 @@ class TestScript extends Script {
   private _models: any[] | null = null;
   private _activePlot: string | null = null;
   private _availableIDS: string[] = [];
-
+  private _disable: boolean = false;
   set availableIDS(v: string[]) {
     this._availableIDS = v;
   }
   get availableIDS() {
     return this._availableIDS;
+  }
+
+  set disable(v: boolean) {
+    this._disable = v;
+    if (this._models) this.updateModels(this._models);
+  }
+  get disable() {
+    return this._disable;
   }
 
   set activePlot(v: string | null) {
@@ -100,7 +110,7 @@ class TestScript extends Script {
 
       const render = model.render as RenderComponent;
 
-      model.enabled = true;
+      model.enabled = !this._disable;
 
       if (render?.meshInstances) {
         let needsUpdate = false;
@@ -124,12 +134,9 @@ class TestScript extends Script {
     const immediateLayer = this.app.scene.layers.getLayerByName("Immediate");
     this._models = this.entity.children[0].children;
 
-    console.log("_availableIDS", this._availableIDS);
-
     this._models.forEach((model) => {
       model.on("click", () => {
         const name = model.name;
-        console.log("name", name);
 
         if (this.callback) this.callback(name);
 
