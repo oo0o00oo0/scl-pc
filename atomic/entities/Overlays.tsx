@@ -8,6 +8,9 @@ import { Entity } from "@playcanvas/react";
 import { type RenderComponent } from "playcanvas";
 import { useAppStore } from "@/state/appStore";
 import { useModel } from "@playcanvas/react/hooks";
+import { useFilteredUnits } from "@/hooks/useUnits";
+import { useFiltersStore } from "@/state/filtersStore";
+import { useLocation } from "@tanstack/react-router";
 
 // @ts-ignore
 
@@ -27,24 +30,36 @@ declare module "playcanvas" {
 }
 
 const Overlays = () => {
+  const { pathname } = useLocation();
   const { asset: model } = useModel("/models/overlays.glb");
+  const { filters } = useFiltersStore();
+  const { setStoreState } = useAppStore();
+  const { data: response } = useFilteredUnits(
+    filters,
+  );
+
+  const { data } = response;
 
   const selectedUnit = useAppStore((state: any) => state.selectedUnit);
 
-  // const setStoreState = useAppStore((state: any) => state.setStoreState);
-
-  const handleModelClick = (data: any) => {
-    console.log("CLICKED", data, selectedUnit);
-    // setStoreState({ selectedUnit: data });
+  const handleModelClick = (unitName: any) => {
+    if (pathname === "/residences") {
+      const unit = data.find((unit: any) =>
+        unit.unit.replace(" ", "") === unitName
+      );
+      setStoreState({ selectedUnit: unit });
+    }
   };
+  if (data.length === 0) return null;
 
   return (
     <Entity scale={[-1, 1, -1]}>
       <Render asset={model as any} type={"asset"}>
         <ScriptComponent
+          availableIDS={data.map((unit: any) => unit.unit.replace(" ", ""))}
           script={TestScript}
           callback={handleModelClick}
-          activePlot={selectedUnit?.unit}
+          activePlot={selectedUnit?.unit.replace(" ", "")}
         />
       </Render>
     </Entity>
@@ -59,6 +74,14 @@ class TestScript extends Script {
   // private readonly defaultColor = new Color(0, 0, 0);
   private _models: any[] | null = null;
   private _activePlot: string | null = null;
+  private _availableIDS: string[] = [];
+
+  set availableIDS(v: string[]) {
+    this._availableIDS = v;
+  }
+  get availableIDS() {
+    return this._availableIDS;
+  }
 
   set activePlot(v: string | null) {
     if (this._activePlot !== v) {
@@ -72,7 +95,6 @@ class TestScript extends Script {
   }
 
   updateModels(models: any[]) {
-    console.log("UPDATING MODELS", this._activePlot);
     models.forEach((model) => {
       const isSelected = this.activePlot === model.name;
 
@@ -102,15 +124,16 @@ class TestScript extends Script {
     const immediateLayer = this.app.scene.layers.getLayerByName("Immediate");
     this._models = this.entity.children[0].children;
 
+    console.log("_availableIDS", this._availableIDS);
+
     this._models.forEach((model) => {
       model.on("click", () => {
         const name = model.name;
+        console.log("name", name);
 
         if (this.callback) this.callback(name);
 
-        console.log(name);
-        this.activePlot = name;
-        this.updateModels(this._models!);
+        // this.updateModels(this._models!);
       });
 
       const render = model.render as RenderComponent;
