@@ -87,12 +87,14 @@ class TestScript extends Script {
             mi.material.name = `${model.name}_material`;
           }
 
+          // @ts-ignore
           mi.material.emissive = new Color(0.1, 0.1, 0.1);
           // Set opacity: 0 if no active district OR if this is the selected district, 0.8 for non-selected when there's an active district
           // console.log(isSelected, model.name);
           // @ts-ignore
           mi.material.opacity = (!this.isActive || isSelected) ? 0 : 0.8;
 
+          // @ts-ignore
           mi.material.emissive.copy(colour);
           needsUpdate = true;
         });
