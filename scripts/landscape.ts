@@ -14,6 +14,7 @@ class LandscapeScript extends Script {
     this.entity.on("gsplat:ready", () => {
       this.currentOpacity = 0;
       this.targetOpacity = 0;
+      // [RENDER:INIT] Request render after gsplat ready
       this.app.renderNextFrame = true;
     });
   }
@@ -52,6 +53,7 @@ class LandscapeScript extends Script {
       material.setParameter("uSplatOpacity", this.currentOpacity);
     }
 
+    // [RENDER:ANIM] Request render during animation
     this.app.renderNextFrame = true;
   }
 
@@ -78,6 +80,7 @@ class LandscapeScript extends Script {
         material.setParameter("uSplatOpacity", this.currentOpacity);
       }
 
+      // [RENDER:INSTANT] Request render after instant opacity change
       this.app.renderNextFrame = true;
 
       if (this.targetOpacity === 0) {

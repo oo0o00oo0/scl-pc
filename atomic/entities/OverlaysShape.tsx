@@ -105,6 +105,7 @@ class TestScript extends Script {
           });
 
           this.app.renderNextFrame = true;
+          console.log("rendernextframe - overlays shape");
           this.app.fire("render");
         }
       }

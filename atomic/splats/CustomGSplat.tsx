@@ -12,9 +12,7 @@ export const CustomGSplat: FC<GsplatProps> = (
   { asset },
 ) => {
   const parent: PcEntity = useParent();
-
   const assetRef = useRef<PcEntity | null>(null);
-
   const app = useApp();
 
   useLayoutEffect(() => {
@@ -29,6 +27,7 @@ export const CustomGSplat: FC<GsplatProps> = (
         parent.fire("gsplat:ready", assetRef.current);
       }, 0);
 
+      // [RENDER:GSPLAT] Disable autoRender for gsplat components
       app.autoRender = false;
     }
 
@@ -36,7 +35,7 @@ export const CustomGSplat: FC<GsplatProps> = (
       if (!assetRef.current) return;
       parent.removeChild(assetRef.current);
     };
-  }, [asset, parent]);
+  }, [asset, parent, app]);
 
   return null;
 };

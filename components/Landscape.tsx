@@ -73,9 +73,11 @@ const Landscape = ({
       const gsplatInstance = gsplatComponent?.instance;
 
       if (gsplatInstance) {
+        // [RENDER:INIT] Request render after gsplat initialization
         app.renderNextFrame = true;
 
         gsplatInstance.sorter.on("updated", () => {
+          // [RENDER:SORT] Request render after sorter update
           app.renderNextFrame = true;
         });
       }
@@ -106,47 +108,62 @@ const Landscape = ({
     }
   }, [splat, id, onReady]);
 
-  // Effect for opacity animation
+  // Effect for opacity animation and cleanup
   useEffect(() => {
+    // Remove this line as it's handled by CustomGSplat
+    // app.autoRender = false;
+    let didUnload = false;
+
     if (!splat) return;
 
     const landscapeScript = scriptRef.current as LandscapeScript;
-    if (currentSceneId === id) {
+
+    if (!load) {
+      const handleUnload = () => {
+        const splatAssets = app.assets.filter(
+          (a) => (a.type as string) === "gsplat",
+        );
+        let i = 0;
+        let splatAsset = splatAssets.find((a) => {
+          i++;
+          return (a as any).id === id;
+        });
+        console.log("Number of assets:", i);
+        if (splatAsset && splatAsset.loaded) {
+          console.log("SPLAT ASSET FOUND", splatAsset);
+          // First unload the asset
+          splatAsset.unload();
+          // Then remove it from the registry
+          app.assets.remove(splatAsset);
+          // [RENDER:UNLOAD] Request render after unloading asset
+          app.renderNextFrame = true;
+          didUnload = true;
+        }
+      };
+      handleUnload();
+    } else if (currentSceneId === id) {
       setTimeout(() => {
         landscapeScript.animateToOpacity(1, 1000);
       }, 1000);
     } else {
       landscapeScript.animateToOpacity(0, 1000);
     }
-  }, [currentSceneId, id, splat]);
 
-  //TODO - HANDLE UNLOADING
-
-  // useEffect(() => {
-  //   let didUnload = false;
-
-  //   const handleUnload = () => {
-  //     const splatAssets = app.assets.filter(
-  //       (a) => (a.type as string) === "gsplat",
-  //     );
-  //     let splatAsset = splatAssets.find((a) => (a as any).id === id);
-  //     if (splatAsset && splatAsset.loaded) {
-  //       splatAsset.unload();
-  //       app.renderNextFrame = true;
-  //       didUnload = true;
-  //     }
-  //   };
-
-  //   if (!load) {
-  //     handleUnload();
-  //   }
-
-  //   return () => {
-  //     if (!didUnload) {
-  //       handleUnload();
-  //     }
-  //   };
-  // }, [load, id, app]);
+    return () => {
+      if (!didUnload && !load) {
+        const splatAssets = app.assets.filter(
+          (a) => (a.type as string) === "gsplat",
+        );
+        const splatAsset = splatAssets.find((a) => (a as any).id === id);
+        if (splatAsset && splatAsset.loaded) {
+          splatAsset.unload();
+          app.assets.remove(splatAsset);
+          // [RENDER:CLEANUP] Request render after cleanup
+          app.renderNextFrame = true;
+        }
+      }
+    };
+  }, [currentSceneId, id, splat, load, app]);
 
   return (
     <Entity

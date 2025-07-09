@@ -2,7 +2,11 @@ import { useApp, useFrame } from "@playcanvas/react/hooks";
 import { Entity as PcEntity } from "playcanvas";
 import { useEffect, useRef } from "react";
 
-const nearlyEquals = (a: Float32Array, b: Float32Array, epsilon = 1e-4): boolean => {
+const nearlyEquals = (
+  a: Float32Array,
+  b: Float32Array,
+  epsilon = 1e-4,
+): boolean => {
   for (let i = 0; i < a.length; i++) {
     if (Math.abs(a[i] - b[i]) >= epsilon) return false;
   }
@@ -39,7 +43,7 @@ export const useRenderOnCameraChange = (entity: PcEntity | null) => {
           app.renderNextFrame = false;
         }
       },
-      { threshold: 0.1 }
+      { threshold: 0.1 },
     );
 
     observer.observe(canvas);
@@ -61,13 +65,14 @@ export const useRenderOnCameraChange = (entity: PcEntity | null) => {
       return;
     }
 
-    const changed = !nearlyEquals(world, prevWorld.current) || !nearlyEquals(proj, prevProj.current);
-    
+    const changed = !nearlyEquals(world, prevWorld.current) ||
+      !nearlyEquals(proj, prevProj.current);
     if (!app.renderNextFrame) {
       app.renderNextFrame = changed;
     }
 
     if (app.renderNextFrame) {
+      console.log("rendernextframe - use-render-on-camera-change", changed);
       prevWorld.current.set(world);
       prevProj.current.set(proj);
     }

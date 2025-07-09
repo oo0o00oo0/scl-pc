@@ -2,7 +2,9 @@
 import { Asset, TEXTURETYPE_RGBP } from "playcanvas";
 import { useApp } from "@playcanvas/react/hooks";
 import { useQuery } from "@tanstack/react-query";
+import type { UseQueryOptions } from "@tanstack/react-query";
 import { fetchAsset } from "@playcanvas/react/utils";
+import { useEffect } from "react";
 
 /**
  * Loads an asset using react-query
@@ -51,13 +53,15 @@ export const useSplatWithId = (
   const app = useApp();
   const queryKey = [app.root?.getGuid(), src, "gsplat", props, id];
 
-  return useQuery({
+  const queryOptions: UseQueryOptions<
+    Asset | null,
+    Error,
+    Asset | null,
+    (string | number | {} | null)[]
+  > = {
     queryKey,
     queryFn: async () => {
-      // console.log("CALL USE ASSET, id", id, src.split("/").pop());
       if (!app) return null;
-
-      //TODO MAKES QUERY EVERY TIME, FIX THIS
 
       try {
         // Create the asset manually using the correct Asset constructor
@@ -72,7 +76,7 @@ export const useSplatWithId = (
         app.assets.add(asset);
 
         // Return a promise that resolves when the asset is loaded
-        return new Promise((resolve, reject) => {
+        return new Promise<Asset>((resolve, reject) => {
           asset.on("load", () => resolve(asset));
           asset.on("error", (err: any) => reject(err));
 
@@ -94,7 +98,22 @@ export const useSplatWithId = (
       }
     },
     enabled: shouldLoad,
-  });
+  };
+
+  const query = useQuery(queryOptions);
+
+  // Handle cleanup when shouldLoad changes or component unmounts
+  useEffect(() => {
+    if (!shouldLoad && query.data) {
+      // If we have an asset and shouldLoad is false, clean it up
+      query.data.unload();
+      app.assets.remove(query.data);
+      console.log("rendernextframe - use-asset");
+      app.renderNextFrame = true;
+    }
+  }, [shouldLoad, query.data, app]);
+
+  return query;
 };
 
 // Alternative approach that uses array indexing but still sets proper IDs

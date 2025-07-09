@@ -13,6 +13,7 @@ const UnloadScene = () => {
           return false;
         });
 
+        console.log("rendernextframe - unload scene");
         app.renderNextFrame = true;
       }
     };

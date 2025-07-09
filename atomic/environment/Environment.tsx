@@ -22,7 +22,7 @@ const Environment = (
 
   useEffect(() => {
     // let t = 0;
-    console.log("ACTIVE SCENE", activeScene);
+    // console.log("ACTIVE SCENE", activeScene);
     // scriptRef.current?.animateToIntensity(10, 1000); // const handleSwitchIntensity = setInterval(() => {
     scriptRef.current?.setSkyboxRotationY(activeScene?.skyboxPosition || 0);
     // setTimeout(() => {
@@ -85,6 +85,7 @@ class EnvAnimationScript extends Script {
       this.app.scene.skyboxLuminance = this.currentIntensity;
     }
 
+    console.log("rendernextframe - environment");
     this.app.renderNextFrame = true;
   }
 
