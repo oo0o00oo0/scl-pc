@@ -5,14 +5,16 @@ import { useEffect, useRef } from "react";
 import { Quat, Script, Vec3 } from "playcanvas";
 import { Script as ScriptPC } from "@playcanvas/react/components";
 import { easeInOutQuad } from "@/libs/utils";
+import sceneStore from "@/state/sceneStore";
 // @ts-ignore
 const tempActiveScene = {
   skyboxPosition: 0,
 };
 const Environment = (
-  { url, activeScene }: { url: string; activeScene?: any },
+  { url }: { url: string },
 ) => {
   const { asset } = useEnvAtlas(url);
+  const activeScene = sceneStore((s) => s.activeScene);
   const scriptRef = useRef<EnvAnimationScript>(null);
   const app = useApp();
   // @ts-ignore
@@ -20,7 +22,7 @@ const Environment = (
 
   useEffect(() => {
     // let t = 0;
-
+    console.log("ACTIVE SCENE", activeScene);
     // scriptRef.current?.animateToIntensity(10, 1000); // const handleSwitchIntensity = setInterval(() => {
     scriptRef.current?.setSkyboxRotationY(activeScene?.skyboxPosition || 0);
     // setTimeout(() => {
