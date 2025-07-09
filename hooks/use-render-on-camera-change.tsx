@@ -72,7 +72,7 @@ export const useRenderOnCameraChange = (entity: PcEntity | null) => {
     }
 
     if (app.renderNextFrame) {
-      console.log("rendernextframe - use-render-on-camera-change", changed);
+      // console.log("rendernextframe - use-render-on-camera-change", changed);
       prevWorld.current.set(world);
       prevProj.current.set(proj);
     }
