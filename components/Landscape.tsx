@@ -110,6 +110,7 @@ const Landscape = ({
 
   // Effect for opacity animation and cleanup
   useEffect(() => {
+    console.log("id", id, load);
     // Remove this line as it's handled by CustomGSplat
     // app.autoRender = false;
     let didUnload = false;
