@@ -141,7 +141,6 @@ class TestScript extends Script {
 
   public setActive(active: boolean) {
     this.entity.enabled = active;
-    console.log("rendernextframe - billboard");
     this.app.renderNextFrame = true;
   }
 

@@ -110,7 +110,6 @@ const Landscape = ({
 
   // Effect for opacity animation and cleanup
   useEffect(() => {
-    console.log("id", id, load);
     // Remove this line as it's handled by CustomGSplat
     // app.autoRender = false;
     let didUnload = false;
@@ -129,9 +128,7 @@ const Landscape = ({
           i++;
           return (a as any).id === id;
         });
-        console.log("Number of assets:", i);
         if (splatAsset && splatAsset.loaded) {
-          console.log("SPLAT ASSET FOUND", splatAsset);
           // First unload the asset
           splatAsset.unload();
           // Then remove it from the registry
