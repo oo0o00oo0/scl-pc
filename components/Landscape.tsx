@@ -20,7 +20,7 @@ type GSplatComponent = {
 const Landscape = ({
   id,
   url,
-  currentSceneId,
+  active,
   updateProgress,
   onReady,
   position = new Vec3(0, 0, 0),
@@ -28,7 +28,7 @@ const Landscape = ({
   load = false,
 }: {
   id: number;
-  currentSceneId: number | null;
+  active: boolean;
   updateProgress: (id: number, progress: number) => void;
   url: string;
   load: boolean;
@@ -38,8 +38,6 @@ const Landscape = ({
 }) => {
   const scriptRef = useRef<LandscapeScript | null>(null);
   const gsplatRef = useRef<PcEntity | null>(null);
-
-  console.log(id);
 
   const app = useApp();
 
@@ -141,7 +139,7 @@ const Landscape = ({
         }
       };
       handleUnload();
-    } else if (currentSceneId === id) {
+    } else if (active) {
       setTimeout(() => {
         landscapeScript.animateToOpacity(1, 1000);
       }, 1000);
@@ -163,7 +161,7 @@ const Landscape = ({
         }
       }
     };
-  }, [currentSceneId, id, splat, load, app]);
+  }, [active, id, splat, load, app]);
 
   return (
     <Entity
