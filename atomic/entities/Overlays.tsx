@@ -3,7 +3,7 @@ import {
   Render,
   Script as ScriptComponent,
 } from "@playcanvas/react/components";
-import { BLEND_NORMAL, Color, Script } from "playcanvas";
+import { BLEND_NORMAL, Color, Script, Vec2, Vec3 } from "playcanvas";
 import { Entity } from "@playcanvas/react";
 import { type RenderComponent } from "playcanvas";
 
@@ -20,13 +20,13 @@ declare module "playcanvas" {
 interface OverlaysProps {
   data: any[];
   model: any;
-  handleModelClick: (data: any) => void;
-  activePlot: string | null;
+  handleModelClick: (name: string, data?: any) => void;
+  activeID: string | null;
   disable: boolean;
 }
 
 const Overlays = (
-  { data, model, handleModelClick, activePlot, disable }: OverlaysProps,
+  { data, model, handleModelClick, activeID, disable }: OverlaysProps,
 ) => {
   if (data.length === 0) return null;
 
@@ -35,9 +35,9 @@ const Overlays = (
       <Render asset={model as any} type={"asset"}>
         <ScriptComponent
           availableIDS={data.map((unit: any) => unit.unit.replace(" ", ""))}
-          script={TestScript}
+          script={OverlaysScript}
           callback={handleModelClick}
-          activePlot={activePlot}
+          activeID={activeID}
           disable={disable}
         />
       </Render>
@@ -45,16 +45,18 @@ const Overlays = (
   );
 };
 
-class TestScript extends Script {
-  callback: (data: any) => void = () => {};
+class OverlaysScript extends Script {
+  callback: (name: string, data?: any) => void = () => {};
 
   // private readonly selectedColor = new Color(0.90, 0.91, 0.92);
   private readonly selectedColor = new Color(0.24, 0.30, 0.30);
   // private readonly defaultColor = new Color(0, 0, 0);
   private _models: any[] | null = null;
-  private _activePlot: string | null = null;
+  private _activeID: string | null = null;
   private _availableIDS: string[] = [];
   private _disable: boolean = false;
+  private clickPosition: Vec2 = new Vec2(0, 0);
+  private modelData: any[] = [];
   set availableIDS(v: string[]) {
     this._availableIDS = v;
   }
@@ -66,39 +68,35 @@ class TestScript extends Script {
     this._disable = v;
     if (this._models) this.updateModels(this._models);
   }
+
   get disable() {
     return this._disable;
   }
 
-  set activePlot(v: string | null) {
-    if (this._activePlot !== v) {
-      this._activePlot = v;
+  set activeID(v: string | null) {
+    if (this._activeID !== v) {
+      this._activeID = v;
 
       if (this._models) this.updateModels(this._models);
     }
   }
-  get activePlot() {
-    return this._activePlot;
+  get activeID() {
+    return this._activeID;
   }
 
   updateModels(models: any[]) {
     models.forEach((model) => {
-      const isSelected = this.activePlot === model.name;
-
+      const isSelected = this.activeID === model.name;
       const render = model.render as RenderComponent;
-
       model.enabled = !this._disable;
-
       if (render?.meshInstances) {
         let needsUpdate = false;
-
         render.meshInstances.forEach((mi) => {
           if (mi.material.opacity !== (isSelected ? 0.7 : 0.0)) {
             mi.material.opacity = isSelected ? 0.7 : 0.0;
             needsUpdate = true;
           }
         });
-
         if (needsUpdate) {
           render.meshInstances.forEach((mi) => mi.material.update());
           this.app.renderNextFrame = true;
@@ -111,13 +109,26 @@ class TestScript extends Script {
     const immediateLayer = this.app.scene.layers.getLayerByName("Immediate");
     this._models = this.entity.children[0].children;
 
+    this.modelData = this._models.map((model) => getModelVertecies(model));
+    // ---- SETUP EVENTS ----
+
     this._models.forEach((model) => {
-      model.on("click", () => {
+      model.on("pointerdown", (e: any) => {
+        const downVec = new Vec2(e.nativeEvent.clientX, e.nativeEvent.clientY);
+        this.clickPosition.copy(downVec);
+      });
+    });
+
+    this._models.forEach((model) => {
+      model.on("pointerup", (e: any) => {
+        const upVec = new Vec2(e.nativeEvent.clientX, e.nativeEvent.clientY);
+        const distance = upVec.distance(this.clickPosition);
+        if (distance > 2) return;
         const name = model.name;
 
-        if (this.callback) this.callback(name);
+        const modelData = this.modelData.find((data) => data.name === name);
 
-        // this.updateModels(this._models!);
+        if (this.callback) this.callback(name, modelData);
       });
 
       const render = model.render as RenderComponent;
@@ -125,9 +136,6 @@ class TestScript extends Script {
       if (immediateLayer && render?.meshInstances) {
         render.layers = [immediateLayer.id];
         render.meshInstances.forEach((mi) => {
-          // mi.material.emissive.copy(
-          //   enabled ? this.defaultColor : this.unavailableColor,
-          // );
           mi.material.emissive.copy(this.selectedColor);
 
           mi.material.opacity = 0.0;
@@ -137,8 +145,50 @@ class TestScript extends Script {
       }
     });
 
-    if (this._activePlot) this.updateModels(this._models);
+    if (this._activeID) this.updateModels(this._models);
   }
 }
+
+const getModelVertecies = (model: any) => {
+  const positions: number[] = [];
+
+  const render = model.render as RenderComponent;
+  const meshInstances = render?.meshInstances;
+
+  meshInstances?.map((mi) => {
+    mi.mesh.getPositions(positions);
+  });
+
+  const partition = positions.reduce(
+    (acc: number[][], curr: number, index: number) => {
+      if (index % 3 === 0) {
+        acc.push([]);
+      }
+      acc[acc.length - 1].push(curr);
+      return acc;
+    },
+    [],
+  );
+
+  const vertecies = partition.map((p) => new Vec3(p[0] * -1, p[1], p[2] * -1));
+
+  const sumPoint = vertecies.reduce(
+    (acc, curr) => acc.add(curr),
+    new Vec3(0, 0, 0),
+  );
+
+  const averagePoint = new Vec3(
+    sumPoint.x / vertecies.length,
+    sumPoint.y / vertecies.length,
+    sumPoint.z / vertecies.length,
+  );
+
+  return {
+    name: model.name,
+    vertices: vertecies,
+    sum: sumPoint,
+    center: averagePoint,
+  };
+};
 
 export default Overlays;
