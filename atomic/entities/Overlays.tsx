@@ -22,12 +22,12 @@ interface OverlaysProps {
   model: any;
   handleModelClick: (name: string, data?: any) => void;
   activeID: string | null;
-  disable: boolean;
+  visible: boolean;
   onInit: (data: any[]) => void;
 }
 
 const Overlays = (
-  { data, model, handleModelClick, activeID, disable, onInit }: OverlaysProps,
+  { data, model, handleModelClick, activeID, visible, onInit }: OverlaysProps,
 ) => {
   if (data.length === 0) return null;
 
@@ -35,11 +35,11 @@ const Overlays = (
     <Entity scale={[-1, 1, -1]}>
       <Render asset={model as any} type={"asset"}>
         <ScriptComponent
-          availableIDS={data.map((unit: any) => unit.unit.replace(" ", ""))}
+          availableIDS={data}
           script={OverlaysScript}
           callback={handleModelClick}
           activeID={activeID}
-          disable={disable}
+          visible={visible}
           onInit={onInit}
         />
       </Render>
@@ -48,51 +48,48 @@ const Overlays = (
 };
 
 class OverlaysScript extends Script {
+  private _visible: boolean = false;
   callback: (name: string, data?: any) => void = () => {};
   onInit: (data: any[]) => void = () => {};
 
   // private readonly selectedColor = new Color(0.90, 0.91, 0.92);
   private readonly selectedColor = new Color(0.24, 0.30, 0.30);
   // private readonly defaultColor = new Color(0, 0, 0);
-  private _models: any[] | null = null;
+  private models: any[] | null = null;
   private _activeID: string | null = null;
   private _availableIDS: string[] = [];
-  private _disable: boolean = false;
   private clickPosition: Vec2 = new Vec2(0, 0);
   private modelData: any[] = [];
 
   set availableIDS(v: string[]) {
     this._availableIDS = v;
   }
-  get availableIDS() {
-    return this._availableIDS;
-  }
 
-  set disable(v: boolean) {
-    this._disable = v;
-    if (this._models) this.updateModels(this._models);
-  }
-
-  get disable() {
-    return this._disable;
+  set visible(v: boolean) {
+    this._visible = v;
+    if (this.models) this.updateModels();
   }
 
   set activeID(v: string | null) {
     if (this._activeID !== v) {
       this._activeID = v;
-
-      if (this._models) this.updateModels(this._models);
+      if (this.models) this.updateModels();
     }
   }
+
   get activeID() {
     return this._activeID;
   }
 
-  updateModels(models: any[]) {
+  updateModels() {
+    const models = this.models;
+
+    if (!models) return;
+
     models.forEach((model) => {
       const isSelected = this.activeID === model.name;
       const render = model.render as RenderComponent;
-      model.enabled = !this._disable;
+      // model.enabled = this.visible;
       if (render?.meshInstances) {
         let needsUpdate = false;
         render.meshInstances.forEach((mi) => {
@@ -111,20 +108,18 @@ class OverlaysScript extends Script {
 
   initialize() {
     const immediateLayer = this.app.scene.layers.getLayerByName("Immediate");
-    this._models = this.entity.children[0].children;
-
-    this.modelData = this._models.map((model) => getModelVertecies(model));
+    this.models = this.entity.children[0].children;
+    this.modelData = this.models.map((model) => getModelVertecies(model));
     this.onInit(this.modelData);
-    // ---- SETUP EVENTS ----
 
-    this._models.forEach((model) => {
+    this.models.forEach((model) => {
       model.on("pointerdown", (e: any) => {
         const downVec = new Vec2(e.nativeEvent.clientX, e.nativeEvent.clientY);
         this.clickPosition.copy(downVec);
       });
     });
 
-    this._models.forEach((model) => {
+    this.models.forEach((model) => {
       model.on("pointerup", (e: any) => {
         const upVec = new Vec2(e.nativeEvent.clientX, e.nativeEvent.clientY);
         const distance = upVec.distance(this.clickPosition);
@@ -150,7 +145,7 @@ class OverlaysScript extends Script {
       }
     });
 
-    if (this._activeID) this.updateModels(this._models);
+    if (this._activeID) this.updateModels();
   }
 }
 
