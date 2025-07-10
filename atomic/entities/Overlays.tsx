@@ -87,9 +87,8 @@ class OverlaysScript extends Script {
     if (!models) return;
 
     models.forEach((model) => {
-      const isSelected = this.activeID === model.name;
+      const isSelected = this.activeID === model.name && this._visible;
       const render = model.render as RenderComponent;
-      // model.enabled = this.visible;
       if (render?.meshInstances) {
         let needsUpdate = false;
         render.meshInstances.forEach((mi) => {
