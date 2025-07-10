@@ -6,7 +6,6 @@ import {
 import { BLEND_NORMAL, Color, Script } from "playcanvas";
 import { Entity } from "@playcanvas/react";
 import { type RenderComponent } from "playcanvas";
-import { useAppStore } from "@/state/appStore";
 
 declare module "playcanvas" {
   interface Material {
