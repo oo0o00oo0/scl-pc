@@ -1,167 +1,145 @@
-// /* eslint-disable @typescript-eslint/no-explicit-any */
-// import {
-//   Render,
-//   Script as ScriptComponent,
-// } from "@playcanvas/react/components";
-// import { BLEND_NORMAL, Color, Script } from "playcanvas";
-// import { Entity } from "@playcanvas/react";
-// import { type RenderComponent } from "playcanvas";
-// import { useAppStore } from "@/state/appStore";
-// import { useModel } from "@playcanvas/react/hooks";
-// import { useFilteredUnits } from "@/hooks/useUnits";
-// import { useFiltersStore } from "@/state/filtersStore";
-// import { useLocation } from "@tanstack/react-router";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import {
+  Render,
+  Script as ScriptComponent,
+} from "@playcanvas/react/components";
+import { BLEND_NORMAL, Color, Script } from "playcanvas";
+import { Entity } from "@playcanvas/react";
+import { type RenderComponent } from "playcanvas";
+import { useAppStore } from "@/state/appStore";
 
-// // @ts-ignore
+declare module "playcanvas" {
+  interface Material {
+    emissive: Color;
+    blendType: number;
+    emissiveIntensity: number;
+    opacity: number;
+    update(): void;
+  }
+}
 
-// const backupData = [
-//   { Plot: "123", Availability: "AVAILABLE" },
-//   { Plot: "456", Availability: "UNAVAILABLE" },
-// ];
+interface OverlaysProps {
+  data: any[];
+  model: any;
+  handleModelClick: (data: any) => void;
+  activePlot: string | null;
+  disable: boolean;
+}
 
-// declare module "playcanvas" {
-//   interface Material {
-//     emissive: Color;
-//     blendType: number;
-//     emissiveIntensity: number;
-//     opacity: number;
-//     update(): void;
-//   }
-// }
+const Overlays = (
+  { data, model, handleModelClick, activePlot, disable }: OverlaysProps,
+) => {
+  if (data.length === 0) return null;
 
-// const Overlays = () => {
-//   const { pathname } = useLocation();
-//   const { asset: model } = useModel("/models/overlays.glb");
-//   const { filters } = useFiltersStore();
-//   const { setStoreState } = useAppStore();
-//   const { data: response } = useFilteredUnits(
-//     filters,
-//   );
+  return (
+    <Entity scale={[-1, 1, -1]}>
+      <Render asset={model as any} type={"asset"}>
+        <ScriptComponent
+          availableIDS={data.map((unit: any) => unit.unit.replace(" ", ""))}
+          script={TestScript}
+          callback={handleModelClick}
+          activePlot={activePlot}
+          disable={disable}
+        />
+      </Render>
+    </Entity>
+  );
+};
 
-//   const residencePopup = useAppStore((state: any) => state.residencePopup);
-//   const { data } = response;
-//   const selectedUnit = useAppStore((state: any) => state.selectedUnit);
+class TestScript extends Script {
+  callback: (data: any) => void = () => {};
 
-//   const handleModelClick = (unitName: any) => {
-//     if (pathname === "/residences" && !residencePopup.isOpen) {
-//       const unit = data.find((unit: any) =>
-//         unit.unit.replace(" ", "") === unitName
-//       );
-//       setStoreState({ selectedUnit: unit });
-//     }
-//   };
+  // private readonly selectedColor = new Color(0.90, 0.91, 0.92);
+  private readonly selectedColor = new Color(0.24, 0.30, 0.30);
+  // private readonly defaultColor = new Color(0, 0, 0);
+  private _models: any[] | null = null;
+  private _activePlot: string | null = null;
+  private _availableIDS: string[] = [];
+  private _disable: boolean = false;
+  set availableIDS(v: string[]) {
+    this._availableIDS = v;
+  }
+  get availableIDS() {
+    return this._availableIDS;
+  }
 
-//   if (data.length === 0) return null;
+  set disable(v: boolean) {
+    this._disable = v;
+    if (this._models) this.updateModels(this._models);
+  }
+  get disable() {
+    return this._disable;
+  }
 
-//   return (
-//     <Entity scale={[-1, 1, -1]}>
-//       <Render asset={model as any} type={"asset"}>
-//         <ScriptComponent
-//           availableIDS={data.map((unit: any) => unit.unit.replace(" ", ""))}
-//           script={TestScript}
-//           callback={handleModelClick}
-//           activePlot={selectedUnit?.unit.replace(" ", "")}
-//           disable={residencePopup.isOpen}
-//         />
-//       </Render>
-//     </Entity>
-//   );
-// };
+  set activePlot(v: string | null) {
+    if (this._activePlot !== v) {
+      this._activePlot = v;
 
-// class TestScript extends Script {
-//   callback: (data: any) => void = () => {};
+      if (this._models) this.updateModels(this._models);
+    }
+  }
+  get activePlot() {
+    return this._activePlot;
+  }
 
-//   // private readonly selectedColor = new Color(0.90, 0.91, 0.92);
-//   private readonly selectedColor = new Color(0.24, 0.30, 0.30);
-//   // private readonly defaultColor = new Color(0, 0, 0);
-//   private _models: any[] | null = null;
-//   private _activePlot: string | null = null;
-//   private _availableIDS: string[] = [];
-//   private _disable: boolean = false;
-//   set availableIDS(v: string[]) {
-//     this._availableIDS = v;
-//   }
-//   get availableIDS() {
-//     return this._availableIDS;
-//   }
+  updateModels(models: any[]) {
+    models.forEach((model) => {
+      const isSelected = this.activePlot === model.name;
 
-//   set disable(v: boolean) {
-//     this._disable = v;
-//     if (this._models) this.updateModels(this._models);
-//   }
-//   get disable() {
-//     return this._disable;
-//   }
+      const render = model.render as RenderComponent;
 
-//   set activePlot(v: string | null) {
-//     if (this._activePlot !== v) {
-//       this._activePlot = v;
+      model.enabled = !this._disable;
 
-//       if (this._models) this.updateModels(this._models);
-//     }
-//   }
-//   get activePlot() {
-//     return this._activePlot;
-//   }
+      if (render?.meshInstances) {
+        let needsUpdate = false;
 
-//   updateModels(models: any[]) {
-//     models.forEach((model) => {
-//       const isSelected = this.activePlot === model.name;
+        render.meshInstances.forEach((mi) => {
+          if (mi.material.opacity !== (isSelected ? 0.7 : 0.0)) {
+            mi.material.opacity = isSelected ? 0.7 : 0.0;
+            needsUpdate = true;
+          }
+        });
 
-//       const render = model.render as RenderComponent;
+        if (needsUpdate) {
+          render.meshInstances.forEach((mi) => mi.material.update());
+          this.app.renderNextFrame = true;
+        }
+      }
+    });
+  }
 
-//       model.enabled = !this._disable;
+  initialize() {
+    const immediateLayer = this.app.scene.layers.getLayerByName("Immediate");
+    this._models = this.entity.children[0].children;
 
-//       if (render?.meshInstances) {
-//         let needsUpdate = false;
+    this._models.forEach((model) => {
+      model.on("click", () => {
+        const name = model.name;
 
-//         render.meshInstances.forEach((mi) => {
-//           if (mi.material.opacity !== (isSelected ? 0.7 : 0.0)) {
-//             mi.material.opacity = isSelected ? 0.7 : 0.0;
-//             needsUpdate = true;
-//           }
-//         });
+        if (this.callback) this.callback(name);
 
-//         if (needsUpdate) {
-//           render.meshInstances.forEach((mi) => mi.material.update());
-//           this.app.renderNextFrame = true;
-//         }
-//       }
-//     });
-//   }
+        // this.updateModels(this._models!);
+      });
 
-//   initialize() {
-//     const immediateLayer = this.app.scene.layers.getLayerByName("Immediate");
-//     this._models = this.entity.children[0].children;
+      const render = model.render as RenderComponent;
 
-//     this._models.forEach((model) => {
-//       model.on("click", () => {
-//         const name = model.name;
+      if (immediateLayer && render?.meshInstances) {
+        render.layers = [immediateLayer.id];
+        render.meshInstances.forEach((mi) => {
+          // mi.material.emissive.copy(
+          //   enabled ? this.defaultColor : this.unavailableColor,
+          // );
+          mi.material.emissive.copy(this.selectedColor);
 
-//         if (this.callback) this.callback(name);
+          mi.material.opacity = 0.0;
+          mi.material.blendType = BLEND_NORMAL;
+          mi.material.update();
+        });
+      }
+    });
 
-//         // this.updateModels(this._models!);
-//       });
+    if (this._activePlot) this.updateModels(this._models);
+  }
+}
 
-//       const render = model.render as RenderComponent;
-
-//       if (immediateLayer && render?.meshInstances) {
-//         render.layers = [immediateLayer.id];
-//         render.meshInstances.forEach((mi) => {
-//           // mi.material.emissive.copy(
-//           //   enabled ? this.defaultColor : this.unavailableColor,
-//           // );
-//           mi.material.emissive.copy(this.selectedColor);
-
-//           mi.material.opacity = 0.0;
-//           mi.material.blendType = BLEND_NORMAL;
-//           mi.material.update();
-//         });
-//       }
-//     });
-
-//     if (this._activePlot) this.updateModels(this._models);
-//   }
-// }
-
-// export default Overlays;
+export default Overlays;

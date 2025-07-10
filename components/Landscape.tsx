@@ -39,6 +39,8 @@ const Landscape = ({
   const scriptRef = useRef<LandscapeScript | null>(null);
   const gsplatRef = useRef<PcEntity | null>(null);
 
+  console.log(id);
+
   const app = useApp();
 
   const { data: splat } = useSplatWithId(url, id, {}, load);
