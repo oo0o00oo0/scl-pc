@@ -23,10 +23,11 @@ interface OverlaysProps {
   handleModelClick: (name: string, data?: any) => void;
   activeID: string | null;
   disable: boolean;
+  onInit: (data: any[]) => void;
 }
 
 const Overlays = (
-  { data, model, handleModelClick, activeID, disable }: OverlaysProps,
+  { data, model, handleModelClick, activeID, disable, onInit }: OverlaysProps,
 ) => {
   if (data.length === 0) return null;
 
@@ -39,6 +40,7 @@ const Overlays = (
           callback={handleModelClick}
           activeID={activeID}
           disable={disable}
+          onInit={onInit}
         />
       </Render>
     </Entity>
@@ -47,6 +49,7 @@ const Overlays = (
 
 class OverlaysScript extends Script {
   callback: (name: string, data?: any) => void = () => {};
+  onInit: (data: any[]) => void = () => {};
 
   // private readonly selectedColor = new Color(0.90, 0.91, 0.92);
   private readonly selectedColor = new Color(0.24, 0.30, 0.30);
@@ -57,6 +60,7 @@ class OverlaysScript extends Script {
   private _disable: boolean = false;
   private clickPosition: Vec2 = new Vec2(0, 0);
   private modelData: any[] = [];
+
   set availableIDS(v: string[]) {
     this._availableIDS = v;
   }
@@ -110,6 +114,7 @@ class OverlaysScript extends Script {
     this._models = this.entity.children[0].children;
 
     this.modelData = this._models.map((model) => getModelVertecies(model));
+    this.onInit(this.modelData);
     // ---- SETUP EVENTS ----
 
     this._models.forEach((model) => {
