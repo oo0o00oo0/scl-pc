@@ -7,7 +7,6 @@ const LogSceneState = forwardRef((_, ref) => {
   const logCameraPosition = () => {
     if (!app) return;
     const camera = app.root.findByName("camera");
-    console.log("camera", camera);
     const position = camera?.getPosition();
     console.log(
       `new Vec3(${position?.x.toFixed(3)}, ${position?.y.toFixed(3)}, ${

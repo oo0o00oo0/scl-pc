@@ -24,10 +24,12 @@ interface OverlaysProps {
   activeID: string | null;
   visible: boolean;
   onInit: (data: any[]) => void;
+  disabled: boolean;
 }
 
 const Overlays = (
-  { data, model, handleModelClick, activeID, visible, onInit }: OverlaysProps,
+  { data, model, handleModelClick, activeID, visible, onInit, disabled }:
+    OverlaysProps,
 ) => {
   if (data.length === 0) return null;
 
@@ -41,6 +43,7 @@ const Overlays = (
           activeID={activeID}
           visible={visible}
           onInit={onInit}
+          disabled={disabled}
         />
       </Render>
     </Entity>
@@ -49,6 +52,7 @@ const Overlays = (
 
 class OverlaysScript extends Script {
   private _visible: boolean = false;
+  private _disabled: boolean = false;
   callback: (name: string, data?: any) => void = () => {};
   onInit: (data: any[]) => void = () => {};
 
@@ -77,6 +81,11 @@ class OverlaysScript extends Script {
     }
   }
 
+  set disabled(v: boolean) {
+    this._disabled = v;
+    if (this.models) this.updateModels();
+  }
+
   get activeID() {
     return this._activeID;
   }
@@ -88,6 +97,12 @@ class OverlaysScript extends Script {
 
     models.forEach((model) => {
       const isSelected = this.activeID === model.name && this._visible;
+      if (this._disabled) {
+        model.enabled = false;
+        return;
+      } else {
+        model.enabled = true;
+      }
       const render = model.render as RenderComponent;
       if (render?.meshInstances) {
         let needsUpdate = false;
@@ -109,6 +124,7 @@ class OverlaysScript extends Script {
     const immediateLayer = this.app.scene.layers.getLayerByName("Immediate");
     this.models = this.entity.children[0].children;
     this.modelData = this.models.map((model) => getModelVertecies(model));
+    console.log("this.modelData", this.modelData);
     this.onInit(this.modelData);
 
     this.models.forEach((model) => {
