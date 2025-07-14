@@ -384,8 +384,8 @@ void main(void) {
 
     // 11. Output the final UV and color values.
   gaussianUV = corner.uv;
-  // gaussianColor = vec4(prepareOutputFromGamma(max(clr.xyz, 0.0)), clr.w * uSplatOpacity);
-  gaussianColor = vec4(prepareOutputFromGamma(max(clr.xyz, 0.0)), clr.w * 0.2);
+  gaussianColor = vec4(prepareOutputFromGamma(max(clr.xyz, 0.0)), clr.w * uSplatOpacity);
+  // gaussianColor = vec4(prepareOutputFromGamma(max(clr.xyz, 0.0)), clr.w * 0.2);
 
     #ifndef DITHER_NONE
   id = float(source.id);

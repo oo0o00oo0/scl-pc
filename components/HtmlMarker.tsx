@@ -5,16 +5,24 @@ import gsap from "gsap";
 import { worldToScreenStandalone } from "../utils";
 
 export const HtmlMarker = (
-  { worldPosition, size = 150 }: { worldPosition: Vec3; size?: number },
+  { worldPosition, size = 150, isActive, onClick }: {
+    worldPosition: Vec3;
+    size?: number;
+    isActive: boolean;
+    onClick: () => void;
+  },
 ) => {
   const ref = useRef<HTMLDivElement>(null);
   const svgRef = useRef<SVGSVGElement>(null);
 
-  const [isActive, setIsActive] = useState<boolean>(false);
+  const [hover, setHover] = useState<boolean>(false);
+
+  // const [isActive, setIsActive] = useState<boolean>(false);
 
   const screenPos = useRef<Vec3>(new Vec3());
 
   useEffect(() => {
+    if (!isActive) return;
     const unsubscribe = camStore.subscribe(
       (state) => state.camData,
       ({ viewProjMatrix, cameraRect, canvasWidth, canvasHeight }) => {
@@ -36,12 +44,19 @@ export const HtmlMarker = (
     );
 
     return () => unsubscribe();
-  }, [worldPosition]);
+  }, [worldPosition, isActive]);
 
   useEffect(() => {
     gsap.to(svgRef.current, {
-      stroke: isActive ? "#0d9488" : "#EFEFE6",
-      strokeWidth: isActive ? 2 : 1.2,
+      stroke: hover ? "#0d9488" : "#EFEFE6",
+      strokeWidth: hover ? 2 : 1.2,
+      duration: 0.3,
+      ease: "power2.inOut",
+    });
+  }, [hover]);
+  useEffect(() => {
+    gsap.to(svgRef.current, {
+      opacity: isActive ? 1 : 0,
       duration: 0.3,
       ease: "power2.inOut",
     });
@@ -49,10 +64,12 @@ export const HtmlMarker = (
 
   return (
     <div
-      onPointerEnter={() => setIsActive(true)}
-      onPointerLeave={() => setIsActive(false)}
+      onClick={onClick}
+      onPointerEnter={() => setHover(true)}
+      onPointerLeave={() => setHover(false)}
       ref={ref}
       style={{
+        pointerEvents: isActive ? "auto" : "none",
         position: "absolute",
         top: 0,
         left: 0,

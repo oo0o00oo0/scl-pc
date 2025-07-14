@@ -62,13 +62,13 @@ class OverlaysScript extends Script {
   // private readonly defaultColor = new Color(0, 0, 0);
   private models: any[] | null = null;
   private _activeID: string | null = null;
-  private _availableIDS: string[] = [];
+  // private _availableIDS: string[] = [];
   private clickPosition: Vec2 = new Vec2(0, 0);
   private modelData: any[] = [];
 
-  set availableIDS(v: string[]) {
-    this._availableIDS = v;
-  }
+  // set availableIDS(v: string[]) {
+  //   this._availableIDS = v;
+  // }
 
   set visible(v: boolean) {
     this._visible = v;
