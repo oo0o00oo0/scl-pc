@@ -57,7 +57,8 @@ class OverlaysScript extends Script {
   onInit: (data: any[]) => void = () => {};
 
   // private readonly selectedColor = new Color(0.90, 0.91, 0.92);
-  private readonly selectedColor = new Color(0.24, 0.30, 0.30);
+  // private readonly selectedColor = new Color(0.24, 0.30, 0.30);
+  private readonly selectedColor = new Color(0.85, 0.85, 0.82);
   // private readonly defaultColor = new Color(0, 0, 0);
   private models: any[] | null = null;
   private _activeID: string | null = null;
@@ -124,7 +125,6 @@ class OverlaysScript extends Script {
     const immediateLayer = this.app.scene.layers.getLayerByName("Immediate");
     this.models = this.entity.children[0].children;
     this.modelData = this.models.map((model) => getModelVertecies(model));
-    console.log("this.modelData", this.modelData);
     this.onInit(this.modelData);
 
     this.models.forEach((model) => {
@@ -154,7 +154,9 @@ class OverlaysScript extends Script {
           mi.material.emissive.copy(this.selectedColor);
 
           mi.material.opacity = 0.0;
+          // mi.material.opacity = 0.5;
           mi.material.blendType = BLEND_NORMAL;
+          // mi.material.blendType = 7;
           mi.material.update();
         });
       }

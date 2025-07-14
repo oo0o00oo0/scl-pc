@@ -8,7 +8,7 @@ import { CameraControls as CameraControlsScript } from "@/libs/scripts/camera-co
 
 // @ts-ignore
 import type { CameraConstraints, CamState } from "@/state/sceneStore";
-import { Vec2, Vec3 } from "playcanvas";
+import { Mat4, Vec2, Vec3, Vec4 } from "playcanvas";
 import { useRenderOnCameraChange } from "@/libs/hooks/use-render-on-camera-change";
 
 const defaultCameraConstraints: CameraConstraints = {
@@ -24,9 +24,15 @@ const defaultCamState: CamState = {
 };
 
 const CameraControls = (
-  { camState = defaultCamState, clearColor }: {
+  { camState = defaultCamState, clearColor, onChange = () => {} }: {
     camState: CamState | null;
     clearColor: string;
+    onChange: (camData: {
+      viewProjMatrix: Mat4;
+      cameraRect: Vec4;
+      canvasWidth: number;
+      canvasHeight: number;
+    }) => void;
   },
 ) => {
   const app = useApp();
@@ -40,7 +46,7 @@ const CameraControls = (
   } = camState || defaultCamState;
   const entityRef = useRef<any>(null);
 
-  useRenderOnCameraChange(entityRef.current);
+  useRenderOnCameraChange(entityRef.current, onChange);
 
   const { pitchRange, azimouthRange } = cameraConstraints;
 

@@ -1,5 +1,6 @@
+import camStore from "@/state/camStore";
 import { useApp, useFrame } from "@playcanvas/react/hooks";
-import { Entity as PcEntity } from "playcanvas";
+import { Entity as PcEntity, Mat4, Vec3, Vec4 } from "playcanvas";
 import { useEffect, useRef } from "react";
 
 const nearlyEquals = (
@@ -20,7 +21,15 @@ const nearlyEquals = (
  * @param {Entity | null} entity - The PlayCanvas entity representing the camera. If null, the hook does nothing.
  * @returns {void} This hook does not return a value but updates the rendering state of the application.
  */
-export const useRenderOnCameraChange = (entity: PcEntity | null) => {
+export const useRenderOnCameraChange = (
+  entity: PcEntity | null,
+  callback: (camData: {
+    viewProjMatrix: Mat4;
+    cameraRect: Vec4;
+    canvasWidth: number;
+    canvasHeight: number;
+  }) => void,
+) => {
   const app = useApp();
   const prevWorld = useRef<Float32Array>(new Float32Array(16));
   const prevProj = useRef<Float32Array>(new Float32Array(16));
@@ -55,6 +64,7 @@ export const useRenderOnCameraChange = (entity: PcEntity | null) => {
    * However if the canvas is not visible on the page it will take precedence.
    * Don't render if the canvas is not visible regardless of any animations.
    */
+
   useFrame(() => {
     if (!entity || !isVisible.current) return;
     const world = entity.getWorldTransform().data;
@@ -73,6 +83,22 @@ export const useRenderOnCameraChange = (entity: PcEntity | null) => {
 
     if (app.renderNextFrame) {
       // console.log("rendernextframe - use-render-on-camera-change", changed);
+      if (entity.camera) {
+        const viewProjMatrix = new Mat4();
+        viewProjMatrix.copy(entity.camera.projectionMatrix).mul2(
+          viewProjMatrix,
+          entity.camera.viewMatrix,
+        );
+
+        const camData = {
+          viewProjMatrix: viewProjMatrix,
+          cameraRect: entity.camera.rect,
+          canvasWidth: app.graphicsDevice.canvas.width,
+          canvasHeight: app.graphicsDevice.canvas.height,
+        };
+        callback(camData);
+      }
+
       prevWorld.current.set(world);
       prevProj.current.set(proj);
     }
