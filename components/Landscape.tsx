@@ -142,7 +142,6 @@ const Landscape = ({
       };
       handleUnload();
     } else if (active) {
-      console.log("active", opacityOverride);
       setTimeout(() => {
         landscapeScript.animateToOpacity(1 * opacityOverride, 1000);
       }, 1000);
