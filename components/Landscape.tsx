@@ -26,6 +26,7 @@ const Landscape = ({
   position = new Vec3(0, 0, 0),
   rotation = new Vec3(0, 0, 0),
   load = false,
+  opacityOverride = 1,
 }: {
   id: number;
   active: boolean;
@@ -35,6 +36,7 @@ const Landscape = ({
   onReady: (id: number) => void;
   position?: Vec3;
   rotation?: Vec3;
+  opacityOverride?: number;
 }) => {
   const scriptRef = useRef<LandscapeScript | null>(null);
   const gsplatRef = useRef<PcEntity | null>(null);
@@ -140,8 +142,9 @@ const Landscape = ({
       };
       handleUnload();
     } else if (active) {
+      console.log("active", opacityOverride);
       setTimeout(() => {
-        landscapeScript.animateToOpacity(1, 1000);
+        landscapeScript.animateToOpacity(1 * opacityOverride, 1000);
       }, 1000);
     } else {
       landscapeScript.animateToOpacity(0, 1000);
@@ -161,7 +164,7 @@ const Landscape = ({
         }
       }
     };
-  }, [active, id, splat, load, app]);
+  }, [active, id, splat, load, app, opacityOverride]);
 
   return (
     <Entity
