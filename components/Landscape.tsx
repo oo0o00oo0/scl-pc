@@ -27,6 +27,7 @@ const Landscape = ({
   rotation = new Vec3(0, 0, 0),
   load = false,
   opacityOverride = 1,
+  delay = 1000,
 }: {
   id: number;
   active: boolean;
@@ -34,6 +35,7 @@ const Landscape = ({
   url: string;
   load: boolean;
   onReady: (id: number) => void;
+  delay?: number;
   position?: Vec3;
   rotation?: Vec3;
   opacityOverride?: number;
@@ -144,7 +146,7 @@ const Landscape = ({
     } else if (active) {
       setTimeout(() => {
         landscapeScript.animateToOpacity(1 * opacityOverride, 1000);
-      }, 1000);
+      }, delay);
     } else {
       landscapeScript.animateToOpacity(0, 1000);
     }
