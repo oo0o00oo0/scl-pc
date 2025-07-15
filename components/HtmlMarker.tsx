@@ -1,50 +1,49 @@
 import { useEffect, useRef, useState } from "react";
-import { Vec3 } from "playcanvas";
-import camStore from "@/state/camStore";
+import { Mat4, Vec3, Vec4 } from "playcanvas";
 import gsap from "gsap";
 import { worldToScreenStandalone } from "../utils";
 
+type CamData = {
+  viewProjMatrix: Mat4;
+  cameraRect: Vec4;
+  canvasWidth: number;
+  canvasHeight: number;
+};
+
 export const HtmlMarker = (
-  { worldPosition, size = 150, isActive, onClick }: {
+  { worldPosition, size = 150, isActive, onClick, useCamStore }: {
     worldPosition: Vec3;
     size?: number;
     isActive: boolean;
     onClick: () => void;
+    useCamStore: () => CamData;
   },
 ) => {
   const ref = useRef<HTMLDivElement>(null);
   const svgRef = useRef<SVGSVGElement>(null);
-
+  const screenPos = useRef<Vec3>(new Vec3());
   const [hover, setHover] = useState<boolean>(false);
 
-  // const [isActive, setIsActive] = useState<boolean>(false);
-
-  const screenPos = useRef<Vec3>(new Vec3());
+  const camData = useCamStore();
 
   useEffect(() => {
-    if (!isActive) return;
-    const unsubscribe = camStore.subscribe(
-      (state) => state.camData,
-      ({ viewProjMatrix, cameraRect, canvasWidth, canvasHeight }) => {
-        if (ref.current) {
-          worldToScreenStandalone(
-            worldPosition,
-            viewProjMatrix,
-            cameraRect,
-            canvasWidth,
-            canvasHeight,
-            screenPos.current,
-          );
+    if (!isActive || !ref.current) return;
 
-          ref.current.style.transform = `translate(${
-            screenPos.current.x - size / 2
-          }px, ${screenPos.current.y - size / 2}px)`;
-        }
-      },
+    const { viewProjMatrix, cameraRect, canvasWidth, canvasHeight } = camData;
+
+    worldToScreenStandalone(
+      worldPosition,
+      viewProjMatrix,
+      cameraRect,
+      canvasWidth,
+      canvasHeight,
+      screenPos.current,
     );
 
-    return () => unsubscribe();
-  }, [worldPosition, isActive]);
+    ref.current.style.transform = `translate(${
+      screenPos.current.x - size / 2
+    }px, ${screenPos.current.y - size / 2}px)`;
+  }, [worldPosition, isActive, camData]);
 
   useEffect(() => {
     gsap.to(svgRef.current, {
