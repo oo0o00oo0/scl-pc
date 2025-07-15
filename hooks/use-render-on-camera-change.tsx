@@ -1,6 +1,5 @@
-import camStore from "@/state/camStore";
 import { useApp, useFrame } from "@playcanvas/react/hooks";
-import { Entity as PcEntity, Mat4, Vec3, Vec4 } from "playcanvas";
+import { Entity as PcEntity, Mat4, Vec4 } from "playcanvas";
 import { useEffect, useRef } from "react";
 
 const nearlyEquals = (
