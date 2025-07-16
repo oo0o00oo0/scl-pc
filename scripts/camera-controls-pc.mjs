@@ -693,12 +693,14 @@ class CameraControls extends Script {
         this._pan(this._getMidPoint(tmpVa));
       }
 
-      // pinch zoom
-      const pinchDist = this._getPinchDist();
-      if (this._lastPinchDist > 0) {
-        this._zoom((this._lastPinchDist - pinchDist) * this.zoomPinchSens);
+      // pinch zoom - only if zoom is enabled
+      if (this.enableZoom) {
+        const pinchDist = this._getPinchDist();
+        if (this._lastPinchDist > 0) {
+          this._zoom((this._lastPinchDist - pinchDist) * this.zoomPinchSens);
+        }
+        this._lastPinchDist = pinchDist;
       }
-      this._lastPinchDist = pinchDist;
     }
   }
 
@@ -1137,8 +1139,8 @@ class CameraControls extends Script {
     this._element.addEventListener("contextmenu", this._onContextMenu);
 
     // These can stay on window since they're keyboard events
-    window.addEventListener("keydown", this._onKeyDown, false);
-    window.addEventListener("keyup", this._onKeyUp, false);
+    // window.addEventListener("keydown", this._onKeyDown, false);
+    // window.addEventListener("keyup", this._onKeyUp, false);
   }
 
   detach() {
@@ -1154,8 +1156,8 @@ class CameraControls extends Script {
     this._element.removeEventListener("contextmenu", this._onContextMenu);
 
     // Remove keyboard events from window
-    window.removeEventListener("keydown", this._onKeyDown, false);
-    window.removeEventListener("keyup", this._onKeyUp, false);
+    // window.removeEventListener("keydown", this._onKeyDown, false);
+    // window.removeEventListener("keyup", this._onKeyUp, false);
 
     this._camera = null;
 
