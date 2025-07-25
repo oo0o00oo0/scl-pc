@@ -6,14 +6,15 @@ import { useEffect, useRef } from "react";
 // @ts-ignore
 import { CameraControls as CameraControlsScript } from "@/libs/scripts/camera-controls-pc.mjs";
 
-// @ts-ignore
-import type { CameraConstraints, CamState } from "@/state/sceneStore";
+import type { CameraConstraints, CamState } from "@/types/camera";
+import { AZIMUTH_PRESETS, clampAzimuthAngle } from "@/utils/cameraUtils";
 import { Mat4, Vec2, Vec3, Vec4 } from "playcanvas";
 import { useRenderOnCameraChange } from "@/libs/hooks/use-render-on-camera-change";
 
 const defaultCameraConstraints: CameraConstraints = {
-  pitchRange: new Vec2(-90, 90),
-  azimouthRange: new Vec2(-10, 10),
+  pitchRange: { min: -90, max: 90 },
+  azimuth: AZIMUTH_PRESETS.unlimited(),
+  enableZoom: false,
 };
 
 const defaultCamState: CamState = {
@@ -48,7 +49,9 @@ const CameraControls = (
 
   useRenderOnCameraChange(entityRef.current, onChange);
 
-  const { pitchRange, azimouthRange } = cameraConstraints;
+  const { pitchRange, azimuth, enableZoom } = cameraConstraints;
+
+  console.log("enableZoom", enableZoom);
 
   useEffect(() => {
     if (entityRef.current) {
@@ -58,10 +61,14 @@ const CameraControls = (
       if (!cameraControlsScript) return;
 
       const clampAnglesHandler = (angles: Vec2) => {
-        angles.y = Math.max(
-          azimouthRange.x,
-          Math.min(azimouthRange.y, angles.y),
+        // Clamp pitch (X component)
+        angles.x = Math.max(
+          pitchRange.min,
+          Math.min(pitchRange.max, angles.x),
         );
+
+        // Clamp azimuth (Y component) using new system
+        angles.y = clampAzimuthAngle(angles.y, azimuth);
       };
 
       cameraControlsScript.on("clamp:angles", clampAnglesHandler);
@@ -73,9 +80,8 @@ const CameraControls = (
         );
       }, delay);
 
-      if (azimouthRange.x === Infinity) {
-        cameraControlsScript.off("clamp:angles", clampAnglesHandler);
-      }
+      // Always apply clamping with new system
+      // (no more Infinity check needed)
 
       // Cleanup: remove the handler
       return () => {
@@ -89,7 +95,7 @@ const CameraControls = (
     target,
     delay,
     pitchRange,
-    azimouthRange,
+    azimuth,
   ]);
 
   return (
@@ -98,8 +104,8 @@ const CameraControls = (
       name="camera"
     >
       <Script
-        pitchRange={pitchRange}
-        enableZoom={false}
+        pitchRange={new Vec2(pitchRange.min, pitchRange.max)}
+        enableZoom={enableZoom}
         enableFly={false}
         enablePan={false}
         enableOrbit={true}
