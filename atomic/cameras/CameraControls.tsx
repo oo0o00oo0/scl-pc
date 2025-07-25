@@ -42,16 +42,12 @@ const CameraControls = (
     target,
     delay = 0,
     cameraConstraints,
-    // damping = 0.96,
-    // mode = "orbit",
   } = camState || defaultCamState;
   const entityRef = useRef<any>(null);
 
   useRenderOnCameraChange(entityRef.current, onChange);
 
   const { pitchRange, azimuth, enableZoom } = cameraConstraints;
-
-  console.log("enableZoom", enableZoom);
 
   useEffect(() => {
     if (entityRef.current) {
