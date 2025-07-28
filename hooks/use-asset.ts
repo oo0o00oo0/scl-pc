@@ -17,8 +17,6 @@ export const useAsset = (src: string, type: string, props: any) => {
   const app = useApp();
   const queryKey = [app.root?.getGuid(), src, type, props];
 
-  console.log("QUERY KEY", queryKey);
-
   // Construct a query for the asset
   return useQuery({
     queryKey,

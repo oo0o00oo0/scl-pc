@@ -42,8 +42,6 @@ const LogSceneState = forwardRef((_, ref) => {
       }
     };
 
-    console.log("loggg");
-
     window.addEventListener("keydown", handleKeyDown);
 
     return () => {
