@@ -16,7 +16,7 @@ export const CustomGSplat: FC<GsplatProps> = (
   const app = useApp();
 
   useLayoutEffect(() => {
-    if (asset) {
+    if (asset && assetRef) {
       assetRef.current = (asset.resource as any).instantiate({
         vertex,
       });

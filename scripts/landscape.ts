@@ -8,7 +8,7 @@ class LandscapeScript extends Script {
   private startOpacity: number = 0;
   private animationDuration: number = 50; // milliseconds
   private elapsedTime: number = 0;
-
+  private onComplete: () => void = () => {};
   initialize() {
     this.entity.enabled = false;
     // this.entity.on("gsplat:ready", () => {
@@ -37,6 +37,7 @@ class LandscapeScript extends Script {
     if (reachedTarget) {
       this.animating = false;
       this.currentOpacity = this.targetOpacity;
+      this.onComplete?.();
 
       // If faded out completely, disable the entity
       if (this.targetOpacity === 0) {
@@ -61,7 +62,9 @@ class LandscapeScript extends Script {
   public animateToOpacity(
     targetOpacity: number,
     durationMs: number = 1000,
+    onComplete: () => void,
   ): void {
+    this.onComplete = onComplete;
     this.targetOpacity = Math.max(0, Math.min(1, targetOpacity));
     this.animationDuration = Math.max(16, durationMs);
 
