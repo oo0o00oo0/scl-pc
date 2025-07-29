@@ -22,13 +22,6 @@ export const CustomGSplat: FC<GsplatProps> = (
       });
 
       parent.addChild(assetRef.current!);
-
-      setTimeout(() => {
-        parent.fire("gsplat:ready", assetRef.current);
-      }, 0);
-
-      // [RENDER:GSPLAT] Disable autoRender for gsplat components
-      app.autoRender = false;
     }
 
     return () => {

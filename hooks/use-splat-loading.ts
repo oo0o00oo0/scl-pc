@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { type AssetMeta, useSplatWithId } from "./use-splat-with-id";
+import { type AssetMeta, useDelayedSplat } from "./use-splat-with-id";
 import { useApp } from "@playcanvas/react/hooks";
 import { Entity as PcEntity } from "playcanvas";
 import type LandscapeScript from "../scripts/landscape";
@@ -27,13 +27,9 @@ export const useSplatLoading = (
 
   const app = useApp();
 
-  const { data: splat } = useSplatWithId(url, updateProgress, load);
+  const { data: splat } = useDelayedSplat(url, updateProgress, load);
 
   useEffect(() => {
-    let splatAsset = splat;
-
-    if (!splatAsset) return;
-
     if (splat) {
       const entity = gsplatRef.current;
 
@@ -51,14 +47,10 @@ export const useSplatLoading = (
           app.renderNextFrame = true;
         });
       }
-
-      console.log("HOW MANY TIMES IS THIS CALLED?");
     }
   }, [splat, app, id, updateProgress, url]);
 
   useEffect(() => {
-    if (!splat) return;
-
     const landscapeScript = scriptRef.current;
 
     if (!landscapeScript) return;
@@ -66,7 +58,6 @@ export const useSplatLoading = (
     if (!load) {
       const handleUnload = () => {
         const splatAsset = app.assets.find(url, "gsplat");
-
         if (splatAsset && splatAsset.loaded) {
           landscapeScript.animateToOpacity(0, 0);
           splatAsset.unload();

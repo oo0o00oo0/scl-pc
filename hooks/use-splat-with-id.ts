@@ -108,7 +108,7 @@ const fetchSplat = async (
   });
 };
 
-export const useSplatWithId = (
+export const useDelayedSplat = (
   src: string,
   onProgress?: (meta: AssetMeta) => void,
   shouldLoad = true,
@@ -129,18 +129,5 @@ export const useSplatWithId = (
     enabled: shouldLoad,
   };
 
-  const query = useQuery(queryOptions);
-
-  // // Handle cleanup when shouldLoad changes or component unmounts
-  // useEffect(() => {
-  //   if (!shouldLoad && query.data) {
-  //     // If we have an asset and shouldLoad is false, clean it up
-  //     query.data.unload();
-  //     app.assets.remove(query.data);
-  //     console.log("rendernextframe - use-asset");
-  //     app.renderNextFrame = true;
-  //   }
-  // }, [shouldLoad, query.data, app]);
-
-  return query;
+  return useQuery(queryOptions);
 };
