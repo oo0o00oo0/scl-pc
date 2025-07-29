@@ -17,7 +17,6 @@ const Landscape = ({
   rotation = new Vec3(0, 0, 0),
   load = false,
   opacityOverride = 1,
-  delay = 1000,
 }: {
   id: number;
   active: boolean;
@@ -38,7 +37,6 @@ const Landscape = ({
     onReady,
     active,
     opacityOverride,
-    delay,
   );
 
   return (
