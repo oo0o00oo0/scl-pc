@@ -1,6 +1,5 @@
-import { useRef } from "react";
-import { useSplatWithId } from "./use-asset";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
+import { useSplatWithId } from "./use-splat-with-id";
 import { useApp } from "@playcanvas/react/hooks";
 import { Entity as PcEntity } from "playcanvas";
 import type LandscapeScript from "../scripts/landscape";
