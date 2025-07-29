@@ -29,7 +29,7 @@ const Landscape = ({
   rotation?: Vec3;
   opacityOverride?: number;
 }) => {
-  console.log("LANDSCAPE", url);
+  console.log("LANDSCAPEEE", url);
   const { splat, gsplatRef, scriptRef } = useSplatLoading(
     id,
     url,
