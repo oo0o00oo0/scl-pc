@@ -42,20 +42,12 @@ const fetchSplat = async (
   src: string,
   onProgress?: (meta: AssetMeta) => void,
 ): Promise<Asset> => {
-  console.log("FETCH SPLAT CALLED:", {
-    src,
-    isProduction: typeof window !== "undefined"
-      ? window.location.hostname
-      : "unknown",
-  });
-
   return new Promise((resolve, reject) => {
     let propsKey = src;
 
     let asset = app.assets.find(propsKey, "gsplat");
 
     if (!asset) {
-      console.log("Creating new asset for:", src);
       asset = new Asset(
         propsKey,
         "gsplat",
@@ -64,12 +56,9 @@ const fetchSplat = async (
 
       (asset as any).id = src;
       app.assets.add(asset);
-    } else {
-      console.log("Found existing asset for:", src);
     }
 
     const handleLoad = () => {
-      console.log("Asset loaded successfully:", src);
       cleanup();
       onProgress?.({ progress: 1 });
       resolve(asset);
@@ -114,10 +103,7 @@ const fetchSplat = async (
 
       // Start loading if not already loading
       if (!asset.loading) {
-        console.log("Starting asset load for:", src);
         app.assets.load(asset);
-      } else {
-        console.log("Asset already loading:", src);
       }
     }
   });

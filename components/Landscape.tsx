@@ -29,14 +29,6 @@ const Landscape = ({
   rotation?: Vec3;
   opacityOverride?: number;
 }) => {
-  console.log("LANDSCAPEEE", url);
-  console.log("PRODUCTION DEBUG:", {
-    id,
-    url,
-    load,
-    isProduction: import.meta.env.PROD,
-    environment: import.meta.env.MODE,
-  });
   const { splat, gsplatRef, scriptRef } = useSplatLoading(
     id,
     url,
