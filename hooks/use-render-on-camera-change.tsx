@@ -1,4 +1,4 @@
-import { useApp, useFrame } from "@playcanvas/react/hooks";
+import { useApp, useAppEvent } from "@playcanvas/react/hooks";
 import { Entity as PcEntity, Mat4, Vec4 } from "playcanvas";
 import { useEffect, useRef } from "react";
 
@@ -65,7 +65,7 @@ export const useRenderOnCameraChange = (
    * Don't render if the canvas is not visible regardless of any animations.
    */
 
-  useFrame(() => {
+  useAppEvent("update", () => {
     const entity = entityRef.current;
     if (!entity || !isVisible.current) return;
     const world = entity.getWorldTransform().data;

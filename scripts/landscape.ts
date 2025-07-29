@@ -42,6 +42,7 @@ class LandscapeScript extends Script {
       if (this.targetOpacity === 0) {
         this.entity.enabled = false;
       }
+
       this.app.autoRender = false;
     }
 
