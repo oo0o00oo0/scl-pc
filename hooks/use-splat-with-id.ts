@@ -1,19 +1,120 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Asset } from "playcanvas";
 import { useApp } from "@playcanvas/react/hooks";
 import { useQuery } from "@tanstack/react-query";
 import type { UseQueryOptions } from "@tanstack/react-query";
-import { fetchAsset } from "@playcanvas/react/utils";
-import { useEffect } from "react";
+import { Application, Asset } from "playcanvas";
+
+export type AssetMeta = {
+  /**
+   * The normalized progress of the asset loading.
+   */
+  progress: number;
+} & Record<string, unknown>;
+
+export type FetchAssetOptions = {
+  /**
+   * The PlayCanvas application instance. When loading an asset it will be scoped to this application.
+   * The asset can't be re-used across different applications.
+   */
+  app: Application;
+  /**
+   * The URL of the asset to fetch.
+   */
+  url: string;
+  /**
+   * The type of the asset to fetch.
+   */
+  type: string;
+  /**
+   * Props passed to the asset. This is spread into the `file` `data` and `options` properties of the asset.
+   * @defaultValue {}
+   */
+  props?: Record<string, unknown>;
+  /**
+   * A callback function that is called to provide loading progress.
+   * @param {AssetMeta} meta - The progress of the asset loading.
+   * @returns void
+   */
+  onProgress?: (meta: AssetMeta) => void;
+};
+const fetchSplat = async (
+  app: Application,
+  src: string,
+  onProgress?: (meta: AssetMeta) => void,
+): Promise<Asset> => {
+  return new Promise((resolve, reject) => {
+    let propsKey = src;
+
+    let asset = app.assets.find(propsKey, "gsplat");
+
+    if (!asset) {
+      asset = new Asset(
+        propsKey,
+        "gsplat",
+        { url: src },
+      );
+
+      (asset as any).id = src;
+      app.assets.add(asset);
+    }
+
+    const handleLoad = () => {
+      cleanup();
+      onProgress?.({ progress: 1 });
+      resolve(asset);
+    };
+
+    const handleError = (err: string) => {
+      cleanup();
+      reject(err);
+    };
+
+    const handleProgress = (totalReceived: number, totalRequired: number) => {
+      if (
+        typeof totalReceived !== "number" || typeof totalRequired !== "number"
+      ) {
+        //  warnOnce('Invalid progress callback parameters');
+        return;
+      }
+
+      onProgress?.({
+        progress: totalReceived / totalRequired,
+        totalReceived,
+        totalRequired,
+      });
+    };
+
+    const cleanup = () => {
+      if (onProgress) asset.off("progress", handleProgress);
+      asset.off("load", handleLoad);
+      asset.off("error", handleError);
+    };
+
+    if (onProgress) {
+      asset.on("progress", handleProgress);
+    }
+
+    if (asset.resource) {
+      handleLoad();
+    } else {
+      asset.once("load", handleLoad);
+      asset.once("error", handleError);
+
+      // Start loading if not already loading
+      if (!asset.loading) {
+        app.assets.load(asset);
+      }
+    }
+  });
+};
 
 export const useSplatWithId = (
   src: string,
-  id: number,
-  props = {},
+  onProgress?: (meta: AssetMeta) => void,
   shouldLoad = true,
 ) => {
   const app = useApp();
-  const queryKey = [app.root?.getGuid(), src, "gsplat", props, id];
+  const queryKey = [app.root?.getGuid(), src, "gsplat"];
 
   const queryOptions: UseQueryOptions<
     Asset | null,
@@ -23,57 +124,23 @@ export const useSplatWithId = (
   > = {
     queryKey,
     queryFn: async () => {
-      if (!app) return null;
-
-      try {
-        // Create the asset manually using the correct Asset constructor
-        const asset = new Asset(src, "gsplat", {
-          url: src,
-        }, props);
-
-        // Set the custom ID BEFORE loading starts
-        (asset as any).id = id;
-
-        // Add to asset registry
-        app.assets.add(asset);
-
-        // Return a promise that resolves when the asset is loaded
-        return new Promise<Asset>((resolve, reject) => {
-          asset.on("load", () => resolve(asset));
-          asset.on("error", (err: any) => reject(err));
-
-          // Start loading the asset
-          app.assets.load(asset);
-        });
-      } catch (error) {
-        console.warn(
-          "Manual asset creation failed, falling back to fetchAsset:",
-          error,
-        );
-        // Fallback to the original method
-        // @ts-ignore
-        const asset = await fetchAsset(app, src, "gsplat", props) as Asset;
-        if (asset) {
-          (asset as any).id = id;
-        }
-        return asset;
-      }
+      return fetchSplat(app, src, onProgress);
     },
     enabled: shouldLoad,
   };
 
   const query = useQuery(queryOptions);
 
-  // Handle cleanup when shouldLoad changes or component unmounts
-  useEffect(() => {
-    if (!shouldLoad && query.data) {
-      // If we have an asset and shouldLoad is false, clean it up
-      query.data.unload();
-      app.assets.remove(query.data);
-      console.log("rendernextframe - use-asset");
-      app.renderNextFrame = true;
-    }
-  }, [shouldLoad, query.data, app]);
+  // // Handle cleanup when shouldLoad changes or component unmounts
+  // useEffect(() => {
+  //   if (!shouldLoad && query.data) {
+  //     // If we have an asset and shouldLoad is false, clean it up
+  //     query.data.unload();
+  //     app.assets.remove(query.data);
+  //     console.log("rendernextframe - use-asset");
+  //     app.renderNextFrame = true;
+  //   }
+  // }, [shouldLoad, query.data, app]);
 
   return query;
 };

@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { useSplatWithId } from "./use-splat-with-id";
+import { type AssetMeta, useSplatWithId } from "./use-splat-with-id";
 import { useApp } from "@playcanvas/react/hooks";
 import { Entity as PcEntity } from "playcanvas";
 import type LandscapeScript from "../scripts/landscape";
@@ -16,7 +16,7 @@ export const useSplatLoading = (
   id: number,
   url: string,
   load: boolean,
-  updateProgress: (id: number, progress: number) => void,
+  updateProgress: (meta: AssetMeta) => void,
   onReady: (id: number) => void,
   active: boolean,
   opacityOverride: number,
@@ -27,27 +27,12 @@ export const useSplatLoading = (
 
   const app = useApp();
 
-  const { data: splat } = useSplatWithId(url, id, {}, load);
+  const { data: splat } = useSplatWithId(url, updateProgress, load);
 
   useEffect(() => {
-    const splatAssets = app.assets.filter(
-      (a) => (a.type as string) === "gsplat",
-    );
-
-    if (!splatAssets.length) return;
-
-    let splatAsset = splatAssets.find((a) => (a as any).id === id);
-
-    if (!splatAsset) {
-      splatAsset = splatAssets[id];
-    }
+    let splatAsset = splat;
 
     if (!splatAsset) return;
-
-    splatAsset.on("progress", (received, length) => {
-      const percent = Math.min(1, received / length) * 100;
-      updateProgress(id, percent);
-    });
 
     if (splat) {
       const entity = gsplatRef.current;
@@ -59,42 +44,19 @@ export const useSplatLoading = (
       const gsplatInstance = gsplatComponent?.instance;
 
       if (gsplatInstance) {
+        onReady(id);
         app.renderNextFrame = true;
 
         gsplatInstance.sorter.on("updated", () => {
           app.renderNextFrame = true;
         });
       }
+
+      console.log("HOW MANY TIMES IS THIS CALLED?");
     }
-
-    return () => {
-      if (splatAsset) {
-        splatAsset.off("progress");
-      }
-    };
-  }, [splat, app, id, updateProgress]);
-
-  // Separate effect for handling onReady
-  useEffect(() => {
-    if (!splat) return;
-
-    const entity = gsplatRef.current;
-    const gsplatComponent = entity?.findComponent("gsplat") as
-      | GSplatComponent
-      | undefined;
-    const gsplatInstance = gsplatComponent?.instance;
-
-    if (gsplatInstance) {
-      const timeoutId = setTimeout(() => {
-        onReady(id);
-      });
-      return () => clearTimeout(timeoutId);
-    }
-  }, [splat, id, onReady]);
+  }, [splat, app, id, updateProgress, url]);
 
   useEffect(() => {
-    let didUnload = false;
-
     if (!splat) return;
 
     const landscapeScript = scriptRef.current;
@@ -103,19 +65,13 @@ export const useSplatLoading = (
 
     if (!load) {
       const handleUnload = () => {
-        const splatAssets = app.assets.filter(
-          (a) => (a.type as string) === "gsplat",
-        );
-        let i = 0;
-        let splatAsset = splatAssets.find((a) => {
-          i++;
-          return (a as any).id === id;
-        });
+        const splatAsset = app.assets.find(url, "gsplat");
+
         if (splatAsset && splatAsset.loaded) {
+          landscapeScript.animateToOpacity(0, 0);
           splatAsset.unload();
           app.assets.remove(splatAsset);
           app.renderNextFrame = true;
-          didUnload = true;
         }
       };
       handleUnload();
@@ -126,20 +82,6 @@ export const useSplatLoading = (
     } else {
       landscapeScript.animateToOpacity(0, 1000);
     }
-
-    return () => {
-      if (!didUnload && !load) {
-        const splatAssets = app.assets.filter(
-          (a) => (a.type as string) === "gsplat",
-        );
-        const splatAsset = splatAssets.find((a) => (a as any).id === id);
-        if (splatAsset && splatAsset.loaded) {
-          splatAsset.unload();
-          app.assets.remove(splatAsset);
-          app.renderNextFrame = true;
-        }
-      }
-    };
   }, [active, id, splat, load, app, opacityOverride]);
 
   return {

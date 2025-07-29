@@ -5,6 +5,7 @@ import { CustomGSplat } from "../atomic/splats/CustomGSplat";
 import LandscapeScript from "../scripts/landscape";
 import { Vec3 } from "playcanvas";
 import { useSplatLoading } from "../hooks/use-splat-loading";
+import { type AssetMeta } from "../hooks/use-splat-with-id";
 
 const Landscape = ({
   id,
@@ -20,7 +21,7 @@ const Landscape = ({
 }: {
   id: number;
   active: boolean;
-  updateProgress: (id: number, progress: number) => void;
+  updateProgress: (meta: AssetMeta) => void;
   url: string;
   load: boolean;
   onReady: (id: number) => void;
