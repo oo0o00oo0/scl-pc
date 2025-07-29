@@ -1,13 +1,16 @@
 import { Entity } from "@playcanvas/react";
 import { Camera, Script } from "@playcanvas/react/components";
 import { useApp } from "@playcanvas/react/hooks";
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 //
 // @ts-ignore
 import { CameraControls as CameraControlsScript } from "@/libs/scripts/camera-controls-pc.mjs";
 
-import type { CameraConstraints, CamState } from "@/types/camera";
-import { AZIMUTH_PRESETS, clampAzimuthAngle } from "@/utils/cameraUtils";
+import type { CameraConstraints, CamState } from "@/libs/types/camera.ts";
+import {
+  AZIMUTH_PRESETS,
+  clampAzimuthAngle,
+} from "@/libs/atomic/utils/cameraUtils";
 import { Mat4, Vec2, Vec3, Vec4 } from "playcanvas";
 import { useRenderOnCameraChange } from "@/libs/hooks/use-render-on-camera-change";
 
@@ -43,9 +46,8 @@ const CameraControls = (
     delay = 0,
     cameraConstraints,
   } = camState || defaultCamState;
-  const entityRef = useRef<any>(null);
 
-  useRenderOnCameraChange(entityRef.current, onChange);
+  const { entity: entityRef } = useRenderOnCameraChange(onChange);
 
   const { pitchRange, azimuth, enableZoom } = cameraConstraints;
 
@@ -70,6 +72,7 @@ const CameraControls = (
       cameraControlsScript.on("clamp:angles", clampAnglesHandler);
 
       setTimeout(() => {
+        //@ts-ignore
         cameraControlsScript.focus(
           target,
           position,

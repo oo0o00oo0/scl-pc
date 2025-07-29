@@ -21,7 +21,6 @@ const nearlyEquals = (
  * @returns {void} This hook does not return a value but updates the rendering state of the application.
  */
 export const useRenderOnCameraChange = (
-  entity: PcEntity | null,
   callback: (camData: {
     viewProjMatrix: Mat4;
     cameraRect: Vec4;
@@ -33,6 +32,8 @@ export const useRenderOnCameraChange = (
   const prevWorld = useRef<Float32Array>(new Float32Array(16));
   const prevProj = useRef<Float32Array>(new Float32Array(16));
   const isVisible = useRef(true);
+
+  const entityRef = useRef<PcEntity | null>(null);
 
   /**
    * This hook ensures that rendering only happens when the canvas is visible in the viewport.
@@ -65,6 +66,7 @@ export const useRenderOnCameraChange = (
    */
 
   useFrame(() => {
+    const entity = entityRef.current;
     if (!entity || !isVisible.current) return;
     const world = entity.getWorldTransform().data;
     const proj = entity.camera?.projectionMatrix?.data;
@@ -102,4 +104,6 @@ export const useRenderOnCameraChange = (
       prevProj.current.set(proj);
     }
   });
+
+  return { entity: entityRef };
 };
