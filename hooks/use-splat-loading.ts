@@ -20,7 +20,6 @@ export const useSplatLoading = (
   onReady: (id: number) => void,
   active: boolean,
   opacityOverride: number,
-  delay: number,
 ) => {
   const scriptRef = useRef<LandscapeScript | null>(null);
   const gsplatRef = useRef<PcEntity | null>(null);
