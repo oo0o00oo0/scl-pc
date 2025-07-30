@@ -659,6 +659,26 @@ class CameraControls extends Script {
   updateBaseAngles() {
     this._baseAngles = { x: this._dir.x, y: this._dir.y };
   }
+
+  /**
+   * Set absolute camera position based on normalized screen coordinates
+   * @param {number} normalizedX - Horizontal position (-1 to 1, left to right)
+   * @param {number} normalizedY - Vertical position (-1 to 1, top to bottom)
+   * @param {number} [lerpFactor=0.1] - Interpolation speed (higher = more responsive)
+   */
+  setAbsolutePosition(normalizedX, normalizedY, lerpFactor = 0.1) {
+    console.log("setAbsolutePosition", normalizedX, normalizedY);
+    if (this._orbiting || this._focusing) {
+      return; // Don't apply absolute positioning during active interactions
+    }
+  }
+
+  /**
+   * Reset the absolute positioning center (call when camera position changes significantly)
+   */
+  resetAbsoluteCenter() {
+    this._absoluteCenter = { x: this._dir.x, y: this._dir.y };
+  }
   /**
    * @private
    * @param {PointerEvent} event - The pointer event.
@@ -668,6 +688,8 @@ class CameraControls extends Script {
     if (!this._camera) {
       return;
     }
+
+    console.log("onPointerDown", event);
 
     this._element.setPointerCapture(event.pointerId);
     this._pointerEvents.set(event.pointerId, event);
