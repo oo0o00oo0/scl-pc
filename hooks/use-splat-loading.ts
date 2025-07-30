@@ -39,7 +39,8 @@ export const useSplatLoading = (
       const gsplatInstance = gsplatComponent?.instance;
 
       if (gsplatInstance) {
-        onReady(id);
+        // onReady(id);
+
         app.renderNextFrame = true;
 
         gsplatInstance.sorter.on("updated", () => {
@@ -54,6 +55,8 @@ export const useSplatLoading = (
 
     if (!landscapeScript) return;
 
+    console.log("ACTIVE", active);
+
     // if (!active) {
     if (!load) {
       const handleUnload = () => {
@@ -64,12 +67,15 @@ export const useSplatLoading = (
           app.renderNextFrame = true;
         }
       };
-      landscapeScript.animateToOpacity(0, 1000, () => {
+      landscapeScript.animateToOpacity(0, 400, () => {
         handleUnload();
       });
-    } else {
-      landscapeScript.animateToOpacity(1 * opacityOverride, 1000, () => {
+    } else if (active) {
+      landscapeScript.animateToOpacity(1 * opacityOverride, 400, () => {
         app.renderNextFrame = true;
+      });
+    } else if (!active) {
+      landscapeScript.animateToOpacity(0, 400, () => {
       });
     }
   }, [active, id, splat, load, app, opacityOverride]);

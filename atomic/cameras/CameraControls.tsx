@@ -6,30 +6,14 @@ import { useEffect } from "react";
 // @ts-ignore
 import { CameraControls as CameraControlsScript } from "@/libs/scripts/camera-controls-pc.mjs";
 
-import type { CameraConstraints, CamState } from "@/libs/types/camera.ts";
-import {
-  AZIMUTH_PRESETS,
-  clampAzimuthAngle,
-} from "@/libs/atomic/utils/cameraUtils";
-import { Mat4, Vec2, Vec3, Vec4 } from "playcanvas";
+import type { CamState } from "@/libs/types/camera.ts";
+import { clampAzimuthAngle } from "@/libs/atomic/utils/cameraUtils";
+import { Mat4, Vec2, Vec4 } from "playcanvas";
 import { useRenderOnCameraChange } from "@/libs/hooks/use-render-on-camera-change";
 
-const defaultCameraConstraints: CameraConstraints = {
-  pitchRange: { min: -90, max: 90 },
-  azimuth: AZIMUTH_PRESETS.unlimited(),
-  enableZoom: false,
-};
-
-const defaultCamState: CamState = {
-  position: new Vec3(1, 1, 1),
-  target: new Vec3(0, 0, 0),
-  delay: 0,
-  cameraConstraints: defaultCameraConstraints,
-};
-
 const CameraControls = (
-  { camState = defaultCamState, clearColor, onChange = () => {} }: {
-    camState: CamState | null;
+  { camState, clearColor, onChange = () => {} }: {
+    camState: CamState;
     clearColor: string;
     onChange: (camData: {
       viewProjMatrix: Mat4;
@@ -45,7 +29,7 @@ const CameraControls = (
     target,
     delay = 0,
     cameraConstraints,
-  } = camState || defaultCamState;
+  } = camState || {};
 
   const { entity: entityRef } = useRenderOnCameraChange(onChange);
 
@@ -65,7 +49,6 @@ const CameraControls = (
           Math.min(pitchRange.max, angles.x),
         );
 
-        // Clamp azimuth (Y component) using new system
         angles.y = clampAzimuthAngle(angles.y, azimuth);
       };
 
@@ -79,10 +62,6 @@ const CameraControls = (
         );
       }, delay);
 
-      // Always apply clamping with new system
-      // (no more Infinity check needed)
-
-      // Cleanup: remove the handler
       return () => {
         cameraControlsScript.off("clamp:angles", clampAnglesHandler);
       };
@@ -101,12 +80,13 @@ const CameraControls = (
     <Entity
       ref={entityRef}
       name="camera"
+      position={[position.x, position.y, position.z]}
     >
       <Script
         pitchRange={new Vec2(pitchRange.min, pitchRange.max)}
         enableZoom={enableZoom}
-        enableFly={false}
-        enablePan={false}
+        enableFly={true}
+        enablePan={true}
         enableOrbit={true}
         //
         script={CameraControlsScript}
