@@ -69,7 +69,7 @@ const CameraControls = (
       cameraControlsScript.setGentleMovement(xOffset, yOffset);
     };
 
-        if (isMobile) {
+    if (isMobile) {
       // For mobile, use touchmove with special handling
       const handleTouchMove = (event: TouchEvent) => {
         // Only respond to single finger touches for subtle movement
