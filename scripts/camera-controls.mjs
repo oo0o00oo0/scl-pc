@@ -149,7 +149,7 @@ class CameraControls extends Script {
    * @type {boolean}
    * @private
    */
-  _orbiting = true;
+  _orbiting = false;
 
   /**
    * @type {boolean}
@@ -614,13 +614,50 @@ class CameraControls extends Script {
     return true;
   }
 
-  customEvent(event) {
+  customEvent(dirX, dirY) {
+    console.log("customEvent", dirX, dirY);
     if (this._orbiting) {
       return;
     }
-    const randomYAngle = Math.random() * 40 - 20;
-    this._dir.set(0, randomYAngle, 0);
+    this._dir.set(dirX, dirY, 0);
     this._clampAngles(this._dir);
+  }
+
+  /**
+   * Set gentle camera movement based on mouse position
+   * @param {number} xOffset - Horizontal offset in degrees
+   * @param {number} yOffset - Vertical offset in degrees
+   */
+  setGentleMovement(xOffset, yOffset) {
+    if (this._orbiting || this._focusing) {
+      return; // Don't apply gentle movement during active interactions
+    }
+
+    // Store the base target angles if not set
+    if (!this._baseAngles) {
+      this._baseAngles = { x: this._dir.x, y: this._dir.y };
+    }
+
+    // Apply gentle offset to base angles
+    const targetX = this._baseAngles.x + yOffset;
+    const targetY = this._baseAngles.y + xOffset;
+
+    // Smooth interpolation factor (adjust for responsiveness)
+    const lerpFactor = 0.05; // Lower = smoother, higher = more responsive
+
+    // Smoothly interpolate towards target
+    this._dir.x = this._dir.x + (targetX - this._dir.x) * lerpFactor;
+    this._dir.y = this._dir.y + (targetY - this._dir.y) * lerpFactor;
+
+    // Apply constraints
+    this._clampAngles(this._dir);
+  }
+
+  /**
+   * Update base angles (call this when camera state changes significantly)
+   */
+  updateBaseAngles() {
+    this._baseAngles = { x: this._dir.x, y: this._dir.y };
   }
   /**
    * @private
@@ -1037,6 +1074,9 @@ class CameraControls extends Script {
     if (smooth) {
       this._focusing = true;
     }
+
+    // Update base angles for gentle movement after focusing
+    this.updateBaseAngles();
   }
 
   /**

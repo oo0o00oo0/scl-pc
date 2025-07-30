@@ -36,6 +36,36 @@ const CameraControls = (
   const { pitchRange, azimuth } = cameraConstraints;
 
   useEffect(() => {
+    const scriptComponent = entityRef.current?.script;
+    if (!scriptComponent) return;
+    const cameraControlsScript = scriptComponent?.get(CameraControlsScript);
+    if (!cameraControlsScript) return;
+
+    const handlePassivePointerMove = (event: MouseEvent) => {
+      // Normalize mouse position to [-1, 1] range
+      const mouseX = (event.clientX / window.innerWidth) * 2 - 1; // -1 (left) to 1 (right)
+      const mouseY = (event.clientY / window.innerHeight) * 2 - 1; // -1 (top) to 1 (bottom)
+
+      // Create gentle movement offsets (adjust these values for desired sensitivity)
+      const horizontalSensitivity = 3; // degrees of movement for full mouse range
+      const verticalSensitivity = 2; // degrees of movement for full mouse range
+
+      const xOffset = mouseX * horizontalSensitivity;
+      const yOffset = -mouseY * verticalSensitivity; // Invert Y for natural feel
+
+      // Apply gentle camera movement
+      //@ts-ignore
+      cameraControlsScript.setGentleMovement(xOffset, yOffset);
+    };
+
+    window.addEventListener("pointermove", handlePassivePointerMove);
+
+    return () => {
+      window.removeEventListener("pointermove", handlePassivePointerMove);
+    };
+  }, [cameraConstraints]);
+
+  useEffect(() => {
     if (entityRef.current) {
       const scriptComponent = entityRef.current.script;
       const cameraControlsScript = scriptComponent?.get(CameraControlsScript);
@@ -61,11 +91,6 @@ const CameraControls = (
           position,
         );
       }, delay);
-
-      setInterval(() => {
-        //@ts-ignore
-        cameraControlsScript.customEvent();
-      }, 1000);
 
       return () => {
         cameraControlsScript.off("clamp:angles", clampAnglesHandler);
