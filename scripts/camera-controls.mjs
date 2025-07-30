@@ -614,19 +614,24 @@ class CameraControls extends Script {
     return true;
   }
 
+  customEvent(event) {
+    if (this._orbiting) {
+      return;
+    }
+    const randomYAngle = Math.random() * 40 - 20;
+    this._dir.set(0, randomYAngle, 0);
+    this._clampAngles(this._dir);
+  }
   /**
    * @private
    * @param {PointerEvent} event - The pointer event.
    */
+
   _onPointerDown(event) {
-    // console.log(event.button);
     if (!this._camera) {
       return;
     }
-    if (this.enableOrbit && event.button === 2) {
-      // Block right mouse in orbit mode
-      return;
-    }
+
     this._element.setPointerCapture(event.pointerId);
     this._pointerEvents.set(event.pointerId, event);
 
@@ -634,6 +639,9 @@ class CameraControls extends Script {
     const startMousePan = this._isStartMousePan(event);
     const startFly = this._isStartFly(event);
     const startOrbit = this._isStartOrbit(event);
+
+    console.log("startFly", startFly);
+    console.log("startOrbit", startOrbit);
 
     if (this._focusing) {
       this._cancelSmoothTransform();
@@ -722,6 +730,12 @@ class CameraControls extends Script {
     }
     if (this._dragging) {
       this._dragging = false;
+    }
+    if (this._orbiting) {
+      this._orbiting = false;
+    }
+    if (this._flying) {
+      this._flying = false;
     }
   }
 
@@ -913,20 +927,24 @@ class CameraControls extends Script {
     const ar = dt === -1
       ? 1
       : lerpRate(this._focusing ? this.focusDamping : this.rotateDamping, dt);
+
     const am = dt === -1
       ? 1
       : lerpRate(this._focusing ? this.focusDamping : this.moveDamping, dt);
+
     this._angles.x = math.lerpAngle(
       this._angles.x % 360,
       this._dir.x % 360,
       ar,
     );
+
     this._angles.y = math.lerpAngle(
       this._angles.y % 360,
       this._dir.y % 360,
       ar,
     );
     this._position.lerp(this._position, this._origin, am);
+
     this._baseTransform.setTRS(
       this._position,
       tmpQ1.setFromEulerAngles(this._angles),
@@ -1110,6 +1128,7 @@ class CameraControls extends Script {
     if (!this._flying) {
       this._smoothZoom(dt);
     }
+
     this._smoothTransform(dt);
     this._updateTransform();
   }

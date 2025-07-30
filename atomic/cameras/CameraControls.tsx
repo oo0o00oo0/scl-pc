@@ -33,7 +33,7 @@ const CameraControls = (
 
   const { entity: entityRef } = useRenderOnCameraChange(onChange);
 
-  const { pitchRange, azimuth, enableZoom } = cameraConstraints;
+  const { pitchRange, azimuth } = cameraConstraints;
 
   useEffect(() => {
     if (entityRef.current) {
@@ -62,6 +62,11 @@ const CameraControls = (
         );
       }, delay);
 
+      setInterval(() => {
+        //@ts-ignore
+        cameraControlsScript.customEvent();
+      }, 1000);
+
       return () => {
         cameraControlsScript.off("clamp:angles", clampAnglesHandler);
       };
@@ -84,7 +89,7 @@ const CameraControls = (
     >
       <Script
         pitchRange={new Vec2(pitchRange.min, pitchRange.max)}
-        // enableZoom={enableZoom}
+        enableZoom={true}
         // enableFly={false}
         // enablePan={false}
         // enableOrbit={false}

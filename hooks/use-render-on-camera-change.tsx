@@ -82,8 +82,6 @@ export const useRenderOnCameraChange = (
     }
 
     if (app.renderNextFrame) {
-      console.log("app.renderNextFrame", app.renderNextFrame);
-      // console.log("rendernextframe - use-render-on-camera-change", changed);
       if (entity.camera) {
         const viewProjMatrix = new Mat4();
         viewProjMatrix.copy(entity.camera.projectionMatrix).mul2(

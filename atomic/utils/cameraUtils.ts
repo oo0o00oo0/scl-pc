@@ -115,6 +115,11 @@ export const AZIMUTH_PRESETS = {
     fromAngle: 0,
     toAngle: 90,
   }),
+  backOnly: (range: number = 30): AzimuthConstraint => ({
+    type: "range",
+    center: 180,
+    range,
+  }),
 
   custom: (center: number, range: number): AzimuthConstraint => ({
     type: "range",
