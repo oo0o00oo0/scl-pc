@@ -1,7 +1,7 @@
 import { Entity } from "@playcanvas/react";
 import { Camera, Script } from "@playcanvas/react/components";
 import { useApp } from "@playcanvas/react/hooks";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 //
 // @ts-ignore
 import { CameraControls as CameraControlsScript } from "@/libs/scripts/camera-controls.mjs";
@@ -35,6 +35,9 @@ const CameraControls = (
 
   const { pitchRange, azimuth } = cameraConstraints;
 
+  // Ref to store initial touch position for drag calculations
+  const initialTouchRef = useRef<{ x: number; y: number } | null>(null);
+
   useEffect(() => {
     const scriptComponent = entityRef.current?.script;
     if (!scriptComponent) return;
@@ -46,7 +49,7 @@ const CameraControls = (
 
     // Different sensitivity values for desktop vs mobile
     const sensitivity = isMobile
-      ? { horizontal: -3, vertical: -2.5 } // Reduced sensitivity for mobile
+      ? { horizontal: -13, vertical: -2.5 } // Reduced sensitivity for mobile
       : { horizontal: -6, vertical: -5 }; // Original desktop sensitivity
 
     const handlePassivePointerMove = (event: PointerEvent) => {
@@ -70,27 +73,67 @@ const CameraControls = (
     };
 
     if (isMobile) {
-      // For mobile, use touchmove with special handling
-      const handleTouchMove = (event: TouchEvent) => {
-        // Only respond to single finger touches for subtle movement
+      // Handle touch start to capture initial position
+      const handleTouchStart = (event: TouchEvent) => {
         if (event.touches.length !== 1) return;
 
         const touch = event.touches[0];
-        const touchX = (touch.clientX / window.innerWidth) * 2 - 1;
-        const touchY = (touch.clientY / window.innerHeight) * 2 - 1;
+        initialTouchRef.current = {
+          x: touch.clientX,
+          y: touch.clientY,
+        };
 
-        const xOffset = touchX * sensitivity.horizontal;
-        const yOffset = -touchY * sensitivity.vertical;
+        // Reset base angles for clean movement
+        //@ts-ignore
+        cameraControlsScript.updateBaseAngles();
+      };
+
+      // Handle touch move to calculate offset from initial position
+      const handleTouchMove = (event: TouchEvent) => {
+        // Only respond to single finger touches
+        if (event.touches.length !== 1 || !initialTouchRef.current) return;
+
+        const touch = event.touches[0];
+
+        // Calculate offset from initial touch position
+        const deltaX = touch.clientX - initialTouchRef.current.x;
+        const deltaY = touch.clientY - initialTouchRef.current.y;
+
+        // Convert pixel deltas to degree values (similar to desktop range)
+        // Desktop produces ranges like [-6, 6] and [-5, 5] degrees
+        const maxDragDistance =
+          Math.min(window.innerWidth, window.innerHeight) * 0.3; // 30% of smaller screen dimension
+
+        // Normalize pixel deltas to [-1, 1] range based on max drag distance
+        const normalizedX = Math.max(-1, Math.min(1, deltaX / maxDragDistance));
+        const normalizedY = Math.max(-1, Math.min(1, deltaY / maxDragDistance));
+
+        // Apply sensitivity to get degree values (similar to desktop)
+        const xOffset = normalizedX * sensitivity.horizontal;
+        const yOffset = -normalizedY * sensitivity.vertical; // Invert Y for natural feel
 
         //@ts-ignore
         cameraControlsScript.setGentleMovement(xOffset, yOffset);
       };
 
-      // Add passive touch listener to avoid blocking scrolling
+      // Handle touch end to clear initial position
+      const handleTouchEnd = () => {
+        initialTouchRef.current = null;
+      };
+
+      // Add touch event listeners
+      window.addEventListener("touchstart", handleTouchStart, {
+        passive: true,
+      });
       window.addEventListener("touchmove", handleTouchMove, { passive: true });
+      window.addEventListener("touchend", handleTouchEnd, { passive: true });
+      window.addEventListener("touchcancel", handleTouchEnd, { passive: true });
 
       return () => {
+        window.removeEventListener("touchstart", handleTouchStart);
         window.removeEventListener("touchmove", handleTouchMove);
+        window.removeEventListener("touchend", handleTouchEnd);
+        window.removeEventListener("touchcancel", handleTouchEnd);
       };
     } else {
       // Desktop: use pointer events as before
