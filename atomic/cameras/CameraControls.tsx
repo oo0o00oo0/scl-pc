@@ -41,28 +41,65 @@ const CameraControls = (
     const cameraControlsScript = scriptComponent?.get(CameraControlsScript);
     if (!cameraControlsScript) return;
 
-    const handlePassivePointerMove = (event: MouseEvent) => {
-      // Normalize mouse position to [-1, 1] range
-      const mouseX = (event.clientX / window.innerWidth) * 2 - 1; // -1 (left) to 1 (right)
-      const mouseY = (event.clientY / window.innerHeight) * 2 - 1; // -1 (top) to 1 (bottom)
+    // Detect if device is mobile/touch-capable
+    const isMobile = "ontouchstart" in window || navigator.maxTouchPoints > 0;
 
-      // Create gentle movement offsets (adjust these values for desired sensitivity)
-      const horizontalSensitivity = 3; // degrees of movement for full mouse range
-      const verticalSensitivity = 2; // degrees of movement for full mouse range
+    // Different sensitivity values for desktop vs mobile
+    const sensitivity = isMobile
+      ? { horizontal: -3, vertical: -2.5 } // Reduced sensitivity for mobile
+      : { horizontal: -6, vertical: -5 }; // Original desktop sensitivity
 
-      const xOffset = mouseX * horizontalSensitivity;
-      const yOffset = -mouseY * verticalSensitivity; // Invert Y for natural feel
+    const handlePassivePointerMove = (event: PointerEvent) => {
+      // Skip if this is a touch event and the pointer is down (dragging)
+      // This prevents camera movement during intentional touch interactions
+      if (isMobile && event.pointerType === "touch" && event.pressure > 0) {
+        return;
+      }
+
+      // Normalize pointer position to [-1, 1] range
+      const pointerX = (event.clientX / window.innerWidth) * 2 - 1; // -1 (left) to 1 (right)
+      const pointerY = (event.clientY / window.innerHeight) * 2 - 1; // -1 (top) to 1 (bottom)
+
+      // Create gentle movement offsets with device-appropriate sensitivity
+      const xOffset = pointerX * sensitivity.horizontal;
+      const yOffset = -pointerY * sensitivity.vertical; // Invert Y for natural feel
 
       // Apply gentle camera movement
       //@ts-ignore
       cameraControlsScript.setGentleMovement(xOffset, yOffset);
     };
 
-    window.addEventListener("pointermove", handlePassivePointerMove);
+        if (isMobile) {
+      // For mobile, use touchmove with special handling
+      const handleTouchMove = (event: TouchEvent) => {
+        // Only respond to single finger touches for subtle movement
+        if (event.touches.length !== 1) return;
 
-    return () => {
-      window.removeEventListener("pointermove", handlePassivePointerMove);
-    };
+        const touch = event.touches[0];
+        const touchX = (touch.clientX / window.innerWidth) * 2 - 1;
+        const touchY = (touch.clientY / window.innerHeight) * 2 - 1;
+
+        const xOffset = touchX * sensitivity.horizontal;
+        const yOffset = -touchY * sensitivity.vertical;
+
+        //@ts-ignore
+        cameraControlsScript.setGentleMovement(xOffset, yOffset);
+      };
+
+      // Add passive touch listener to avoid blocking scrolling
+      window.addEventListener("touchmove", handleTouchMove, { passive: true });
+
+      return () => {
+        window.removeEventListener("touchmove", handleTouchMove);
+      };
+    } else {
+      // Desktop: use pointer events as before
+      window.addEventListener("pointermove", handlePassivePointerMove);
+
+      return () => {
+        window.removeEventListener("pointermove", handlePassivePointerMove);
+      };
+    }
   }, [cameraConstraints]);
 
   useEffect(() => {
