@@ -70,7 +70,6 @@ export const useRenderOnCameraChange = (
     if (!entity || !isVisible.current) return;
     const world = entity.getWorldTransform().data;
     const proj = entity.camera?.projectionMatrix?.data;
-
     if (!proj) {
       app.renderNextFrame = true;
       return;
@@ -83,6 +82,7 @@ export const useRenderOnCameraChange = (
     }
 
     if (app.renderNextFrame) {
+      console.log("app.renderNextFrame", app.renderNextFrame);
       // console.log("rendernextframe - use-render-on-camera-change", changed);
       if (entity.camera) {
         const viewProjMatrix = new Mat4();

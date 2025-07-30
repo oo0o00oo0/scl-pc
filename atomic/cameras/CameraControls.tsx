@@ -4,7 +4,7 @@ import { useApp } from "@playcanvas/react/hooks";
 import { useEffect } from "react";
 //
 // @ts-ignore
-import { CameraControls as CameraControlsScript } from "@/libs/scripts/camera-controls-pc.mjs";
+import { CameraControls as CameraControlsScript } from "@/libs/scripts/camera-controls.mjs";
 
 import type { CamState } from "@/libs/types/camera.ts";
 import { clampAzimuthAngle } from "@/libs/atomic/utils/cameraUtils";
@@ -84,10 +84,10 @@ const CameraControls = (
     >
       <Script
         pitchRange={new Vec2(pitchRange.min, pitchRange.max)}
-        enableZoom={enableZoom}
-        enableFly={true}
-        enablePan={true}
-        enableOrbit={true}
+        // enableZoom={enableZoom}
+        // enableFly={false}
+        // enablePan={false}
+        // enableOrbit={false}
         //
         script={CameraControlsScript}
       />

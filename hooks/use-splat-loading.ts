@@ -39,7 +39,7 @@ export const useSplatLoading = (
       const gsplatInstance = gsplatComponent?.instance;
 
       if (gsplatInstance) {
-        // onReady(id);
+        onReady(id);
 
         app.renderNextFrame = true;
 
