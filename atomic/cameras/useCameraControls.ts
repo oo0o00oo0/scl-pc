@@ -2,21 +2,11 @@ import { useEffect, useRef } from "react";
 import type { CamState } from "@/libs/types/camera";
 import { Script, Vec2 } from "playcanvas";
 import { clampAzimuthAngle } from "@/libs/atomic/utils/cameraUtils";
-import { useApp } from "@playcanvas/react/hooks";
 
 const useCameraControls = (
   camState: CamState,
 ) => {
   const scriptRef = useRef<Script>(null);
-  const app = useApp();
-
-  const {
-    position,
-    target,
-    delay = 0,
-    cameraConstraints,
-  } = camState;
-  const { pitchRange, azimuth } = cameraConstraints;
 
   useEffect(() => {
     const cameraControlsScript = scriptRef.current!;
@@ -43,10 +33,19 @@ const useCameraControls = (
         window.removeEventListener("pointermove", handlePassivePointerMove);
       };
     }
-  }, [cameraConstraints]);
+  }, []);
 
   useEffect(() => {
     const cameraControlsScript = scriptRef.current!;
+
+    const {
+      position,
+      target,
+      delay = 0,
+      cameraConstraints,
+    } = camState;
+
+    const { pitchRange, azimuth } = cameraConstraints;
 
     const clampAnglesHandler = (angles: Vec2) => {
       angles.x = Math.max(
@@ -71,13 +70,7 @@ const useCameraControls = (
       cameraControlsScript.off("clamp:angles", clampAnglesHandler);
     };
   }, [
-    app,
     camState,
-    position,
-    target,
-    delay,
-    pitchRange,
-    azimuth,
   ]);
 
   return scriptRef;

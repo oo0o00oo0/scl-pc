@@ -55,8 +55,6 @@ export const useSplatLoading = (
 
     if (!landscapeScript) return;
 
-    console.log("ACTIVE", active);
-
     // if (!active) {
     if (!load) {
       const handleUnload = () => {
@@ -71,12 +69,13 @@ export const useSplatLoading = (
         handleUnload();
       });
     } else if (active) {
-      landscapeScript.animateToOpacity(1 * opacityOverride, 400, () => {
-        app.renderNextFrame = true;
-      });
+      setTimeout(() => {
+        landscapeScript.animateToOpacity(1 * opacityOverride, 400, () => {
+          app.renderNextFrame = true;
+        });
+      }, 400);
     } else if (!active) {
-      landscapeScript.animateToOpacity(0, 400, () => {
-      });
+      landscapeScript.animateToOpacity(0, 400, () => {});
     }
   }, [active, id, splat, load, app, opacityOverride]);
 

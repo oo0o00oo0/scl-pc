@@ -21,13 +21,13 @@ const CameraControls = (
     }) => void;
   },
 ) => {
-  const { entity: entityRef } = useRenderOnCameraChange(onChange);
+  const { entity } = useRenderOnCameraChange(onChange);
 
   const scriptRef = useCameraControls(camState);
 
   return (
     <Entity
-      ref={entityRef}
+      ref={entity}
       name="camera"
     >
       <Script

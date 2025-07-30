@@ -258,7 +258,7 @@ class CameraControls extends Script {
    * more damping. A value of 0 means no damping.
    * @type {number}
    */
-  focusDamping = 0.98;
+  focusDamping = 0.982;
 
   /**
    * @attribute
