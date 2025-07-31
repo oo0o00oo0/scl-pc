@@ -735,7 +735,9 @@ class CameraControls extends Script {
    * @private
    * @param {PointerEvent} event - The pointer event.
    */
+
   _onPointerMove(event) {
+    console.log("IS ORBITING", this._orbiting);
     // console.log(event.button);
     if (this._pointerEvents.size === 0) {
       return;

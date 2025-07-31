@@ -9,28 +9,28 @@ const useCameraControls = (
   const scriptRef = useRef<Script>(null);
 
   useEffect(() => {
-    const cameraControlsScript = scriptRef.current!;
+    // const cameraControlsScript = scriptRef.current!;
 
     const isMobile = "ontouchstart" in window || navigator.maxTouchPoints > 0;
 
     if (!isMobile) {
-      const handlePassivePointerMove = (event: PointerEvent) => {
-        if (isMobile && event.pointerType === "touch" && event.pressure > 0) {
-          return;
-        }
+      // const handlePassivePointerMove = (event: PointerEvent) => {
+      //   if (isMobile && event.pointerType === "touch" && event.pressure > 0) {
+      //     return;
+      //   }
 
-        const pointerX = (event.clientX / window.innerWidth) * 2 - 1;
-        const pointerY = (event.clientY / window.innerHeight) * 2 - 1;
+      //   const pointerX = (event.clientX / window.innerWidth) * 2 - 1;
+      //   const pointerY = (event.clientY / window.innerHeight) * 2 - 1;
 
-        const xOffset = pointerX * -10;
-        const yOffset = -pointerY * -10;
+      //   const xOffset = pointerX * 10;
+      //   const yOffset = -pointerY * 10;
 
-        //@ts-ignore
-        cameraControlsScript.setGentleMovement(xOffset, yOffset);
-      };
-      window.addEventListener("pointermove", handlePassivePointerMove);
+      //   //@ts-ignore
+      //   cameraControlsScript.setGentleMovement(xOffset, yOffset);
+      // };
+      // window.addEventListener("pointermove", handlePassivePointerMove);
       return () => {
-        window.removeEventListener("pointermove", handlePassivePointerMove);
+        // window.removeEventListener("pointermove", handlePassivePointerMove);
       };
     }
   }, []);
