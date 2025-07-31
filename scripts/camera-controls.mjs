@@ -1047,6 +1047,15 @@ class CameraControls extends Script {
     this.entity.setEulerAngles(tmpM1.getEulerAngles());
   }
 
+  interpolateToPoint(start, end, t) {
+    const interpolated = new Vec3();
+    interpolated.lerp(start, end, t);
+
+    console.log("INTERPOLATED", interpolated);
+
+    return interpolated;
+  }
+
   /**
    * Focus the camera on a point.
    *

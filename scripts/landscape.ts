@@ -9,6 +9,7 @@ class LandscapeScript extends Script {
   private animationDuration: number = 50; // milliseconds
   private elapsedTime: number = 0;
   private onComplete: () => void = () => {};
+
   initialize() {
     this.entity.enabled = false;
     // this.entity.on("gsplat:ready", () => {
