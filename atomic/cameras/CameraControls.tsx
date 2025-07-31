@@ -34,6 +34,7 @@ const CameraControls = (
       <Script
         ref={scriptRef}
         script={CameraControlsScript}
+        enableZoom={false}
       />
       <Camera
         nearClip={1}
