@@ -25,6 +25,7 @@ export function useScrollSpy() {
             !entry.isIntersecting && currentIdRef.current ===
               Number(entry.target.getAttribute("data-element-id"))
           ) {
+            console.log("SET DOWN");
             currentIdRef.current =
               Number(entry.target.getAttribute("data-element-id")) - 1;
 
@@ -41,6 +42,7 @@ export function useScrollSpy() {
 
             setActive(currentIdRef.current);
           } else if (entry.isIntersecting) {
+            console.log("SET UP");
             currentIdRef.current = Number(
               entry.target.getAttribute("data-element-id"),
             );

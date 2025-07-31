@@ -76,7 +76,6 @@ const useCameraControls = (
 
     if (domData?.height) {
       currentStartRef.current = scrollPositionRef.current;
-      console.log("domData", domData.height);
     }
 
     const sub = camStore.subscribe(({ scrollPosition }) => {

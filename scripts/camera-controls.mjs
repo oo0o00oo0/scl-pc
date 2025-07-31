@@ -615,7 +615,6 @@ class CameraControls extends Script {
   }
 
   customEvent(dirX, dirY) {
-    console.log("customEvent", dirX, dirY);
     if (this._orbiting) {
       return;
     }
@@ -661,19 +660,6 @@ class CameraControls extends Script {
   }
 
   /**
-   * Set absolute camera position based on normalized screen coordinates
-   * @param {number} normalizedX - Horizontal position (-1 to 1, left to right)
-   * @param {number} normalizedY - Vertical position (-1 to 1, top to bottom)
-   * @param {number} [lerpFactor=0.1] - Interpolation speed (higher = more responsive)
-   */
-  setAbsolutePosition(normalizedX, normalizedY, lerpFactor = 0.1) {
-    console.log("setAbsolutePosition", normalizedX, normalizedY);
-    if (this._orbiting || this._focusing) {
-      return; // Don't apply absolute positioning during active interactions
-    }
-  }
-
-  /**
    * Reset the absolute positioning center (call when camera position changes significantly)
    */
   resetAbsoluteCenter() {
@@ -689,8 +675,6 @@ class CameraControls extends Script {
       return;
     }
 
-    console.log("onPointerDown", event);
-
     this._element.setPointerCapture(event.pointerId);
     this._pointerEvents.set(event.pointerId, event);
 
@@ -698,10 +682,6 @@ class CameraControls extends Script {
     const startMousePan = this._isStartMousePan(event);
     const startFly = this._isStartFly(event);
     const startOrbit = this._isStartOrbit(event);
-
-    console.log("startFly", startFly);
-    console.log("startOrbit", startOrbit);
-
     if (this._focusing) {
       this._cancelSmoothTransform();
       this._focusing = false;
@@ -1045,15 +1025,6 @@ class CameraControls extends Script {
     tmpM1.copy(this._baseTransform).mul(this._cameraTransform);
     this.entity.setPosition(tmpM1.getTranslation());
     this.entity.setEulerAngles(tmpM1.getEulerAngles());
-  }
-
-  interpolateToPoint(start, end, t) {
-    const interpolated = new Vec3();
-    interpolated.lerp(start, end, t);
-
-    console.log("INTERPOLATED", interpolated);
-
-    return interpolated;
   }
 
   /**
