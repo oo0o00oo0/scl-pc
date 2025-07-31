@@ -2,7 +2,8 @@ import { Entity } from "@playcanvas/react";
 import { Camera, Script } from "@playcanvas/react/components";
 //
 // @ts-ignore
-import { CameraControls as CameraControlsScript } from "@/libs/scripts/camera-controls.mjs";
+// import { CameraControls as CameraControlsScript } from "@/libs/scripts/camera-controls.mjs";
+import { CameraControls as CameraControlsScript } from "@/libs/scripts/camera-controls-pc.mjs";
 
 import type { CamState } from "@/libs/types/camera.ts";
 import { Mat4, Vec4 } from "playcanvas";

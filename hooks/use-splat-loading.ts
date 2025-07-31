@@ -51,6 +51,7 @@ export const useSplatLoading = (
   }, [splat, app, id, updateProgress, url]);
 
   useEffect(() => {
+    // console.log(active, id);
     const landscapeScript = scriptRef.current;
 
     if (!landscapeScript) return;
@@ -68,15 +69,21 @@ export const useSplatLoading = (
       landscapeScript.animateToOpacity(0, 400, () => {
         handleUnload();
       });
-    } else if (active) {
+    }
+
+    if (active) {
       setTimeout(() => {
+        console.log("TURN ON SCENE", id);
         landscapeScript.animateToOpacity(1 * opacityOverride, 400, () => {
           app.renderNextFrame = true;
         });
       }, 400);
-    } else if (!active) {
+    } else {
+      console.log("TURN OFF SCENE", id);
       landscapeScript.animateToOpacity(0, 400, () => {});
     }
+
+    console.log("---------");
   }, [active, id, splat, load, app, opacityOverride]);
 
   return {

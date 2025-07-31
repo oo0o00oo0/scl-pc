@@ -948,6 +948,9 @@ class CameraControls extends Script {
    * @param {number} delta - The delta.
    */
   _zoom(delta) {
+    if (!this.enableOrbit && !this.enablePan) {
+      return;
+    }
     if (this._flying) {
       if (this._dragging) {
         return;

@@ -24,7 +24,7 @@ const ZOOM_SCALE_SCENE_MULT = 10;
 const EPSILON = 0.0001;
 
 /**
- * Calculate the lerp rate.
+ * Calculate the lerp rate
  *
  * @param {number} damping - The damping.
  * @param {number} dt - The delta time.
