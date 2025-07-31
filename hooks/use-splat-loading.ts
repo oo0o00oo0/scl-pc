@@ -72,15 +72,14 @@ export const useSplatLoading = (
     }
 
     if (active) {
-      setTimeout(() => {
-        console.log("TURN ON SCENE", id);
-        landscapeScript.animateToOpacity(1 * opacityOverride, 400, () => {
-          app.renderNextFrame = true;
-        });
-      }, 400);
+      landscapeScript.animateToOpacity(1 * opacityOverride, 400, () => {
+        app.renderNextFrame = true;
+      });
+      // }, 400);
     } else {
-      console.log("TURN OFF SCENE", id);
-      landscapeScript.animateToOpacity(0, 400, () => {});
+      setTimeout(() => {
+        landscapeScript.animateToOpacity(0, 400, () => {});
+      });
     }
 
     console.log("---------");
