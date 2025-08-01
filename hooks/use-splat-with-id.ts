@@ -37,6 +37,7 @@ export type FetchAssetOptions = {
    */
   onProgress?: (meta: AssetMeta) => void;
 };
+
 const fetchSplat = async (
   app: Application,
   src: string,
@@ -55,10 +56,11 @@ const fetchSplat = async (
       );
 
       (asset as any).id = src;
+
       app.assets.add(asset);
     }
 
-    const handleLoad = () => {
+    const handleLoaded = () => {
       cleanup();
       onProgress?.({ progress: 1 });
       resolve(asset);
@@ -74,7 +76,6 @@ const fetchSplat = async (
       if (
         typeof totalReceived !== "number" || typeof totalRequired !== "number"
       ) {
-        //  warnOnce('Invalid progress callback parameters');
         return;
       }
 
@@ -87,7 +88,7 @@ const fetchSplat = async (
 
     const cleanup = () => {
       if (onProgress) asset.off("progress", handleProgress);
-      asset.off("load", handleLoad);
+      asset.off("load", handleLoaded);
       asset.off("error", handleError);
     };
 
@@ -96,12 +97,11 @@ const fetchSplat = async (
     }
 
     if (asset.resource) {
-      handleLoad();
+      handleLoaded();
     } else {
-      asset.once("load", handleLoad);
+      asset.once("load", handleLoaded);
       asset.once("error", handleError);
 
-      // Start loading if not already loading
       if (!asset.loading) {
         app.assets.load(asset);
       }
@@ -115,6 +115,7 @@ export const useDelayedSplat = (
   shouldLoad = true,
 ) => {
   const app = useApp();
+
   const queryKey = [app.root?.getGuid(), src, "gsplat"];
 
   const queryOptions: UseQueryOptions<

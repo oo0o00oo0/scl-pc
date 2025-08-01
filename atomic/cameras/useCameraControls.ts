@@ -51,7 +51,8 @@ const useCameraControls = (
     const {
       position,
       target,
-      // delay = 0,
+      isScroll,
+      delay = 0,
       cameraConstraints,
     } = camState;
 
@@ -65,91 +66,65 @@ const useCameraControls = (
 
       angles.y = clampAzimuthAngle(angles.y, azimuth);
     };
-
-    const p1 = currentCamPos.current;
-    const p2 = position;
-
-    const targ = target;
-
     const cameraControlsScript = scriptRef.current!;
     cameraControlsScript.on("clamp:angles", clampAnglesHandler);
 
-    if (domData?.height) {
-      currentStartRef.current = scrollPositionRef.current;
-    }
+    if (isScroll) {
+      const p1 = currentCamPos.current;
+      const p2 = position;
 
-    const sub = camStore.subscribe(({ scrollPosition }) => {
-      scrollPositionRef.current = scrollPosition;
+      const targ = target;
 
-      if (!domData?.height) return;
-
-      if (!domData) return;
-
-      const isUp = domData.direction === "up";
-      const start = currentStartRef.current;
-      const end = domData.height + currentStartRef.current;
-
-      let remapped: number;
-
-      if (isUp) {
-        remapped = 1 - Math.abs(1 - remap(scrollPosition, start, end, 1, 0));
-      } else {
-        remapped = Math.abs(remap(scrollPosition, start, end, 0, 1));
+      if (domData?.height) {
+        currentStartRef.current = scrollPositionRef.current;
       }
 
-      // console.log("REMAP", remapped);
-      //
-      const interpolated = new Vec3();
-      interpolated.lerp(p1, p2, remapped);
-      //@ts-ignore
-      cameraControlsScript.focus(targ, interpolated, true);
-    });
+      const sub = camStore.subscribe(({ scrollPosition }) => {
+        scrollPositionRef.current = scrollPosition;
 
-    currentCamPos.current = camState.position;
+        if (!domData?.height) return;
 
-    return () => {
-      sub();
-      cameraControlsScript.off("clamp:angles", clampAnglesHandler);
-    };
+        if (!domData) return;
+
+        const isUp = domData.direction === "up";
+        const start = currentStartRef.current;
+        const end = domData.height + currentStartRef.current;
+
+        let remapped: number;
+
+        if (isUp) {
+          remapped = 1 - Math.abs(1 - remap(scrollPosition, start, end, 1, 0));
+        } else {
+          remapped = Math.abs(remap(scrollPosition, start, end, 0, 1));
+        }
+
+        const interpolated = new Vec3();
+        interpolated.lerp(p1, p2, remapped);
+        //@ts-ignore
+        cameraControlsScript.focus(targ, interpolated, true);
+      });
+
+      currentCamPos.current = camState.position;
+      return () => {
+        sub();
+        cameraControlsScript.off("clamp:angles", clampAnglesHandler);
+      };
+    } else {
+      cameraControlsScript.on("clamp:angles", clampAnglesHandler);
+
+      setTimeout(() => {
+        //@ts-ignore
+        cameraControlsScript.focus(
+          target,
+          position,
+        );
+      }, delay);
+
+      return () => {
+        cameraControlsScript.off("clamp:angles", clampAnglesHandler);
+      };
+    }
   }, [domData, camState]);
-
-  // useEffect(() => {
-  //   const cameraControlsScript = scriptRef.current!;
-
-  //   const {
-  //     position,
-  //     target,
-  //     delay = 0,
-  //     cameraConstraints,
-  //   } = camState;
-
-  //   const { pitchRange, azimuth } = cameraConstraints;
-
-  //   const clampAnglesHandler = (angles: Vec2) => {
-  //     angles.x = Math.max(
-  //       pitchRange.min,
-  //       Math.min(pitchRange.max, angles.x),
-  //     );
-
-  //     angles.y = clampAzimuthAngle(angles.y, azimuth);
-  //   };
-
-  //   cameraControlsScript.on("clamp:angles", clampAnglesHandler);
-
-  //   setTimeout(() => {
-  //     //@ts-ignore
-  //     cameraControlsScript.focus(
-  //       target,
-  //       position,
-  //     );
-  //   }, delay);
-
-  //   return () => {
-  //     cameraControlsScript.off("clamp:angles", clampAnglesHandler);
-  //   };
-  // }, [
-  //   camState,
-  // ]);
 
   return scriptRef;
 };

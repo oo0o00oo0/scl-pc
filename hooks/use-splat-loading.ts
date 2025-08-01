@@ -51,12 +51,10 @@ export const useSplatLoading = (
   }, [splat, app, id, updateProgress, url]);
 
   useEffect(() => {
-    // console.log(active, id);
     const landscapeScript = scriptRef.current;
 
     if (!landscapeScript) return;
 
-    // if (!active) {
     if (!load) {
       const handleUnload = () => {
         const splatAsset = app.assets.find(url, "gsplat");
