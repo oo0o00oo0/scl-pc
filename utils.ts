@@ -1,5 +1,15 @@
 import { Mat4, Vec3, Vec4 } from "playcanvas";
 
+export const remap = (
+  value: number,
+  inMin: number,
+  inMax: number,
+  outMin: number,
+  outMax: number,
+) => {
+  return outMin + (outMax - outMin) * (value - inMin) / (inMax - inMin);
+};
+
 export const lerpRate = (damping: number, dt: number): number => {
   const t = 1 - Math.pow(damping, dt * 1);
   // Fast ease-in-out - much more subtle curve

@@ -24,7 +24,7 @@ const ZOOM_SCALE_SCENE_MULT = 10;
 const EPSILON = 0.0001;
 
 /**
- * Calculate the lerp rate
+ * Calculate the lerp rate.
  *
  * @param {number} damping - The damping.
  * @param {number} dt - The delta time.
@@ -149,7 +149,7 @@ class CameraControls extends Script {
    * @type {boolean}
    * @private
    */
-  _orbiting = true;
+  _orbiting = false;
 
   /**
    * @type {boolean}
@@ -194,7 +194,8 @@ class CameraControls extends Script {
    * @type {HTMLElement}
    * @private
    */
-  _element = this.app.graphicsDevice.canvas;
+  // _element = this.app.graphicsDevice.canvas;
+  _element = document.getElementById("test");
 
   /**
    * @type {Mat4}
@@ -257,7 +258,7 @@ class CameraControls extends Script {
    * more damping. A value of 0 means no damping.
    * @type {number}
    */
-  focusDamping = 0.98;
+  focusDamping = 0.982;
 
   /**
    * @attribute
@@ -347,8 +348,6 @@ class CameraControls extends Script {
 
   initialize() {
     this._onWheel = this._onWheel.bind(this);
-    this._onKeyDown = this._onKeyDown.bind(this);
-    this._onKeyUp = this._onKeyUp.bind(this);
     this._onPointerDown = this._onPointerDown.bind(this);
     this._onPointerMove = this._onPointerMove.bind(this);
     this._onPointerUp = this._onPointerUp.bind(this);
@@ -479,6 +478,8 @@ class CameraControls extends Script {
     const min = this._pitchRange.x === -360 ? -Infinity : this._pitchRange.x;
     const max = this._pitchRange.y === 360 ? Infinity : this._pitchRange.y;
     angles.x = math.clamp(angles.x, min, max);
+    //??
+    // angles.y = math.clamp(angles.y, -180, 180);
 
     // emit clamp event
     this.fire(CameraControls.EVENT_CLAMP_ANGLES, angles);
@@ -613,18 +614,67 @@ class CameraControls extends Script {
     return true;
   }
 
+  customEvent(dirX, dirY) {
+    if (this._orbiting) {
+      return;
+    }
+    this._dir.set(dirX, dirY, 0);
+    this._clampAngles(this._dir);
+  }
+
+  /**
+   * Set gentle camera movement based on mouse position
+   * @param {number} xOffset - Horizontal offset in degrees
+   * @param {number} yOffset - Vertical offset in degrees
+   */
+  setGentleMovement(xOffset, yOffset) {
+    if (this._orbiting || this._focusing) {
+      return; // Don't apply gentle movement during active interactions
+    }
+
+    // Store the base target angles if not set
+    if (!this._baseAngles) {
+      this._baseAngles = { x: this._dir.x, y: this._dir.y };
+    }
+
+    // Apply gentle offset to base angles
+    const targetX = this._baseAngles.x + yOffset;
+    const targetY = this._baseAngles.y + xOffset;
+
+    // Smooth interpolation factor (adjust for responsiveness)
+    const lerpFactor = 0.05; // Lower = smoother, higher = more responsive
+
+    // Smoothly interpolate towards target
+    this._dir.x = this._dir.x + (targetX - this._dir.x) * lerpFactor;
+    this._dir.y = this._dir.y + (targetY - this._dir.y) * lerpFactor;
+
+    // Apply constraints
+    this._clampAngles(this._dir);
+  }
+
+  /**
+   * Update base angles (call this when camera state changes significantly)
+   */
+  updateBaseAngles() {
+    this._baseAngles = { x: this._dir.x, y: this._dir.y };
+  }
+
+  /**
+   * Reset the absolute positioning center (call when camera position changes significantly)
+   */
+  resetAbsoluteCenter() {
+    this._absoluteCenter = { x: this._dir.x, y: this._dir.y };
+  }
   /**
    * @private
    * @param {PointerEvent} event - The pointer event.
    */
+
   _onPointerDown(event) {
     if (!this._camera) {
       return;
     }
-    if (this.enableOrbit && event.button === 2) {
-      // Block right mouse in orbit mode
-      return;
-    }
+
     this._element.setPointerCapture(event.pointerId);
     this._pointerEvents.set(event.pointerId, event);
 
@@ -632,7 +682,6 @@ class CameraControls extends Script {
     const startMousePan = this._isStartMousePan(event);
     const startFly = this._isStartFly(event);
     const startOrbit = this._isStartOrbit(event);
-
     if (this._focusing) {
       this._cancelSmoothTransform();
       this._focusing = false;
@@ -666,7 +715,10 @@ class CameraControls extends Script {
    * @private
    * @param {PointerEvent} event - The pointer event.
    */
+
   _onPointerMove(event) {
+    console.log("IS ORBITING", this._orbiting);
+    // console.log(event.button);
     if (this._pointerEvents.size === 0) {
       return;
     }
@@ -679,7 +731,6 @@ class CameraControls extends Script {
 
     if (this._pointerEvents.size === 1) {
       if (this._panning) {
-        // mouse pan
         this._pan(tmpVa.set(event.clientX, event.clientY));
       } else if (this._orbiting || this._flying) {
         this._look(event);
@@ -721,6 +772,12 @@ class CameraControls extends Script {
     if (this._dragging) {
       this._dragging = false;
     }
+    if (this._orbiting) {
+      this._orbiting = false;
+    }
+    if (this._flying) {
+      this._flying = false;
+    }
   }
 
   /**
@@ -738,86 +795,13 @@ class CameraControls extends Script {
 
   /**
    * @private
-   * @param {KeyboardEvent} event - The keyboard event.
-   */
-  _onKeyDown(event) {
-    event.stopPropagation();
-    switch (event.key.toLowerCase()) {
-      case "w":
-      case "arrowup":
-        this._key.forward = true;
-        break;
-      case "s":
-      case "arrowdown":
-        this._key.backward = true;
-        break;
-      case "a":
-      case "arrowleft":
-        this._key.left = true;
-        break;
-      case "d":
-      case "arrowright":
-        this._key.right = true;
-        break;
-      case "q":
-        this._key.up = true;
-        break;
-      case "e":
-        this._key.down = true;
-        break;
-      case "shift":
-        this._key.sprint = true;
-        break;
-      case "control":
-        this._key.crouch = true;
-        break;
-    }
-  }
-
-  /**
-   * @private
-   * @param {KeyboardEvent} event - The keyboard event.
-   */
-  _onKeyUp(event) {
-    event.stopPropagation();
-    switch (event.key.toLowerCase()) {
-      case "w":
-      case "arrowup":
-        this._key.forward = false;
-        break;
-      case "s":
-      case "arrowdown":
-        this._key.backward = false;
-        break;
-      case "a":
-      case "arrowleft":
-        this._key.left = false;
-        break;
-      case "d":
-      case "arrowright":
-        this._key.right = false;
-        break;
-      case "q":
-        this._key.up = false;
-        break;
-      case "e":
-        this._key.down = false;
-        break;
-      case "shift":
-        this._key.sprint = false;
-        break;
-      case "control":
-        this._key.crouch = false;
-        break;
-    }
-  }
-
-  /**
-   * @private
    * @param {PointerEvent} event - The pointer event.
    */
   _look(event) {
-    if (event.target !== this.app.graphicsDevice.canvas) {
+    // Allow events from canvas or custom control elements
+    const isValidTarget = event.target === this.app.graphicsDevice.canvas ||
+      event.target === this._element;
+    if (!isValidTarget) {
       return;
     }
     const movementX = event.movementX || 0;
@@ -983,23 +967,28 @@ class CameraControls extends Script {
    * @param {number} dt - The delta time.
    */
   _smoothTransform(dt) {
+    // console.log("SMOOTH TRANSFORM", dt);
     const ar = dt === -1
       ? 1
       : lerpRate(this._focusing ? this.focusDamping : this.rotateDamping, dt);
+
     const am = dt === -1
       ? 1
       : lerpRate(this._focusing ? this.focusDamping : this.moveDamping, dt);
+
     this._angles.x = math.lerpAngle(
       this._angles.x % 360,
       this._dir.x % 360,
       ar,
     );
+
     this._angles.y = math.lerpAngle(
       this._angles.y % 360,
       this._dir.y % 360,
       ar,
     );
     this._position.lerp(this._position, this._origin, am);
+
     this._baseTransform.setTRS(
       this._position,
       tmpQ1.setFromEulerAngles(this._angles),
@@ -1092,6 +1081,9 @@ class CameraControls extends Script {
     if (smooth) {
       this._focusing = true;
     }
+
+    // Update base angles for gentle movement after focusing
+    this.updateBaseAngles();
   }
 
   /**
@@ -1137,10 +1129,6 @@ class CameraControls extends Script {
     this._element.addEventListener("pointermove", this._onPointerMove);
     this._element.addEventListener("pointerup", this._onPointerUp);
     this._element.addEventListener("contextmenu", this._onContextMenu);
-
-    // These can stay on window since they're keyboard events
-    // window.addEventListener("keydown", this._onKeyDown, false);
-    // window.addEventListener("keyup", this._onKeyUp, false);
   }
 
   detach() {
@@ -1148,16 +1136,11 @@ class CameraControls extends Script {
       return;
     }
 
-    // Remove from canvas instead of window
     this._element.removeEventListener("wheel", this._onWheel, PASSIVE);
     this._element.removeEventListener("pointermove", this._onPointerMove);
     this._element.removeEventListener("pointerdown", this._onPointerDown);
     this._element.removeEventListener("pointerup", this._onPointerUp);
     this._element.removeEventListener("contextmenu", this._onContextMenu);
-
-    // Remove keyboard events from window
-    // window.removeEventListener("keydown", this._onKeyDown, false);
-    // window.removeEventListener("keyup", this._onKeyUp, false);
 
     this._camera = null;
 
@@ -1183,10 +1166,6 @@ class CameraControls extends Script {
    * @param {number} dt - The delta time.
    */
   update(dt) {
-    if (this.app.xr?.active) {
-      return;
-    }
-
     if (!this._camera) {
       return;
     }
@@ -1196,6 +1175,7 @@ class CameraControls extends Script {
     if (!this._flying) {
       this._smoothZoom(dt);
     }
+
     this._smoothTransform(dt);
     this._updateTransform();
   }

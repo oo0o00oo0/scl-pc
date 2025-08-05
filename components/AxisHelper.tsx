@@ -22,13 +22,13 @@ const AxisHelper = (
 
   return (
     <Entity position={position} scale={size}>
-      <Entity scale={[100, 0.25, 0.25]}>
+      <Entity position={[50, 0, 0]} scale={[100, 0.25, 0.25]}>
         <Render type="box" material={xMaterial} />
       </Entity>
-      <Entity scale={[0.25, 100, 0.25]}>
+      <Entity position={[0, 50, 0]} scale={[0.25, 100, 0.25]}>
         <Render type="box" material={yMaterial} />
       </Entity>
-      <Entity scale={[0.25, 0.25, 100]}>
+      <Entity position={[0, 0, 50]} scale={[0.25, 0.25, 100]}>
         <Render type="box" material={zMaterial} />
       </Entity>
     </Entity>

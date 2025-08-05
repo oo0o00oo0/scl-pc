@@ -93,7 +93,7 @@ export const HtmlMarker = (
         className="lucide lucide-target-icon lucide-target"
         ref={svgRef}
       >
-        <circle fill={"#3c4c4d7a"} cx="12" cy="12" r="10" />
+        <circle fill={"#3C4C4D"} cx="12" cy="12" r="10" />
         <circle cx="12" cy="12" r="6" />
         <circle cx="12" cy="12" r="2" />
       </svg>

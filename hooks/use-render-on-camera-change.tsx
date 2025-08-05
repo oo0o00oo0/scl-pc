@@ -1,4 +1,4 @@
-import { useApp, useFrame } from "@playcanvas/react/hooks";
+import { useApp, useAppEvent } from "@playcanvas/react/hooks";
 import { Entity as PcEntity, Mat4, Vec4 } from "playcanvas";
 import { useEffect, useRef } from "react";
 
@@ -21,7 +21,6 @@ const nearlyEquals = (
  * @returns {void} This hook does not return a value but updates the rendering state of the application.
  */
 export const useRenderOnCameraChange = (
-  entity: PcEntity | null,
   callback: (camData: {
     viewProjMatrix: Mat4;
     cameraRect: Vec4;
@@ -33,6 +32,8 @@ export const useRenderOnCameraChange = (
   const prevWorld = useRef<Float32Array>(new Float32Array(16));
   const prevProj = useRef<Float32Array>(new Float32Array(16));
   const isVisible = useRef(true);
+
+  const entityRef = useRef<PcEntity | null>(null);
 
   /**
    * This hook ensures that rendering only happens when the canvas is visible in the viewport.
@@ -64,11 +65,11 @@ export const useRenderOnCameraChange = (
    * Don't render if the canvas is not visible regardless of any animations.
    */
 
-  useFrame(() => {
+  useAppEvent("update", () => {
+    const entity = entityRef.current;
     if (!entity || !isVisible.current) return;
     const world = entity.getWorldTransform().data;
     const proj = entity.camera?.projectionMatrix?.data;
-
     if (!proj) {
       app.renderNextFrame = true;
       return;
@@ -81,7 +82,6 @@ export const useRenderOnCameraChange = (
     }
 
     if (app.renderNextFrame) {
-      // console.log("rendernextframe - use-render-on-camera-change", changed);
       if (entity.camera) {
         const viewProjMatrix = new Mat4();
         viewProjMatrix.copy(entity.camera.projectionMatrix).mul2(
@@ -102,4 +102,6 @@ export const useRenderOnCameraChange = (
       prevProj.current.set(proj);
     }
   });
+
+  return { entity: entityRef };
 };

@@ -16,19 +16,12 @@ export const CustomGSplat: FC<GsplatProps> = (
   const app = useApp();
 
   useLayoutEffect(() => {
-    if (asset) {
+    if (asset && assetRef) {
       assetRef.current = (asset.resource as any).instantiate({
         vertex,
       });
 
       parent.addChild(assetRef.current!);
-
-      setTimeout(() => {
-        parent.fire("gsplat:ready", assetRef.current);
-      }, 0);
-
-      // [RENDER:GSPLAT] Disable autoRender for gsplat components
-      app.autoRender = false;
     }
 
     return () => {

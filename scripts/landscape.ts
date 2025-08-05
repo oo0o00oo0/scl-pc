@@ -8,15 +8,16 @@ class LandscapeScript extends Script {
   private startOpacity: number = 0;
   private animationDuration: number = 50; // milliseconds
   private elapsedTime: number = 0;
+  private onComplete: () => void = () => {};
 
   initialize() {
     this.entity.enabled = false;
-    this.entity.on("gsplat:ready", () => {
-      this.currentOpacity = 0;
-      this.targetOpacity = 0;
-      // [RENDER:INIT] Request render after gsplat ready
-      this.app.renderNextFrame = true;
-    });
+    // this.entity.on("gsplat:ready", () => {
+    //   this.currentOpacity = 0;
+    //   this.targetOpacity = 0;
+    //   // [RENDER:INIT] Request render after gsplat ready
+    //   this.app.renderNextFrame = true;
+    // });
   }
 
   update(dt: number) {
@@ -37,11 +38,13 @@ class LandscapeScript extends Script {
     if (reachedTarget) {
       this.animating = false;
       this.currentOpacity = this.targetOpacity;
+      this.onComplete?.();
 
       // If faded out completely, disable the entity
       if (this.targetOpacity === 0) {
         this.entity.enabled = false;
       }
+
       this.app.autoRender = false;
     }
 
@@ -60,8 +63,9 @@ class LandscapeScript extends Script {
   public animateToOpacity(
     targetOpacity: number,
     durationMs: number = 1000,
-    instant: boolean = false,
+    onComplete: () => void,
   ): void {
+    this.onComplete = onComplete;
     this.targetOpacity = Math.max(0, Math.min(1, targetOpacity));
     this.animationDuration = Math.max(16, durationMs);
 
@@ -69,28 +73,9 @@ class LandscapeScript extends Script {
       this.entity.enabled = true;
     }
 
-    if (instant) {
-      this.currentOpacity = this.targetOpacity;
-      this.animating = false;
-
-      const gsplatComponent = this.entity.findComponent("gsplat") as any;
-      const material = gsplatComponent?.material;
-
-      if (material?.setParameter) {
-        material.setParameter("uSplatOpacity", this.currentOpacity);
-      }
-
-      // [RENDER:INSTANT] Request render after instant opacity change
-      this.app.renderNextFrame = true;
-
-      if (this.targetOpacity === 0) {
-        this.entity.enabled = false;
-      }
-    } else {
-      this.startOpacity = this.currentOpacity;
-      this.elapsedTime = 0;
-      this.animating = true;
-    }
+    this.startOpacity = this.currentOpacity;
+    this.elapsedTime = 0;
+    this.animating = true;
   }
 
   public getCurrentOpacity(): number {

@@ -15,9 +15,7 @@ import { useEffect } from "react";
  */
 export const useAsset = (src: string, type: string, props: any) => {
   const app = useApp();
-  const queryKey = [app.root?.getGuid(), src, type, props];
-
-  console.log("QUERY KEY", queryKey);
+  const queryKey = [src, type, props];
 
   // Construct a query for the asset
   return useQuery({
@@ -51,7 +49,10 @@ export const useSplatWithId = (
   shouldLoad = true,
 ) => {
   const app = useApp();
-  const queryKey = [app.root?.getGuid(), src, "gsplat", props, id];
+  const queryKey = [src, "gsplat", JSON.stringify(props), id];
+
+  console.log("useSplatWithId - queryKey:", queryKey);
+  console.log("useSplatWithId - app instance:", app);
 
   const queryOptions: UseQueryOptions<
     Asset | null,
@@ -119,7 +120,7 @@ export const useSplatWithId = (
 // Alternative approach that uses array indexing but still sets proper IDs
 export const useSplatWithArrayIndex = (src: string, id: number, props = {}) => {
   const app = useApp();
-  const queryKey = [app.root?.getGuid(), src, "gsplat", props, id];
+  const queryKey = [src, "gsplat", props, id];
 
   return useQuery({
     queryKey,
