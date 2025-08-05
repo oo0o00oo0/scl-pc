@@ -40,6 +40,8 @@ export const HtmlMarker = (
       screenPos.current,
     );
 
+    // console.log(screenPos.current);
+
     ref.current.style.transform = `translate(${
       screenPos.current.x - size / 2
     }px, ${screenPos.current.y - size / 2}px)`;
