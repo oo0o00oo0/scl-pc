@@ -4,15 +4,24 @@ import { bufferHeight } from "@/state/constants";
 
 type SectionEntry = { id: number; element: HTMLElement };
 
-export function useScrollSpy() {
+export function useScrollSystem() {
   const setActive = sceneStore((s) => s.setActive);
   const setDomData = sceneStore((s) => s.setDomData);
   const sections = useRef<SectionEntry[]>([]);
+  const inc = sceneStore((s) => s.inc);
 
   const register = useCallback((id: number, el: HTMLElement | null) => {
     if (!el) return;
+    // console.log(el.getBoundingClientRect());
     sections.current = sections.current.filter((s) => s.id !== id);
     sections.current.push({ id, element: el });
+
+    let t = 0;
+    sections.current.forEach(({ element }) => {
+      const height = element.getBoundingClientRect().height;
+      t += height;
+    });
+    console.log("t", t + window.innerHeight);
   }, []);
 
   const currentIdRef = useRef<number>(0);
