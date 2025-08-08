@@ -5,7 +5,6 @@ export function useScrollSystem() {
   const containerRef = useRef<HTMLDivElement>(null);
   const setLayoutData = sceneStore((s) => s.setLayoutData);
 
-  // The reusable function to measure and store heights
   const measureHeights = () => {
     const sections = containerRef.current?.querySelectorAll<HTMLDivElement>(
       "div[data-element-id]",
@@ -20,10 +19,8 @@ export function useScrollSystem() {
   };
 
   useEffect(() => {
-    // Initial measure after one frame
     const timeoutId = setTimeout(measureHeights, 0);
 
-    // Measure on window resize
     window.addEventListener("resize", measureHeights);
 
     return () => {

@@ -68,7 +68,7 @@ const useCameraControls = (
     cameraControlsScript.on("clamp:angles", clampAnglesHandler);
     setScriptRef(scriptRef.current);
 
-    if (true) {
+    if (isScroll) {
       // For scroll-enabled sections, interpolate based on scroll progress within the section
       const sub = camStore.subscribe(
         (state) => state.scrollPosition,
