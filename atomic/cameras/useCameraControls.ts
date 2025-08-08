@@ -58,30 +58,34 @@ const useCameraControls = (
         currentStartRef.current = scrollPositionRef.current;
       }
 
-      const sub = camStore.subscribe(({ scrollPosition }) => {
-        scrollPositionRef.current = scrollPosition;
+      const sub = camStore.subscribe(
+        (state) => state.scrollPosition,
+        (scrollPosition: number) => {
+          scrollPositionRef.current = scrollPosition;
 
-        if (!domData?.height) return;
+          if (!domData?.height) return;
 
-        if (!domData) return;
+          if (!domData) return;
 
-        const isUp = domData.direction === "up";
-        const start = currentStartRef.current;
-        const end = domData.height + currentStartRef.current;
+          const isUp = domData.direction === "up";
+          const start = currentStartRef.current;
+          const end = domData.height + currentStartRef.current;
 
-        let remapped: number;
+          let remapped: number;
 
-        if (isUp) {
-          remapped = 1 - Math.abs(1 - remap(scrollPosition, start, end, 1, 0));
-        } else {
-          remapped = Math.abs(remap(scrollPosition, start, end, 0, 1));
-        }
+          if (isUp) {
+            remapped = 1 -
+              Math.abs(1 - remap(scrollPosition, start, end, 1, 0));
+          } else {
+            remapped = Math.abs(remap(scrollPosition, start, end, 0, 1));
+          }
 
-        const interpolated = new Vec3();
-        interpolated.lerp(p1, p2, remapped);
-        //@ts-ignore
-        cameraControlsScript.focus(targ, interpolated, true);
-      });
+          const interpolated = new Vec3();
+          interpolated.lerp(p1, p2, remapped);
+          //@ts-ignore
+          cameraControlsScript.focus(targ, interpolated, true);
+        },
+      );
 
       currentCamPos.current = camState.position;
       return () => {

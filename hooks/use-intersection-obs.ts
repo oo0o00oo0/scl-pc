@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useRef } from "react";
 import sceneStore from "@/state/sceneState";
-import { bufferHeight } from "@/state/constants";
 
 type SectionEntry = { id: number; element: HTMLElement };
 
@@ -8,7 +7,7 @@ export function useScrollSystem() {
   const setActive = sceneStore((s) => s.setActive);
   const setDomData = sceneStore((s) => s.setDomData);
   const sections = useRef<SectionEntry[]>([]);
-  const inc = sceneStore((s) => s.inc);
+  // const inc = sceneStore((s) => s.inc);
 
   const register = useCallback((id: number, el: HTMLElement | null) => {
     if (!el) return;
@@ -65,8 +64,8 @@ export function useScrollSystem() {
         });
       },
       {
-        threshold: 0,
-        rootMargin: `${bufferHeight}px 0px -${bufferHeight}px 0px`,
+        // threshold: 0,
+        // rootMargin: `${bufferHeight}px 0px -${bufferHeight}px 0px`,
       },
     );
     console.log(sections.current);
