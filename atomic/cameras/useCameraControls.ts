@@ -5,6 +5,7 @@ import { clampAzimuthAngle } from "@/libs/atomic/utils/cameraUtils";
 import camStore from "@/state/camStore";
 import { remap } from "@/libs/utils";
 import sceneStore from "@/state/sceneState";
+import { getCurrentSectionIndex } from "@/libs/utils/scrollUtils";
 
 const useCameraControls = (
   camState: CamState,
@@ -18,7 +19,36 @@ const useCameraControls = (
 
   const setScriptRef = camStore((s) => s.setScriptRef);
 
+  const setActive = sceneStore((s) => s.setActive);
   const currentCamPos = useRef<Vec3>(new Vec3(0, 0, 0));
+
+  const layoutData = sceneStore((state) => state.layoutData);
+
+  // Separate effect for section index tracking that doesn't depend on domData/camState
+  useEffect(() => {
+    if (!layoutData?.heights) return;
+
+    const sub = camStore.subscribe(
+      (state) => state.scrollPosition,
+      (scrollPosition: number) => {
+        const currentSectionIndex = getCurrentSectionIndex(
+          scrollPosition,
+          layoutData.heights,
+        );
+        console.log(
+          "scrollPosition:",
+          scrollPosition,
+          "currentSectionIndex:",
+          currentSectionIndex,
+        );
+        setActive(currentSectionIndex);
+      },
+    );
+
+    return () => {
+      sub();
+    };
+  }, [layoutData, setActive]);
 
   useEffect(() => {
     if (!camState) return;
