@@ -16,43 +16,20 @@ const useCameraControls = (
 
   const scrollPositionRef = useRef<number>(0);
 
-  useEffect(() => {
-    // const cameraControlsScript = scriptRef.current!;
-
-    const isMobile = "ontouchstart" in window || navigator.maxTouchPoints > 0;
-
-    if (!isMobile) {
-      // const handlePassivePointerMove = (event: PointerEvent) => {
-      //   if (isMobile && event.pointerType === "touch" && event.pressure > 0) {
-      //     return;
-      //   }
-
-      //   const pointerX = (event.clientX / window.innerWidth) * 2 - 1;
-      //   const pointerY = (event.clientY / window.innerHeight) * 2 - 1;
-
-      //   const xOffset = pointerX * 10;
-      //   const yOffset = -pointerY * 10;
-
-      //   //@ts-ignore
-      //   cameraControlsScript.setGentleMovement(xOffset, yOffset);
-      // };
-      // window.addEventListener("pointermove", handlePassivePointerMove);
-      return () => {
-        // window.removeEventListener("pointermove", handlePassivePointerMove);
-      };
-    }
-  }, []);
+  const setScriptRef = camStore((s) => s.setScriptRef);
 
   const currentCamPos = useRef<Vec3>(new Vec3(0, 0, 0));
 
   useEffect(() => {
     if (!camState) return;
 
+    setScriptRef;
+
     const {
       position,
       target,
-      isScroll,
       delay = 0,
+      isScroll = true,
       cameraConstraints,
     } = camState;
 
@@ -68,6 +45,8 @@ const useCameraControls = (
     };
     const cameraControlsScript = scriptRef.current!;
     cameraControlsScript.on("clamp:angles", clampAnglesHandler);
+
+    setScriptRef(scriptRef.current);
 
     if (isScroll) {
       const p1 = currentCamPos.current;
