@@ -54,9 +54,11 @@ export const useSplatLoading = (
     const landscapeScript = scriptRef.current;
 
     if (!landscapeScript) return;
+    console.log("EFFECT", load, id);
 
     if (!load) {
       const handleUnload = () => {
+        console.log("unload", url);
         const splatAsset = app.assets.find(url, "gsplat");
         if (splatAsset && splatAsset.loaded) {
           splatAsset.unload();
@@ -67,17 +69,17 @@ export const useSplatLoading = (
       landscapeScript.animateToOpacity(0, 400, () => {
         handleUnload();
       });
-    }
-
-    if (active) {
-      landscapeScript.animateToOpacity(1 * opacityOverride, 400, () => {
-        app.renderNextFrame = true;
-      });
-      // }, 400);
     } else {
-      setTimeout(() => {
-        landscapeScript.animateToOpacity(0, 400, () => {});
-      });
+      if (active) {
+        landscapeScript.animateToOpacity(1 * opacityOverride, 400, () => {
+          app.renderNextFrame = true;
+        });
+        // }, 400);
+      } else {
+        setTimeout(() => {
+          landscapeScript.animateToOpacity(0, 400, () => {});
+        });
+      }
     }
 
     console.log("---------");

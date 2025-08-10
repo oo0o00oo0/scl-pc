@@ -8,7 +8,7 @@ import {
   getCameraInterpolationData,
   getCurrentSectionIndex,
 } from "@/libs/utils/scrollUtils";
-import SceneConfig from "@/data/articles/immersive-journey-config";
+import SceneConfig from "@/data/articles/3DUXD-config";
 
 const useCameraControls = (
   camState: CamState,
@@ -30,8 +30,6 @@ const useCameraControls = (
           layoutData.heights,
         );
 
-        console.log("currentSectionIndex", currentSectionIndex);
-
         setActive(currentSectionIndex);
       },
     );
@@ -43,8 +41,6 @@ const useCameraControls = (
 
   useEffect(() => {
     if (!camState || !layoutData?.heights) return;
-
-    console.log(layoutData.heights);
 
     const {
       position,
@@ -80,8 +76,6 @@ const useCameraControls = (
             layoutData.heights,
             camStateTest,
           );
-
-          console.log(scrollPosition);
 
           const { fromCamState, toCamState, progress, shouldInterpolate } =
             interpolationData;
