@@ -194,8 +194,8 @@ class CameraControls extends Script {
    * @type {HTMLElement}
    * @private
    */
-  // _element = this.app.graphicsDevice.canvas;
-  _element = document.getElementById("test");
+  _element = this.app.graphicsDevice.canvas;
+  // _element = document.getElementById("test");
 
   /**
    * @type {Mat4}
@@ -482,6 +482,7 @@ class CameraControls extends Script {
     // angles.y = math.clamp(angles.y, -180, 180);
 
     // emit clamp event
+    console.log("emit clamp event", angles);
     this.fire(CameraControls.EVENT_CLAMP_ANGLES, angles);
   }
 
@@ -623,36 +624,6 @@ class CameraControls extends Script {
   }
 
   /**
-   * Set gentle camera movement based on mouse position
-   * @param {number} xOffset - Horizontal offset in degrees
-   * @param {number} yOffset - Vertical offset in degrees
-   */
-  setGentleMovement(xOffset, yOffset) {
-    if (this._orbiting || this._focusing) {
-      return; // Don't apply gentle movement during active interactions
-    }
-
-    // Store the base target angles if not set
-    if (!this._baseAngles) {
-      this._baseAngles = { x: this._dir.x, y: this._dir.y };
-    }
-
-    // Apply gentle offset to base angles
-    const targetX = this._baseAngles.x + yOffset;
-    const targetY = this._baseAngles.y + xOffset;
-
-    // Smooth interpolation factor (adjust for responsiveness)
-    const lerpFactor = 0.05; // Lower = smoother, higher = more responsive
-
-    // Smoothly interpolate towards target
-    this._dir.x = this._dir.x + (targetX - this._dir.x) * lerpFactor;
-    this._dir.y = this._dir.y + (targetY - this._dir.y) * lerpFactor;
-
-    // Apply constraints
-    this._clampAngles(this._dir);
-  }
-
-  /**
    * Update base angles (call this when camera state changes significantly)
    */
   updateBaseAngles() {
@@ -717,8 +688,6 @@ class CameraControls extends Script {
    */
 
   _onPointerMove(event) {
-    console.log("IS ORBITING", this._orbiting);
-    // console.log(event.button);
     if (this._pointerEvents.size === 0) {
       return;
     }
@@ -1166,6 +1135,7 @@ class CameraControls extends Script {
    * @param {number} dt - The delta time.
    */
   update(dt) {
+    // console.log("this._focusing", this._focusing);
     if (!this._camera) {
       return;
     }

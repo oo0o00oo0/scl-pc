@@ -4,12 +4,13 @@ import { Script, Vec2 } from "playcanvas";
 import { clampAzimuthAngle } from "@/libs/atomic/utils/cameraUtils";
 
 const useCameraControls = (
-  camState: CamState | null,
+  camState: CamState,
 ) => {
   const scriptRef = useRef<Script>(null);
 
   useEffect(() => {
     if (!camState) return;
+    const cameraControlsScript = scriptRef.current!;
 
     const {
       position,
@@ -18,23 +19,25 @@ const useCameraControls = (
       cameraConstraints,
     } = camState;
 
+    setTimeout(() => {
+      //@ts-ignore
+      cameraControlsScript.focus(target, position);
+    }, delay);
+
     const { pitchRange, azimuth } = cameraConstraints;
+
+    if (!pitchRange || !azimuth) return;
 
     const clampAnglesHandler = (angles: Vec2) => {
       angles.x = Math.max(
         pitchRange.min,
         Math.min(pitchRange.max, angles.x),
       );
+
       angles.y = clampAzimuthAngle(angles.y, azimuth);
     };
 
-    const cameraControlsScript = scriptRef.current!;
     cameraControlsScript.on("clamp:angles", clampAnglesHandler);
-
-    setTimeout(() => {
-      //@ts-ignore
-      cameraControlsScript.focus(target, position);
-    }, delay);
 
     return () => {
       cameraControlsScript.off("clamp:angles", clampAnglesHandler);

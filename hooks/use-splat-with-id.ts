@@ -41,7 +41,7 @@ export type FetchAssetOptions = {
 const fetchSplat = async (
   app: Application,
   src: string,
-  onProgress?: (meta: AssetMeta) => void,
+  onProgress?: (meta: AssetMeta, key: string) => void,
 ): Promise<Asset> => {
   return new Promise((resolve, reject) => {
     let propsKey = src;
@@ -55,14 +55,14 @@ const fetchSplat = async (
         { url: src },
       );
 
-      (asset as any).id = src;
+      (asset as any).id = propsKey;
 
       app.assets.add(asset);
     }
 
     const handleLoaded = () => {
       cleanup();
-      onProgress?.({ progress: 1 });
+      onProgress?.({ progress: 1 }, propsKey);
       resolve(asset);
     };
 
@@ -83,7 +83,7 @@ const fetchSplat = async (
         progress: totalReceived / totalRequired,
         totalReceived,
         totalRequired,
-      });
+      }, propsKey);
     };
 
     const cleanup = () => {
@@ -111,8 +111,8 @@ const fetchSplat = async (
 
 export const useDelayedSplat = (
   src: string,
-  onProgress?: (meta: AssetMeta) => void,
   shouldLoad = true,
+  onProgress?: (meta: AssetMeta, key: string) => void,
 ) => {
   const app = useApp();
 

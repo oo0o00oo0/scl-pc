@@ -13,11 +13,10 @@ type GSplatComponent = {
 };
 
 export const useSplatLoading = (
-  id: number,
   url: string,
   load: boolean,
-  updateProgress: (meta: AssetMeta) => void,
-  onReady: (id: number) => void,
+  updateProgress: (meta: AssetMeta, key: string) => void,
+  onReady: (url: string) => void,
   active: boolean,
   opacityOverride: number,
 ) => {
@@ -26,7 +25,7 @@ export const useSplatLoading = (
 
   const app = useApp();
 
-  const { data: splat } = useDelayedSplat(url, updateProgress, load);
+  const { data: splat } = useDelayedSplat(url, load, updateProgress);
 
   useEffect(() => {
     if (splat) {
@@ -39,7 +38,7 @@ export const useSplatLoading = (
       const gsplatInstance = gsplatComponent?.instance;
 
       if (gsplatInstance) {
-        onReady(id);
+        onReady(url);
 
         app.renderNextFrame = true;
 
@@ -48,17 +47,17 @@ export const useSplatLoading = (
         });
       }
     }
-  }, [splat, app, id, updateProgress, url]);
+  }, [splat, app, updateProgress, url]);
 
   useEffect(() => {
     const landscapeScript = scriptRef.current;
 
     if (!landscapeScript) return;
-    console.log("EFFECT", load, id);
+    // console.log("EFFECT", load, id);
 
     if (!load) {
       const handleUnload = () => {
-        console.log("unload", url);
+        // console.log("unload", url);
         const splatAsset = app.assets.find(url, "gsplat");
         if (splatAsset && splatAsset.loaded) {
           splatAsset.unload();
@@ -82,8 +81,8 @@ export const useSplatLoading = (
       }
     }
 
-    console.log("---------");
-  }, [active, id, splat, load, app, opacityOverride]);
+    // console.log("---------");
+  }, [active, splat, load, app, opacityOverride]);
 
   return {
     splat,

@@ -42,47 +42,6 @@ export function clampAzimuthAngle(
     return normalizeAngle(center + clampedDiff);
   }
 
-  if (constraint.type === "sector") {
-    const fromAngle = constraint.fromAngle ?? -45;
-    const toAngle = constraint.toAngle ?? 45;
-
-    // Normalize all angles
-    const normalizedAngle = normalizeAngle(angle);
-    const normalizedFrom = normalizeAngle(fromAngle);
-    const normalizedTo = normalizeAngle(toAngle);
-
-    // Handle sector that crosses 180/-180 boundary
-    if (normalizedFrom > normalizedTo) {
-      // Sector crosses the boundary (e.g., from 170° to -170°)
-      if (
-        normalizedAngle >= normalizedFrom || normalizedAngle <= normalizedTo
-      ) {
-        return normalizedAngle; // Within sector
-      }
-
-      // Find closest boundary
-      const distToFrom = Math.abs(
-        angleDifference(normalizedAngle, normalizedFrom),
-      );
-      const distToTo = Math.abs(angleDifference(normalizedAngle, normalizedTo));
-
-      return distToFrom < distToTo ? normalizedFrom : normalizedTo;
-    } else {
-      // Normal sector (e.g., from -45° to 45°)
-      if (
-        normalizedAngle >= normalizedFrom && normalizedAngle <= normalizedTo
-      ) {
-        return normalizedAngle; // Within sector
-      }
-
-      // Clamp to closest boundary
-      const distToFrom = Math.abs(normalizedAngle - normalizedFrom);
-      const distToTo = Math.abs(normalizedAngle - normalizedTo);
-
-      return distToFrom < distToTo ? normalizedFrom : normalizedTo;
-    }
-  }
-
   return angle;
 }
 
@@ -91,35 +50,6 @@ export function clampAzimuthAngle(
  */
 export const AZIMUTH_PRESETS = {
   unlimited: (): AzimuthConstraint => ({ type: "unlimited" }),
-
-  frontOnly: (range: number = 30): AzimuthConstraint => ({
-    type: "range",
-    center: 0,
-    range,
-  }),
-
-  leftRight: (range: number = 90): AzimuthConstraint => ({
-    type: "range",
-    center: 0,
-    range,
-  }),
-
-  frontLeft: (): AzimuthConstraint => ({
-    type: "sector",
-    fromAngle: -90,
-    toAngle: 0,
-  }),
-
-  frontRight: (): AzimuthConstraint => ({
-    type: "sector",
-    fromAngle: 0,
-    toAngle: 90,
-  }),
-  backOnly: (range: number = 30): AzimuthConstraint => ({
-    type: "range",
-    center: 180,
-    range,
-  }),
 
   custom: (center: number, range: number): AzimuthConstraint => ({
     type: "range",

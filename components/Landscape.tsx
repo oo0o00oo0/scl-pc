@@ -8,7 +8,6 @@ import { useSplatLoading } from "../hooks/use-splat-loading";
 import { type AssetMeta } from "../hooks/use-splat-with-id";
 
 const Landscape = ({
-  id,
   url,
   active,
   updateProgress,
@@ -18,19 +17,17 @@ const Landscape = ({
   load = false,
   opacityOverride = 1,
 }: {
-  id: number;
   active: boolean;
-  updateProgress: (meta: AssetMeta) => void;
+  updateProgress: (meta: AssetMeta, key: string) => void;
   url: string;
   load: boolean;
-  onReady: (id: number) => void;
+  onReady: (url: string) => void;
   delay?: number;
   position?: Vec3;
   rotation?: Vec3;
   opacityOverride?: number;
 }) => {
   const { splat, gsplatRef, scriptRef } = useSplatLoading(
-    id,
     url,
     load,
     updateProgress,
@@ -47,7 +44,6 @@ const Landscape = ({
       ref={gsplatRef}
     >
       <CustomGSplat
-        id={id}
         asset={splat as Asset}
       />
       <ScriptComponent ref={scriptRef} script={LandscapeScript} />
