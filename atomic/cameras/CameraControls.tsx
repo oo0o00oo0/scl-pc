@@ -3,16 +3,17 @@ import { Camera, Script } from "@playcanvas/react/components";
 // @ts-ignore
 import { CameraControls as CameraControlsScript } from "@/libs/scripts/camera-controls.mjs";
 
+console.log("CameraControlsScript", CameraControlsScript);
+
 import type { CamState } from "@/libs/types/camera.ts";
 import { Mat4, Vec4 } from "playcanvas";
 import { useRenderOnCameraChange } from "@/libs/hooks/use-render-on-camera-change";
 import useCameraControls from "./useCameraControls";
-import { Color } from "playcanvas";
 
 const CameraControls = (
   { camState, clearColor, onChange = () => {} }: {
     camState: CamState;
-    clearColor: Color;
+    clearColor: string;
     onChange: (camData: {
       viewProjMatrix: Mat4;
       cameraRect: Vec4;
@@ -38,7 +39,7 @@ const CameraControls = (
       <Camera
         nearClip={1}
         farClip={100}
-        clearColor={"#0000000"}
+        clearColor={clearColor}
       />
     </Entity>
   );
