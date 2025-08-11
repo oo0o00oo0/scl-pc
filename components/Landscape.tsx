@@ -13,6 +13,8 @@ const Landscape = ({
   onReady,
   load = false,
   transform,
+  priority = "normal",
+  useCameraAwareLoading = true,
 }: {
   active: boolean;
   updateProgress: (meta: AssetMeta, key: string) => void;
@@ -26,6 +28,8 @@ const Landscape = ({
     scale?: [number, number, number];
   };
   opacityOverride?: number;
+  priority?: "low" | "normal" | "high";
+  useCameraAwareLoading?: boolean;
 }) => {
   const { splat, gsplatRef, scriptRef } = useSplatLoading(
     url,
@@ -33,6 +37,8 @@ const Landscape = ({
     updateProgress,
     onReady,
     active,
+    priority,
+    useCameraAwareLoading,
   );
 
   return (

@@ -3,6 +3,9 @@ import { type AssetMeta, useDelayedSplat } from "./use-splat-with-id";
 import { useApp } from "@playcanvas/react/hooks";
 import { Entity as PcEntity } from "playcanvas";
 import type LandscapeScript from "../scripts/landscape";
+import { usePausableLoading } from "./use-pausable-loading";
+import { useCameraInteractionState } from "./use-camera-interaction-state";
+import camStore from "@/state/camStore";
 
 type GSplatComponent = {
   instance: {
@@ -18,15 +21,49 @@ export const useSplatLoading = (
   updateProgress: (meta: AssetMeta, key: string) => void,
   onReady: (url: string) => void,
   active: boolean,
+  priority: "low" | "normal" | "high" = "normal",
+  useCameraAwareLoading: boolean = true,
 ) => {
   const scriptRef = useRef<LandscapeScript | null>(null);
   const gsplatRef = useRef<PcEntity | null>(null);
 
   const app = useApp();
+  const cameraEntity = camStore((state) => state.cameraEntity);
 
   const [hasLoaded, setHasLoaded] = useState(false);
 
-  const { data: splat } = useDelayedSplat(url, load, updateProgress);
+  // Use camera interaction state for smart loading
+  const cameraState = useCameraInteractionState(
+    useCameraAwareLoading ? cameraEntity : null,
+    1e-4, // movement threshold
+    800, // wait 800ms after movement stops
+  );
+
+  // Choose loading strategy based on configuration
+  const { data: pausableSplat } = usePausableLoading(
+    url,
+    {
+      enabled: load && useCameraAwareLoading,
+      isSafeToLoad: cameraState.isSafeToLoad,
+      maxPauseTime: priority === "high"
+        ? 2000
+        : priority === "normal"
+        ? 5000
+        : 10000,
+      priority,
+    },
+    updateProgress,
+    app,
+  );
+
+  const { data: regularSplat } = useDelayedSplat(
+    url,
+    load && !useCameraAwareLoading,
+    updateProgress,
+  );
+
+  // Use the appropriate splat based on loading strategy
+  const splat = useCameraAwareLoading ? pausableSplat : regularSplat;
 
   useEffect(() => {
     if (splat) {
