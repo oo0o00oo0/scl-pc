@@ -28,11 +28,10 @@ const useCameraControls = (
 
       angles.y = clampAzimuthAngle(angles.y, azimuth);
     };
+    cameraControlsScript.on("clamp:angles", clampAnglesHandler);
     setTimeout(() => {
       //@ts-ignore
       cameraControlsScript.focus(target, position);
-
-      cameraControlsScript.on("clamp:angles", clampAnglesHandler);
     }, 550);
 
     return () => {

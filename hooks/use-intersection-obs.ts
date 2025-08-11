@@ -1,33 +1,33 @@
-import { useEffect, useRef } from "react";
-import sceneStore from "@/state/sceneState";
+// import { useEffect, useRef } from "react";
+// import sceneStore from "@/state/sceneState";
 
-export function useScrollSystem() {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const setLayoutData = sceneStore((s) => s.setLayoutData);
+// export function useScrollSystem() {
+//   const containerRef = useRef<HTMLDivElement>(null);
+//   const setLayoutData = sceneStore((s) => s.setLayoutData);
 
-  const measureHeights = () => {
-    const sections = containerRef.current?.querySelectorAll<HTMLDivElement>(
-      "div[data-element-id]",
-    );
-    if (!sections) return;
+//   const measureHeights = () => {
+//     const sections = containerRef.current?.querySelectorAll<HTMLDivElement>(
+//       "div[data-element-id]",
+//     );
+//     if (!sections) return;
 
-    const heights = Array.from(sections).map((section) =>
-      section.getBoundingClientRect().height
-    );
+//     const heights = Array.from(sections).map((section) =>
+//       section.getBoundingClientRect().height
+//     );
 
-    setLayoutData({ heights });
-  };
+//     setLayoutData({ heights });
+//   };
 
-  useEffect(() => {
-    const timeoutId = setTimeout(measureHeights, 0);
+//   useEffect(() => {
+//     const timeoutId = setTimeout(measureHeights, 0);
 
-    window.addEventListener("resize", measureHeights);
+//     window.addEventListener("resize", measureHeights);
 
-    return () => {
-      clearTimeout(timeoutId);
-      window.removeEventListener("resize", measureHeights);
-    };
-  }, []);
+//     return () => {
+//       clearTimeout(timeoutId);
+//       window.removeEventListener("resize", measureHeights);
+//     };
+//   }, []);
 
-  return { containerRef };
-}
+//   return { containerRef };
+// }

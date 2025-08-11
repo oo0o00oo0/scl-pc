@@ -53,7 +53,6 @@ export const useSplatLoading = (
     const landscapeScript = scriptRef.current;
 
     if (!landscapeScript) return;
-    // console.log("EFFECT", load, id);
 
     if (!load) {
       const handleUnload = () => {
@@ -75,8 +74,7 @@ export const useSplatLoading = (
           landscapeScript.animateToOpacity(1 * opacityOverride, 400, () => {
             app.renderNextFrame = true;
           });
-        }, 1000);
-        // }, 400);
+        }, 2000);
       } else {
         setTimeout(() => {
           landscapeScript.animateToOpacity(0, 400, () => {});
