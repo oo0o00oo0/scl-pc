@@ -38,6 +38,14 @@ export const lerpRate = (damping, dt) => {
   return t < 0.5 ? 2 * t * t : 1 - 2 * (1 - t) * (1 - t);
 };
 
+/**
+ * Helper easing function for cubic ease-in-out
+ * @param {number} t - Time parameter (0 to 1)
+ * @returns {number} Eased value
+ */
+const easeInOutCubic = (t) =>
+  t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+
 class CameraControls extends Script {
   /**
    * Fired to clamp the position (Vec3).
@@ -176,6 +184,36 @@ class CameraControls extends Script {
   _focusing = false;
 
   /**
+   * @type {number}
+   * @private
+   */
+  _focusT = 0;
+
+  /**
+   * @type {number}
+   * @private
+   */
+  _focusDur = 0.8;
+
+  /**
+   * @type {Vec3}
+   * @private
+   */
+  _focusStartPos = new Vec3();
+
+  /**
+   * @type {Vec2}
+   * @private
+   */
+  _focusStartAngles = new Vec2();
+
+  /**
+   * @type {number}
+   * @private
+   */
+  _focusStartZoom = 0;
+
+  /**
    * @type {Record<string, boolean>}
    * @private
    */
@@ -259,7 +297,10 @@ class CameraControls extends Script {
    * @type {number}
    */
   // focusDamping = 0.982;
-  focusDamping = 0.985;
+  focusDamping = 0.99;
+
+  /** @attribute @title Focus Duration @type {number} */
+  focusDuration = 1.6;
 
   /**
    * @attribute
@@ -1006,7 +1047,6 @@ class CameraControls extends Script {
    * @param {boolean} [smooth] - Whether to smooth the focus.
    */
   focus(point, start, smooth = true) {
-    console.log("FOCUS");
     if (!this._camera) {
       return;
     }
@@ -1052,6 +1092,13 @@ class CameraControls extends Script {
 
     if (smooth) {
       this._focusing = true;
+      this._focusT = 0;
+      this._focusDur = this.focusDuration;
+
+      // snapshot current values as the tween start
+      this._focusStartPos.copy(this._position);
+      this._focusStartAngles.set(this._angles.x, this._angles.y);
+      this._focusStartZoom = this._cameraDist;
     }
 
     // Update base angles for gentle movement after focusing
@@ -1143,8 +1190,35 @@ class CameraControls extends Script {
       return;
     }
 
+    // normal WASD move still allowed
     this._move(dt);
 
+    if (this._focusing) {
+      // time-normalized tween 0..1
+      this._focusT = Math.min(this._focusT + dt, this._focusDur);
+      const s = this._focusT / this._focusDur;
+      const e = easeInOutCubic(s);
+
+      // interpolate angles, pos, and zoom with the same 'e'
+      this._angles.x = math.lerpAngle(this._focusStartAngles.x, this._dir.x, e);
+      this._angles.y = math.lerpAngle(this._focusStartAngles.y, this._dir.y, e);
+      this._position.lerp(this._focusStartPos, this._origin, e);
+      this._cameraDist = math.lerp(this._focusStartZoom, this._zoomDist, e);
+
+      // build transforms directly (skip damping paths)
+      this._baseTransform.setTRS(
+        this._position,
+        tmpQ1.setFromEulerAngles(this._angles),
+        Vec3.ONE,
+      );
+      this._cameraTransform.setTranslate(0, 0, this._cameraDist);
+      this._updateTransform();
+
+      if (s >= 1) this._focusing = false;
+      return; // don't run the damping branch this frame
+    }
+
+    // existing behavior when not focusing
     if (!this._flying) {
       this._smoothZoom(dt);
     }

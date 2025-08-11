@@ -96,7 +96,7 @@ const fetchSplat = async (
       asset.on("progress", handleProgress);
     }
 
-    if (asset.resource) {
+    if (asset.loaded) {
       handleLoaded();
     } else {
       asset.once("load", handleLoaded);

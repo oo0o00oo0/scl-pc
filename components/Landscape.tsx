@@ -12,7 +12,6 @@ const Landscape = ({
   updateProgress,
   onReady,
   load = false,
-  opacityOverride = 1,
   transform,
 }: {
   active: boolean;
@@ -34,14 +33,13 @@ const Landscape = ({
     updateProgress,
     onReady,
     active,
-    opacityOverride,
   );
 
   return (
     <Entity
-      position={transform?.position}
-      rotation={transform?.rotation}
-      scale={transform?.scale}
+      position={transform?.position || [0, 0, 0]}
+      rotation={transform?.rotation || [0, 0, 0]}
+      scale={transform?.scale || [1, 1, 1]}
       name="splat"
       ref={gsplatRef}
     >

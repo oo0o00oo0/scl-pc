@@ -10,6 +10,10 @@ class LandscapeScript extends Script {
   private elapsedTime: number = 0;
   private onComplete: () => void = () => {};
 
+  get opacity() {
+    return this.currentOpacity;
+  }
+
   initialize() {
     this.entity.enabled = false;
     // this.entity.on("gsplat:ready", () => {

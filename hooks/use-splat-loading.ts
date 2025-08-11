@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { type AssetMeta, useDelayedSplat } from "./use-splat-with-id";
 import { useApp } from "@playcanvas/react/hooks";
 import { Entity as PcEntity } from "playcanvas";
@@ -18,12 +18,13 @@ export const useSplatLoading = (
   updateProgress: (meta: AssetMeta, key: string) => void,
   onReady: (url: string) => void,
   active: boolean,
-  opacityOverride: number,
 ) => {
   const scriptRef = useRef<LandscapeScript | null>(null);
   const gsplatRef = useRef<PcEntity | null>(null);
 
   const app = useApp();
+
+  const [hasLoaded, setHasLoaded] = useState(false);
 
   const { data: splat } = useDelayedSplat(url, load, updateProgress);
 
@@ -38,52 +39,53 @@ export const useSplatLoading = (
       const gsplatInstance = gsplatComponent?.instance;
 
       if (gsplatInstance) {
-        onReady(url);
-
-        app.renderNextFrame = true;
+        setHasLoaded(true);
 
         gsplatInstance.sorter.on("updated", () => {
           app.renderNextFrame = true;
         });
       }
     }
-  }, [splat, app, updateProgress, url]);
+  }, [splat, app, url]);
 
   useEffect(() => {
+    // console.log("RERAN", url.split("/").pop());
     const landscapeScript = scriptRef.current;
+
+    const currentOpacity = landscapeScript?.opacity;
 
     if (!landscapeScript) return;
 
-    if (!load) {
+    if (!load && hasLoaded) {
+      console.log("unload", url.split("/").pop());
       const handleUnload = () => {
-        const splatAsset = app.assets.find(url, "gsplat");
+        const splatAsset = splat;
         if (splatAsset && splatAsset.loaded) {
           splatAsset.unload();
           app.assets.remove(splatAsset);
-          app.renderNextFrame = true;
         }
+        setHasLoaded(false);
       };
-      setTimeout(() => {
-        landscapeScript.animateToOpacity(0, 200, () => {
-          handleUnload();
-        });
-      }, 0);
+      landscapeScript.animateToOpacity(0, 300, () => {
+        console.log("ANIMATE TO OFF FROM UNLOAD", url.split("/").pop());
+        handleUnload();
+      });
     } else {
       if (active) {
         setTimeout(() => {
-          landscapeScript.animateToOpacity(1 * opacityOverride, 400, () => {
-            app.renderNextFrame = true;
+          console.log("animate to on from active", url.split("/").pop());
+          landscapeScript.animateToOpacity(1, 800, () => {
+            onReady(url);
           });
-        }, 800);
-      } else {
+        }, 500);
+      } else if (currentOpacity !== 0) {
+        console.log("animate to off from not active", url.split("/").pop());
         setTimeout(() => {
-          landscapeScript.animateToOpacity(0, 400, () => {});
-        }, 0);
+          landscapeScript.animateToOpacity(0, 700, () => {});
+        }, 100);
       }
     }
-
-    // console.log("---------");
-  }, [active, splat, load, app, opacityOverride]);
+  }, [active, splat, load, app, url, hasLoaded]);
 
   return {
     splat,
