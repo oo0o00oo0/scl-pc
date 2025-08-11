@@ -74,7 +74,7 @@ export const useSplatLoading = (
           landscapeScript.animateToOpacity(1 * opacityOverride, 400, () => {
             app.renderNextFrame = true;
           });
-        }, 2000);
+        }, 800);
       } else {
         setTimeout(() => {
           landscapeScript.animateToOpacity(0, 400, () => {});
