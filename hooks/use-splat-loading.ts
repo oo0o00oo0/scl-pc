@@ -61,24 +61,8 @@ export const useSplatLoading = (
         splatAsset.unload();
         app.assets.remove(splatAsset);
       }
-      // setHasLoaded(false);
     };
 
-    // if (!load && hasLoaded && currentOpacity !== 0) {
-    //   console.log("unload", url.split("/").pop());
-    //   const handleUnload = () => {
-    //     const splatAsset = splat;
-    //     if (splatAsset && splatAsset.loaded) {
-    //       splatAsset.unload();
-    //       app.assets.remove(splatAsset);
-    //     }
-    //     setHasLoaded(false);
-    //   };
-    //   landscapeScript.animateToOpacity(0, 300, () => {
-    //     console.log("ANIMATE TO OFF FROM UNLOAD", url.split("/").pop());
-    //     handleUnload();
-    //   });
-    // } else {
     if (active) {
       setTimeout(() => {
         console.log("animate to on from active", url.split("/").pop());
@@ -86,7 +70,7 @@ export const useSplatLoading = (
           onReady(url);
         });
       }, 800);
-    } else if (currentOpacity !== 0) {
+    } else if (currentOpacity === 1) {
       console.log("animate to off from not active", url.split("/").pop());
       setTimeout(() => {
         landscapeScript.animateToOpacity(0, 1000, () => {
@@ -94,7 +78,6 @@ export const useSplatLoading = (
         });
       }, 0);
     }
-    // }
   }, [active, splat, load, app, url, hasLoaded]);
 
   return {
