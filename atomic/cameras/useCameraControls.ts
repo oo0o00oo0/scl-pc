@@ -15,20 +15,12 @@ const useCameraControls = (
     const {
       position,
       target,
-      delay = 0,
       cameraConstraints,
     } = camState;
-
-    setTimeout(() => {
-      //@ts-ignore
-      cameraControlsScript.focus(target, position);
-    }, delay);
-
     const { pitchRange, azimuth } = cameraConstraints;
 
-    if (!pitchRange || !azimuth) return;
-
     const clampAnglesHandler = (angles: Vec2) => {
+      if (!pitchRange || !azimuth) return;
       angles.x = Math.max(
         pitchRange.min,
         Math.min(pitchRange.max, angles.x),
@@ -36,8 +28,12 @@ const useCameraControls = (
 
       angles.y = clampAzimuthAngle(angles.y, azimuth);
     };
+    setTimeout(() => {
+      //@ts-ignore
+      cameraControlsScript.focus(target, position);
 
-    cameraControlsScript.on("clamp:angles", clampAnglesHandler);
+      cameraControlsScript.on("clamp:angles", clampAnglesHandler);
+    }, 550);
 
     return () => {
       cameraControlsScript.off("clamp:angles", clampAnglesHandler);

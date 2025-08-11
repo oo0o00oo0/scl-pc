@@ -258,7 +258,8 @@ class CameraControls extends Script {
    * more damping. A value of 0 means no damping.
    * @type {number}
    */
-  focusDamping = 0.982;
+  // focusDamping = 0.982;
+  focusDamping = 0.985;
 
   /**
    * @attribute
@@ -285,7 +286,7 @@ class CameraControls extends Script {
    * @enabledif {enableFly || enablePan}
    * @type {number}
    */
-  moveSpeed = 2;
+  moveSpeed = 0.1;
 
   /**
    * @attribute
@@ -1005,6 +1006,7 @@ class CameraControls extends Script {
    * @param {boolean} [smooth] - Whether to smooth the focus.
    */
   focus(point, start, smooth = true) {
+    console.log("FOCUS");
     if (!this._camera) {
       return;
     }

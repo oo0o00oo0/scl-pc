@@ -64,19 +64,23 @@ export const useSplatLoading = (
           app.renderNextFrame = true;
         }
       };
-      landscapeScript.animateToOpacity(0, 400, () => {
-        handleUnload();
-      });
+      setTimeout(() => {
+        landscapeScript.animateToOpacity(0, 400, () => {
+          handleUnload();
+        });
+      }, 100);
     } else {
       if (active) {
-        landscapeScript.animateToOpacity(1 * opacityOverride, 400, () => {
-          app.renderNextFrame = true;
-        });
+        setTimeout(() => {
+          landscapeScript.animateToOpacity(1 * opacityOverride, 400, () => {
+            app.renderNextFrame = true;
+          });
+        }, 1000);
         // }, 400);
       } else {
         setTimeout(() => {
           landscapeScript.animateToOpacity(0, 400, () => {});
-        });
+        }, 100);
       }
     }
 
