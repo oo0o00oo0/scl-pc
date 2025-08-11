@@ -482,7 +482,8 @@ class CameraControls extends Script {
     // angles.y = math.clamp(angles.y, -180, 180);
 
     // emit clamp event
-    console.log("emit clamp event", angles);
+    //TODO - this is running too much?
+    // console.log("emit clamp event", angles);
     this.fire(CameraControls.EVENT_CLAMP_ANGLES, angles);
   }
 

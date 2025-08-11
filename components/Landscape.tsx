@@ -3,7 +3,6 @@ import { type Asset } from "playcanvas";
 import { Script as ScriptComponent } from "@playcanvas/react/components";
 import { CustomGSplat } from "../atomic/splats/CustomGSplat";
 import LandscapeScript from "../scripts/landscape";
-import { Vec3 } from "playcanvas";
 import { useSplatLoading } from "../hooks/use-splat-loading";
 import { type AssetMeta } from "../hooks/use-splat-with-id";
 
@@ -12,10 +11,9 @@ const Landscape = ({
   active,
   updateProgress,
   onReady,
-  position = new Vec3(0, 0, 0),
-  rotation = new Vec3(0, 0, 0),
   load = false,
   opacityOverride = 1,
+  transform,
 }: {
   active: boolean;
   updateProgress: (meta: AssetMeta, key: string) => void;
@@ -23,8 +21,11 @@ const Landscape = ({
   load: boolean;
   onReady: (url: string) => void;
   delay?: number;
-  position?: Vec3;
-  rotation?: Vec3;
+  transform?: {
+    position?: [number, number, number];
+    rotation?: [number, number, number];
+    scale?: [number, number, number];
+  };
   opacityOverride?: number;
 }) => {
   const { splat, gsplatRef, scriptRef } = useSplatLoading(
@@ -38,8 +39,9 @@ const Landscape = ({
 
   return (
     <Entity
-      rotation={[rotation.x, rotation.y, rotation.z]}
-      position={[position.x, position.y, position.z]}
+      position={transform?.position}
+      rotation={transform?.rotation}
+      scale={transform?.scale}
       name="splat"
       ref={gsplatRef}
     >

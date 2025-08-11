@@ -2,6 +2,7 @@ import { Entity } from "@playcanvas/react";
 import { Camera, Script } from "@playcanvas/react/components";
 // @ts-ignore
 import { CameraControls as CameraControlsScript } from "@/libs/scripts/camera-controls.mjs";
+// import { CameraControls as CameraControlsOriginal } from "@/libs/scripts/camera-controls-pc.mjs";
 
 import type { CamState } from "@/libs/types/camera.ts";
 import { Mat4, Vec4 } from "playcanvas";
@@ -32,13 +33,14 @@ const CameraControls = (
       <Script
         ref={scriptRef}
         script={CameraControlsScript}
-        enableZoom={false}
-        enablePan={false}
-        enableOrbit={false}
+        // script={CameraControlsOriginal}
+        enableZoom={true}
+        enablePan={true}
+        enableOrbit={true}
       />
       <Camera
         nearClip={1}
-        farClip={100}
+        farClip={1000}
         clearColor={clearColor}
       />
     </Entity>

@@ -57,7 +57,6 @@ export const useSplatLoading = (
 
     if (!load) {
       const handleUnload = () => {
-        // console.log("unload", url);
         const splatAsset = app.assets.find(url, "gsplat");
         if (splatAsset && splatAsset.loaded) {
           splatAsset.unload();
