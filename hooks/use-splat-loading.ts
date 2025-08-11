@@ -78,7 +78,7 @@ export const useSplatLoading = (
       } else {
         setTimeout(() => {
           landscapeScript.animateToOpacity(0, 400, () => {});
-        }, 100);
+        }, 0);
       }
     }
 
