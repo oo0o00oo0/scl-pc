@@ -68,6 +68,7 @@ export const useSplatLoading = (
         console.log("animate to on from active", url.split("/").pop());
         landscapeScript.animateToOpacity(1, 1800, () => {
           onReady(url);
+          app.renderNextFrame = true;
         });
       }, 800);
     } else if (currentOpacity === 1) {
@@ -75,6 +76,7 @@ export const useSplatLoading = (
       setTimeout(() => {
         landscapeScript.animateToOpacity(0, 1000, () => {
           handleUnload();
+          app.renderNextFrame = true;
         });
       }, 0);
     }

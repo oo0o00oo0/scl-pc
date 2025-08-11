@@ -11,12 +11,13 @@ type CamData = {
 };
 
 export const HtmlMarker = (
-  { worldPosition, size = 150, isActive, onClick, useCamStore }: {
+  { worldPosition, size = 150, isActive, onClick, useCamStore, label }: {
     worldPosition: Vec3;
     size?: number;
     isActive: boolean;
     onClick: () => void;
     useCamStore: () => CamData;
+    label: any;
   },
 ) => {
   const ref = useRef<HTMLDivElement>(null);
@@ -31,7 +32,7 @@ export const HtmlMarker = (
 
     const { viewProjMatrix, cameraRect, canvasWidth, canvasHeight } = camData;
 
-    worldToScreenStandalone(
+    const result = worldToScreenStandalone(
       worldPosition,
       viewProjMatrix,
       cameraRect,
@@ -40,11 +41,16 @@ export const HtmlMarker = (
       screenPos.current,
     );
 
-    // console.log(screenPos.current);
+    // Hide marker if it's behind the camera
+    if (result.isBehindCamera) {
+      ref.current.style.display = "none";
+      return;
+    }
 
+    ref.current.style.display = "block";
     ref.current.style.transform = `translate(${
-      screenPos.current.x - size / 2
-    }px, ${screenPos.current.y - size / 2}px)`;
+      result.screenCoord.x - size / 2
+    }px, ${result.screenCoord.y - size / 2}px)`;
   }, [worldPosition, isActive, camData]);
 
   useEffect(() => {
@@ -80,6 +86,23 @@ export const HtmlMarker = (
         zIndex: 1,
       }}
     >
+      <div
+        style={{
+          opacity: hover ? 1 : 0,
+          transition: "opacity 0.3s ease-in-out",
+          backgroundColor: "#1F3C6D",
+          color: "#fff",
+          padding: "5px 10px",
+          borderRadius: "5px",
+          position: "absolute",
+          top: "100%",
+          left: "50%",
+          transform: "translate(-50%, 0)",
+          zIndex: 2,
+        }}
+      >
+        {label.name}
+      </div>
       <svg
         xmlns="http://www.w3.org/2000/svg"
         width={size}

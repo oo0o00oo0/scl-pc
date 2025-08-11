@@ -44,7 +44,7 @@ export function worldToScreenStandalone(
   canvasWidth: number,
   canvasHeight: number,
   screenCoord: Vec3 = new Vec3(),
-): Vec3 {
+): { screenCoord: Vec3; isBehindCamera: boolean } {
   // Transform point by view-projection matrix
   viewProjMatrix.transformPoint(worldCoord, screenCoord);
 
@@ -53,6 +53,9 @@ export function worldToScreenStandalone(
     worldCoord.y * vpm[7] +
     worldCoord.z * vpm[11] +
     1 * vpm[15];
+
+  // Check if point is behind camera (negative z in view space means behind camera)
+  const isBehindCamera = w <= 0;
 
   // Normalize and convert to [0,1]
   screenCoord.x = (screenCoord.x / w + 1) * 0.5;
@@ -64,5 +67,5 @@ export function worldToScreenStandalone(
   screenCoord.y = screenCoord.y * rh * canvasHeight +
     (1 - ry - rh) * canvasHeight;
 
-  return screenCoord;
+  return { screenCoord, isBehindCamera };
 }
