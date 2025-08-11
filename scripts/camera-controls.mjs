@@ -300,7 +300,7 @@ class CameraControls extends Script {
   focusDamping = 0.99;
 
   /** @attribute @title Focus Duration @type {number} */
-  focusDuration = 1.6;
+  focusDuration = 2.5;
 
   /**
    * @attribute

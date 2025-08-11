@@ -376,28 +376,28 @@ void main(void) {
   clipCorner(corner, clr.w);
 
     // 8. Apply normalized size with curve-based offset from opacity.
-  float normalizedSize = 0.2; // Adjust this value to control uniform splat size
+  float normalizedSize = 0.0; // Adjust this value to control uniform splat size
   vec2 normalizedOffset = normalize(corner.offset) * normalizedSize;
 
-    // Create a curved size blend that's offset from opacity
-  float sizeOffset = 0.1; // How much to offset the size curve (0.0 to 1.0)
-  float sizePower = 7.0;  // Curve steepness (1.0 = linear, 2.0 = quadratic, etc.)
+  //   // Create a curved size blend that's offset from opacity
+  // float sizeOffset = 0.0; // How much to offset the size curve (0.0 to 1.0)
+  // float sizePower = 9.0;  // Curve steepness (1.0 = linear, 2.0 = quadratic, etc.)
 
     // Apply offset and curve to the opacity for size blending
     // Remap opacity so it still reaches 1.0 but starts later
-  float adjustedOpacity = clamp((uSplatOpacity - sizeOffset) / (1.0 - sizeOffset), 0.0, 1.0);
-  float curvedSizeBlend = pow(adjustedOpacity, sizePower);
+  // float adjustedOpacity = clamp((uSplatOpacity - sizeOffset) / (1.0 - sizeOffset), 0.0, 1.0);
+  // float curvedSizeBlend = pow(adjustedOpacity, sizePower);
 
-  vec2 blend = mix(normalizedOffset, corner.offset, curvedSizeBlend);
+  vec2 blend = mix(normalizedOffset, corner.offset, clamp(uSplatOpacity, 0.0, 1.0));
 
   gl_Position = center.proj + vec4(blend, 0.0, 0.0);
 
   // 10. Use original color without blending
-  vec4 colMix = clr;
+  vec4 colMix = mix(vec4(0.84, 0.83, 0.84, 1.0), clr, 0.7 + uSplatOpacity * 0.3);
 
     // 11. Output the final UV and color values.
   gaussianUV = corner.uv;
-  gaussianColor = vec4(prepareOutputFromGamma(max(clr.xyz, 0.0)), clr.w * 1.0);
+  gaussianColor = vec4(prepareOutputFromGamma(max(colMix.xyz, 0.0)), colMix.w * 1.0);
   // gaussianColor = vec4(prepareOutputFromGamma(max(clr.xyz, 0.0)), clr.w * 0.2);
 
     #ifndef DITHER_NONE

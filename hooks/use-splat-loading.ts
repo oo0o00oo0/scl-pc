@@ -55,36 +55,46 @@ export const useSplatLoading = (
     const currentOpacity = landscapeScript?.opacity;
 
     if (!landscapeScript) return;
-
-    if (!load && hasLoaded) {
-      console.log("unload", url.split("/").pop());
-      const handleUnload = () => {
-        const splatAsset = splat;
-        if (splatAsset && splatAsset.loaded) {
-          splatAsset.unload();
-          app.assets.remove(splatAsset);
-        }
-        setHasLoaded(false);
-      };
-      landscapeScript.animateToOpacity(0, 300, () => {
-        console.log("ANIMATE TO OFF FROM UNLOAD", url.split("/").pop());
-        handleUnload();
-      });
-    } else {
-      if (active) {
-        setTimeout(() => {
-          console.log("animate to on from active", url.split("/").pop());
-          landscapeScript.animateToOpacity(1, 800, () => {
-            onReady(url);
-          });
-        }, 500);
-      } else if (currentOpacity !== 0) {
-        console.log("animate to off from not active", url.split("/").pop());
-        setTimeout(() => {
-          landscapeScript.animateToOpacity(0, 700, () => {});
-        }, 100);
+    const handleUnload = () => {
+      const splatAsset = splat;
+      if (splatAsset && splatAsset.loaded) {
+        splatAsset.unload();
+        app.assets.remove(splatAsset);
       }
+      // setHasLoaded(false);
+    };
+
+    // if (!load && hasLoaded && currentOpacity !== 0) {
+    //   console.log("unload", url.split("/").pop());
+    //   const handleUnload = () => {
+    //     const splatAsset = splat;
+    //     if (splatAsset && splatAsset.loaded) {
+    //       splatAsset.unload();
+    //       app.assets.remove(splatAsset);
+    //     }
+    //     setHasLoaded(false);
+    //   };
+    //   landscapeScript.animateToOpacity(0, 300, () => {
+    //     console.log("ANIMATE TO OFF FROM UNLOAD", url.split("/").pop());
+    //     handleUnload();
+    //   });
+    // } else {
+    if (active) {
+      setTimeout(() => {
+        console.log("animate to on from active", url.split("/").pop());
+        landscapeScript.animateToOpacity(1, 1800, () => {
+          onReady(url);
+        });
+      }, 800);
+    } else if (currentOpacity !== 0) {
+      console.log("animate to off from not active", url.split("/").pop());
+      setTimeout(() => {
+        landscapeScript.animateToOpacity(0, 1000, () => {
+          handleUnload();
+        });
+      }, 0);
     }
+    // }
   }, [active, splat, load, app, url, hasLoaded]);
 
   return {

@@ -14,7 +14,7 @@ const Environment = (
   const app = useApp();
 
   useEffect(() => {
-    scriptRef.current?.setSkyboxRotationY(skyboxPosition || 0);
+    scriptRef.current?.setSkyboxRotationY(0);
   }, [app, asset, skyboxPosition]);
 
   if (!asset) return null;
