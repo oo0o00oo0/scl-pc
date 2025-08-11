@@ -696,10 +696,10 @@ class CameraControls extends Script {
     const startMousePan = this._isStartMousePan(event);
     const startFly = this._isStartFly(event);
     const startOrbit = this._isStartOrbit(event);
-    if (this._focusing) {
-      this._cancelSmoothTransform();
-      this._focusing = false;
-    }
+    // if (this._focusing) {
+    //   this._cancelSmoothTransform();
+    //   this._focusing = false;
+    // }
 
     if (startTouchPan) {
       // start touch pan
@@ -736,10 +736,10 @@ class CameraControls extends Script {
     }
     this._pointerEvents.set(event.pointerId, event);
 
-    if (this._focusing) {
-      this._cancelSmoothTransform();
-      this._focusing = false;
-    }
+    // if (this._focusing) {
+    //   this._cancelSmoothTransform();
+    //   this._focusing = false;
+    // }
 
     if (this._pointerEvents.size === 1) {
       if (this._panning) {

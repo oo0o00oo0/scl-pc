@@ -33,13 +33,13 @@ const CameraControls = (
         ref={scriptRef}
         script={CameraControlsScript}
         // script={CameraControlsOriginal}
-        enableZoom={true}
-        enablePan={true}
-        enableOrbit={true}
+        enableZoom={false}
+        enablePan={false}
+        enableOrbit={false}
       />
       <Camera
         nearClip={1}
-        farClip={1000}
+        farClip={100}
         clearColor={clearColor}
       />
     </Entity>
