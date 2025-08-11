@@ -65,10 +65,10 @@ export const useSplatLoading = (
         }
       };
       setTimeout(() => {
-        landscapeScript.animateToOpacity(0, 400, () => {
+        landscapeScript.animateToOpacity(0, 200, () => {
           handleUnload();
         });
-      }, 100);
+      }, 0);
     } else {
       if (active) {
         setTimeout(() => {
