@@ -49,7 +49,7 @@ export const HtmlMarker = (
 
   useEffect(() => {
     gsap.to(svgRef.current, {
-      stroke: hover ? "#0d9488" : "#EFEFE6",
+      stroke: hover ? "#" : "#EFEFE6",
       strokeWidth: hover ? 2 : 1.2,
       duration: 0.3,
       ease: "power2.inOut",
@@ -93,7 +93,7 @@ export const HtmlMarker = (
         className="lucide lucide-target-icon lucide-target"
         ref={svgRef}
       >
-        <circle fill={"#3C4C4D"} cx="12" cy="12" r="10" />
+        <circle fill={"#1F3C6D"} cx="12" cy="12" r="10" />
         <circle cx="12" cy="12" r="6" />
         <circle cx="12" cy="12" r="2" />
       </svg>

@@ -10,6 +10,7 @@ const useCameraControls = (
 
   useEffect(() => {
     if (!camState) return;
+    const cameraControlsScript = scriptRef.current!;
 
     const {
       position,
@@ -17,10 +18,10 @@ const useCameraControls = (
       delay = 0,
       cameraConstraints,
     } = camState;
-
     const { pitchRange, azimuth } = cameraConstraints;
 
     const clampAnglesHandler = (angles: Vec2) => {
+      if (!pitchRange || !azimuth) return;
       angles.x = Math.max(
         pitchRange.min,
         Math.min(pitchRange.max, angles.x),
@@ -28,10 +29,11 @@ const useCameraControls = (
 
       angles.y = clampAzimuthAngle(angles.y, azimuth);
     };
-    const cameraControlsScript = scriptRef.current;
-    if (!cameraControlsScript) return;
-    console.log("cameraControlsScript", cameraControlsScript);
     cameraControlsScript.on("clamp:angles", clampAnglesHandler);
+    setTimeout(() => {
+      //@ts-ignore
+      cameraControlsScript.focus(target, position);
+    }, 550);
 
     setTimeout(() => {
       //@ts-ignore

@@ -13,11 +13,10 @@ type GSplatComponent = {
 };
 
 export const useSplatLoading = (
-  id: number,
   url: string,
   load: boolean,
-  updateProgress: (meta: AssetMeta) => void,
-  onReady: (id: number) => void,
+  updateProgress: (meta: AssetMeta, key: string) => void,
+  onReady: (url: string) => void,
   active: boolean,
   opacityOverride: number,
 ) => {
@@ -26,7 +25,7 @@ export const useSplatLoading = (
 
   const app = useApp();
 
-  const { data: splat } = useDelayedSplat(url, updateProgress, load);
+  const { data: splat } = useDelayedSplat(url, load, updateProgress);
 
   useEffect(() => {
     if (splat) {
@@ -39,7 +38,7 @@ export const useSplatLoading = (
       const gsplatInstance = gsplatComponent?.instance;
 
       if (gsplatInstance) {
-        onReady(id);
+        onReady(url);
 
         app.renderNextFrame = true;
 
@@ -48,7 +47,7 @@ export const useSplatLoading = (
         });
       }
     }
-  }, [splat, app, id, updateProgress, url]);
+  }, [splat, app, updateProgress, url]);
 
   useEffect(() => {
     const landscapeScript = scriptRef.current;
@@ -64,24 +63,27 @@ export const useSplatLoading = (
           app.renderNextFrame = true;
         }
       };
-      landscapeScript.animateToOpacity(0, 400, () => {
-        handleUnload();
-      });
-    }
-
-    if (active) {
-      landscapeScript.animateToOpacity(1 * opacityOverride, 400, () => {
-        app.renderNextFrame = true;
-      });
-      // }, 400);
-    } else {
       setTimeout(() => {
-        landscapeScript.animateToOpacity(0, 400, () => {});
-      });
+        landscapeScript.animateToOpacity(0, 200, () => {
+          handleUnload();
+        });
+      }, 0);
+    } else {
+      if (active) {
+        setTimeout(() => {
+          landscapeScript.animateToOpacity(1 * opacityOverride, 400, () => {
+            app.renderNextFrame = true;
+          });
+        }, 2000);
+      } else {
+        setTimeout(() => {
+          landscapeScript.animateToOpacity(0, 400, () => {});
+        }, 100);
+      }
     }
 
-    console.log("---------");
-  }, [active, id, splat, load, app, opacityOverride]);
+    // console.log("---------");
+  }, [active, splat, load, app, opacityOverride]);
 
   return {
     splat,

@@ -3,33 +3,50 @@
 // import { Script, Vec2, Vec3 } from "playcanvas";
 // import { clampAzimuthAngle } from "@/libs/atomic/utils/cameraUtils";
 // import camStore from "@/state/camStore";
-// import { remap } from "@/libs/utils";
 // import sceneStore from "@/state/sceneState";
+// import {
+//   getCameraInterpolationData,
+//   getCurrentSectionIndex,
+// } from "@/libs/utils/scrollUtils";
+// import SceneConfig from "@/data/articles/3DUXD-config";
 
-// const useScrollCamera = (
+// const useCameraControls = (
 //   camState: CamState,
 // ) => {
 //   const scriptRef = useRef<Script>(null);
-//   const domData = sceneStore((state) => state.domData);
-
-//   const currentStartRef = useRef<number>(0);
-
-//   const scrollPositionRef = useRef<number>(0);
-
 //   const setScriptRef = camStore((s) => s.setScriptRef);
+//   const setActive = sceneStore((s) => s.setActive);
+//   const layoutData = sceneStore((state) => state.layoutData);
 
-//   const currentCamPos = useRef<Vec3>(new Vec3(0, 0, 0));
+//   // Section index tracking - independent of camera movement
+//   useEffect(() => {
+//     if (!layoutData?.heights) return;
+
+//     const sub = camStore.subscribe(
+//       (state) => state.scrollPosition,
+//       (scrollPosition: number) => {
+//         const currentSectionIndex = getCurrentSectionIndex(
+//           scrollPosition,
+//           layoutData.heights,
+//         );
+
+//         setActive(currentSectionIndex);
+//       },
+//     );
+
+//     return () => {
+//       sub();
+//     };
+//   }, [layoutData, setActive]);
 
 //   useEffect(() => {
-//     if (!camState) return;
-
-//     setScriptRef;
+//     if (!camState || !layoutData?.heights) return;
 
 //     const {
 //       position,
 //       target,
 //       delay = 0,
-//       isScroll = true,
+//       isScroll = false,
 //       cameraConstraints,
 //     } = camState;
 
@@ -40,72 +57,90 @@
 //         pitchRange.min,
 //         Math.min(pitchRange.max, angles.x),
 //       );
-
 //       angles.y = clampAzimuthAngle(angles.y, azimuth);
 //     };
+
 //     const cameraControlsScript = scriptRef.current!;
 //     cameraControlsScript.on("clamp:angles", clampAnglesHandler);
-
 //     setScriptRef(scriptRef.current);
 
 //     if (isScroll) {
-//       const p1 = currentCamPos.current;
-//       const p2 = position;
+//       // For scroll-enabled sections, interpolate based on scroll progress within the section
+//       const sub = camStore.subscribe(
+//         (state) => state.scrollPosition,
+//         (scrollPosition: number) => {
+//           const { camStateTest } = SceneConfig;
 
-//       const targ = target;
+//           const interpolationData = getCameraInterpolationData(
+//             scrollPosition,
+//             layoutData.heights,
+//             camStateTest,
+//           );
 
-//       if (domData?.height) {
-//         currentStartRef.current = scrollPositionRef.current;
-//       }
+//           const { fromCamState, toCamState, progress, shouldInterpolate } =
+//             interpolationData;
 
-//       const sub = camStore.subscribe(({ scrollPosition }) => {
-//         scrollPositionRef.current = scrollPosition;
+//           // console.log("Camera interpolation:", {
+//           //   shouldInterpolate,
+//           //   progress: progress.toFixed(2),
+//           //   from: fromCamState
+//           //     ? getCurrentSectionIndex(scrollPosition, layoutData.heights)
+//           //     : null,
+//           //   to: toCamState
+//           //     ? getCurrentSectionIndex(scrollPosition, layoutData.heights) + 1
+//           //     : null,
+//           // });
 
-//         if (!domData?.height) return;
+//           if (shouldInterpolate && fromCamState && toCamState) {
+//             // Interpolate position between sections
+//             const fromPos = fromCamState.position;
+//             const toPos = toCamState.position;
+//             const interpolatedPos = new Vec3();
+//             interpolatedPos.lerp(fromPos, toPos, progress);
 
-//         if (!domData) return;
+//             // Interpolate target between sections
+//             const fromTarget = fromCamState.target;
+//             const toTarget = toCamState.target;
+//             const interpolatedTarget = new Vec3();
+//             interpolatedTarget.lerp(fromTarget, toTarget, progress);
 
-//         const isUp = domData.direction === "up";
-//         const start = currentStartRef.current;
-//         const end = domData.height + currentStartRef.current;
+//             //@ts-ignore
+//             cameraControlsScript.focus(
+//               interpolatedTarget,
+//               interpolatedPos,
+//               true,
+//             );
+//           } else if (fromCamState) {
+//             // Use current section's camera position
+//             //@ts-ignore
+//             cameraControlsScript.focus(
+//               fromCamState.target,
+//               fromCamState.position,
+//               true,
+//             );
+//           }
+//         },
+//       );
 
-//         let remapped: number;
-
-//         if (isUp) {
-//           remapped = 1 - Math.abs(1 - remap(scrollPosition, start, end, 1, 0));
-//         } else {
-//           remapped = Math.abs(remap(scrollPosition, start, end, 0, 1));
-//         }
-
-//         const interpolated = new Vec3();
-//         interpolated.lerp(p1, p2, remapped);
-//         //@ts-ignore
-//         cameraControlsScript.focus(targ, interpolated, true);
-//       });
-
-//       currentCamPos.current = camState.position;
 //       return () => {
 //         sub();
 //         cameraControlsScript.off("clamp:angles", clampAnglesHandler);
 //       };
 //     } else {
-//       cameraControlsScript.on("clamp:angles", clampAnglesHandler);
-
+//       // For non-scroll sections, move directly to position after delay
 //       setTimeout(() => {
 //         //@ts-ignore
-//         cameraControlsScript.focus(
-//           target,
-//           position,
-//         );
+//         cameraControlsScript.focus(target, position);
 //       }, delay);
 
 //       return () => {
 //         cameraControlsScript.off("clamp:angles", clampAnglesHandler);
 //       };
 //     }
-//   }, [domData, camState]);
+//   }, [camState, layoutData]);
 
 //   return scriptRef;
 // };
 
 // export default useScrollCamera;
+// export default useCameraControls;
