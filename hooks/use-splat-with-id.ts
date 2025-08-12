@@ -181,6 +181,7 @@ const fetchSplat = async (
         (asset as any).originalUrl = src; // Keep reference to original URL
         (asset as any).blobUrl = blobUrl; // Keep reference to blob URL
 
+        console.log("app.assets.add(asset)");
         app.assets.add(asset);
       } catch (error) {
         console.error("Error in single fetch approach:", error);

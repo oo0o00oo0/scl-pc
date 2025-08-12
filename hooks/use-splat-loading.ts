@@ -6,6 +6,7 @@ import type LandscapeScript from "../scripts/landscape";
 
 // Import the new cache utilities
 import { clearSplatCaches, getSplatCacheStats } from "./use-splat-with-id";
+import { debugPlayCanvasAssets } from "../utils";
 
 // Re-export for backward compatibility
 export const getBinaryDataCacheStats = getSplatCacheStats;
@@ -124,12 +125,7 @@ export const useSplatLoading = (
           });
 
           // Cancel any ongoing animation before starting new one
-          if (landscapeScript.isAnimating()) {
-            console.log(
-              "Canceling ongoing animation before activating",
-              url.split("/").pop(),
-            );
-          }
+
           landscapeScript.animateToOpacity(1, 1800, () => {
             if (activeRef.current) {
               console.log(
@@ -154,13 +150,6 @@ export const useSplatLoading = (
       deactivateTimeout = setTimeout(() => {
         // Check if still inactive when timeout executes
         if (!activeRef.current) {
-          // Cancel any ongoing animation before starting new one
-          if (landscapeScript.isAnimating()) {
-            console.log(
-              "Canceling ongoing animation before deactivating",
-              url.split("/").pop(),
-            );
-          }
           landscapeScript.animateToOpacity(0, 1000, () => {
             console.log(
               `🗑️ [${hookId}] Animation completed - destroying entity via ref`,
