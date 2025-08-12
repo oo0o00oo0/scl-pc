@@ -97,6 +97,8 @@ export const useSplatLoading = (
       if (splatAsset && splatAsset.loaded) {
         // Unload from PlayCanvas app to free VRAM
         splatAsset.unload();
+        entityRef.current?.destroyEntity();
+
         // splat.destroy();
 
         console.log(
@@ -106,23 +108,9 @@ export const useSplatLoading = (
     };
 
     if (active) {
-      console.log("Setting up activation timeout for:", {
-        url: url.split("/").pop(),
-        splatLoaded: splat?.loaded,
-        splatLoading: splat?.loading,
-        hasResource: !!splat?.resource,
-      });
-
       activateTimeout = setTimeout(() => {
         // Check if still active when timeout executes
         if (activeRef.current) {
-          console.log("Activation timeout fired - animate to ON from active", {
-            url: url.split("/").pop(),
-            splatLoaded: splat?.loaded,
-            splatLoading: splat?.loading,
-            hasResource: !!splat?.resource,
-          });
-
           landscapeScript.animateToOpacity(1, 1800, () => {
             if (activeRef.current) {
               console.log(
@@ -148,29 +136,7 @@ export const useSplatLoading = (
         // Check if still inactive when timeout executes
         if (!activeRef.current) {
           landscapeScript.animateToOpacity(0, 1000, () => {
-            console.log(
-              `🗑️ [${hookId}] Animation completed - destroying entity via ref`,
-            );
-
-            // Destroy the entity using the forward ref
-            if (entityRef.current) {
-              const entity = entityRef.current.getEntity();
-              console.log(`🗑️ [${hookId}] Destroying entity via forward ref`, {
-                hasEntity: !!entity,
-                entityName: entity?.name,
-                stillActive: activeRef.current,
-              });
-              entityRef.current.destroyEntity();
-            } else {
-              console.warn(
-                `🗑️ [${hookId}] No entity ref available - entity may have already been destroyed`,
-              );
-            }
-
-            // Unload the asset after animation completes
-            if (!activeRef.current) {
-              handleUnload();
-            }
+            handleUnload();
 
             app.renderNextFrame = true;
           });
@@ -178,9 +144,6 @@ export const useSplatLoading = (
       }, 0);
     }
 
-    console.log("entityRef:::::::", entityRef.current);
-
-    // Cleanup function to cancel pending timeouts
     return () => {
       if (activateTimeout) {
         clearTimeout(activateTimeout);
