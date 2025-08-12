@@ -30,7 +30,34 @@ export const useSplatLoading = (
   const { data: splat } = useDelayedSplat(url, load, updateProgress);
 
   useEffect(() => {
+    console.log("useSplatLoading first useEffect:", {
+      hasSplat: !!splat,
+      splatLoaded: splat?.loaded,
+      splatLoading: splat?.loading,
+      splatId: splat?.id,
+      hasResource: !!splat?.resource,
+      url: url.split("/").pop(),
+    });
+
     if (splat) {
+      // If asset was unloaded, reload it
+      if (!splat.loaded && !splat.loading) {
+        console.log(
+          "Reloading unloaded asset in useEffect",
+          url.split("/").pop(),
+        );
+        // Add load event listener to track when reload completes
+        splat.once("load", () => {
+          console.log(
+            `Asset reload completed for ${
+              url.split("/").pop()
+            }, hasResource: ${!!splat.resource}`,
+          );
+        });
+        app.assets.load(splat);
+        return; // Exit early, let the load event trigger this effect again
+      }
+
       const entity = gsplatRef.current;
 
       const gsplatComponent = entity?.findComponent("gsplat") as
@@ -47,7 +74,7 @@ export const useSplatLoading = (
         });
       }
     }
-  }, [splat, app, url]);
+  }, [splat, splat?.loaded, app, url]);
 
   useEffect(() => {
     // console.log("RERAN", url.split("/").pop());
@@ -64,7 +91,15 @@ export const useSplatLoading = (
 
     const handleUnload = () => {
       const splatAsset = splat;
+      console.log("handleUnload called for:", {
+        hasAsset: !!splatAsset,
+        assetLoaded: splatAsset?.loaded,
+        assetId: splatAsset?.id,
+        url: url.split("/").pop(),
+      });
+
       if (splatAsset && splatAsset.loaded) {
+        console.log("Unloading asset:", splatAsset.id);
         // Only unload the asset data, keep it in the registry for reuse
         splatAsset.unload();
         // DO NOT remove from registry - this breaks React Query cache consistency
@@ -73,10 +108,23 @@ export const useSplatLoading = (
     };
 
     if (active) {
+      console.log("Setting up activation timeout for:", {
+        url: url.split("/").pop(),
+        splatLoaded: splat?.loaded,
+        splatLoading: splat?.loading,
+        hasResource: !!splat?.resource,
+      });
+
       activateTimeout = setTimeout(() => {
         // Check if still active when timeout executes
         if (activeRef.current) {
-          console.log("animate to ON from active", url.split("/").pop());
+          console.log("Activation timeout fired - animate to ON from active", {
+            url: url.split("/").pop(),
+            splatLoaded: splat?.loaded,
+            splatLoading: splat?.loading,
+            hasResource: !!splat?.resource,
+          });
+
           // Cancel any ongoing animation before starting new one
           if (landscapeScript.isAnimating()) {
             console.log(
@@ -87,6 +135,11 @@ export const useSplatLoading = (
           landscapeScript.animateToOpacity(1, 1800, () => {
             // Double-check active state before calling onReady
             if (activeRef.current) {
+              console.log(
+                `Animation completed for ${
+                  url.split("/").pop()
+                }, calling onReady`,
+              );
               onReady(url);
               app.renderNextFrame = true;
             }
@@ -108,7 +161,7 @@ export const useSplatLoading = (
           landscapeScript.animateToOpacity(0, 1000, () => {
             // Double-check inactive state before unloading
             if (!activeRef.current) {
-              // handleUnload();
+              handleUnload();
               app.renderNextFrame = true;
             }
           });

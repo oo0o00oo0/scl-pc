@@ -45,6 +45,7 @@ const Landscape = ({
     >
       <CustomGSplat
         asset={splat as Asset}
+        active={active}
       />
       <ScriptComponent ref={scriptRef} script={LandscapeScript} />
     </Entity>
