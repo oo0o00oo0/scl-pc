@@ -55,10 +55,6 @@ export const useSplatLoading = (
 
     let deactivateTimeout: ReturnType<typeof setTimeout> | null = null;
 
-    splat.once("load", () => {
-      console.log("Asset loaded hellooo");
-    });
-
     const handleUnload = () => {
       const splatAsset = splat;
 
