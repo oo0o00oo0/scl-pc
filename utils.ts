@@ -69,3 +69,31 @@ export function worldToScreenStandalone(
 
   return { screenCoord, isBehindCamera };
 }
+
+export const debugPlayCanvasAssets = (app: any) => {
+  const loadedAssets = app.assets.filter((asset: any) => asset.loaded);
+  const gsplatAssets = loadedAssets.filter((asset: any) =>
+    asset.type === "gsplat"
+  );
+
+  console.log("PlayCanvas Asset Debug:", {
+    totalAssets: app.assets.list().length,
+    loadedAssets: loadedAssets.length,
+    gsplatAssets: gsplatAssets.length,
+    gsplatDetails: gsplatAssets.map((asset: any) => ({
+      id: asset.id,
+      name: asset.name,
+      loaded: asset.loaded,
+      hasResource: !!asset.resource,
+      resourceType: asset.resource?.constructor?.name,
+      originalUrl: (asset as any).originalUrl,
+      blobUrl: (asset as any).blobUrl,
+    })),
+  });
+
+  return {
+    totalAssets: app.assets.list().length,
+    loadedAssets: loadedAssets.length,
+    gsplatAssets: gsplatAssets.length,
+  };
+};

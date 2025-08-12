@@ -4,102 +4,14 @@ import { useApp } from "@playcanvas/react/hooks";
 import { Entity as PcEntity } from "playcanvas";
 import type LandscapeScript from "../scripts/landscape";
 
-// Global cache for binary data to avoid refetching
-const binaryDataCache = new Map<string, ArrayBuffer>();
+// Import the new cache utilities
+import { clearSplatCaches, getSplatCacheStats } from "./use-splat-with-id";
 
-// Track pending requests to prevent duplicate fetches
-const pendingRequests = new Map<string, Promise<ArrayBuffer>>();
-
-// Utility function to clear cached binary data (for memory management)
-export const clearBinaryDataCache = () => {
-  console.log(`Clearing binary data cache with ${binaryDataCache.size} items`);
-  binaryDataCache.clear();
-  pendingRequests.clear();
-};
-
-// Utility function to get cache stats
-export const getBinaryDataCacheStats = () => ({
-  size: binaryDataCache.size,
-  keys: Array.from(binaryDataCache.keys()),
-  totalSizeMB: Array.from(binaryDataCache.values()).reduce(
-    (total, buffer) => total + buffer.byteLength,
-    0,
-  ) / (1024 * 1024),
-});
+// Re-export for backward compatibility
+export const getBinaryDataCacheStats = getSplatCacheStats;
+export const clearBinaryDataCache = clearSplatCaches;
 
 // Utility function to debug PlayCanvas app asset state
-export const debugPlayCanvasAssets = (app: any) => {
-  const loadedAssets = app.assets.filter((asset: any) => asset.loaded);
-  const gsplatAssets = loadedAssets.filter((asset: any) =>
-    asset.type === "gsplat"
-  );
-
-  console.log("PlayCanvas Asset Debug:", {
-    totalAssets: app.assets.list().length,
-    loadedAssets: loadedAssets.length,
-    gsplatAssets: gsplatAssets.length,
-    gsplatDetails: gsplatAssets.map((asset: any) => ({
-      id: asset.id,
-      name: asset.name,
-      loaded: asset.loaded,
-      hasResource: !!asset.resource,
-      resourceType: asset.resource?.constructor?.name,
-    })),
-  });
-
-  return {
-    totalAssets: app.assets.list().length,
-    loadedAssets: loadedAssets.length,
-    gsplatAssets: gsplatAssets.length,
-  };
-};
-
-// Function to fetch and cache binary data
-const fetchAndCacheBinaryData = async (url: string): Promise<ArrayBuffer> => {
-  // Check if already cached
-  const cached = binaryDataCache.get(url);
-  if (cached) {
-    console.log("✅ Using cached binary data for:", url);
-    return cached;
-  }
-
-  // Check if already being fetched
-  const pendingRequest = pendingRequests.get(url);
-  if (pendingRequest) {
-    console.log("⏳ Waiting for pending request for:", url);
-    return pendingRequest;
-  }
-
-  console.log("🌐 Fetching binary data for:", url);
-  console.trace("📍 Fetch called from:"); // This will show the call stack
-
-  // Create and store the promise to prevent duplicate requests
-  const fetchPromise = (async () => {
-    try {
-      const response = await fetch(url);
-      if (!response.ok) {
-        throw new Error(`Failed to fetch ${url}: ${response.statusText}`);
-      }
-
-      const arrayBuffer = await response.arrayBuffer();
-      console.log("arrayBuffer::::::::::::::", arrayBuffer);
-      binaryDataCache.set(url, arrayBuffer);
-      console.log(
-        `💾 Cached binary data for ${url} (${
-          (arrayBuffer.byteLength / 1024 / 1024).toFixed(2)
-        }MB)`,
-      );
-
-      return arrayBuffer;
-    } finally {
-      // Remove from pending requests when done (success or failure)
-      pendingRequests.delete(url);
-    }
-  })();
-
-  pendingRequests.set(url, fetchPromise);
-  return fetchPromise;
-};
 
 type GSplatComponent = {
   instance: {
@@ -131,78 +43,13 @@ export const useSplatLoading = (
   const { data: splat } = useDelayedSplat(url, load, updateProgress);
 
   useEffect(() => {
-    console.log(`🔍 [${hookId}] useSplatLoading first useEffect:`, {
-      hasSplat: !!splat,
-      splatLoaded: splat?.loaded,
-      splatLoading: splat?.loading,
-      splatId: splat?.id,
-      hasResource: !!splat?.resource,
-      resourceType: splat?.resource?.constructor?.name,
-      hasInstantiate:
-        typeof (splat?.resource as any)?.instantiate === "function",
-      url: url.split("/").pop(),
-    });
-
     if (splat) {
-      // If asset was unloaded, check if we have cached binary data
+      // With the new single-fetch approach, assets are always created from blob URLs
+      // No need for complex restoration logic
       if (!splat.loaded && !splat.loading) {
-        const cachedBinaryData = binaryDataCache.get(url);
-
-        if (cachedBinaryData) {
-          console.log(
-            "Restoring asset from cached binary data:",
-            url.split("/").pop(),
-          );
-
-          // Create a new asset from the cached binary data
-          try {
-            // Create a Blob from the cached binary data
-            const blob = new Blob([cachedBinaryData]);
-            const blobUrl = URL.createObjectURL(blob);
-
-            // Update the asset's file data to use the cached binary
-            (splat as any).file = {
-              url: blobUrl,
-              size: cachedBinaryData.byteLength,
-            };
-
-            // Add load event listener
-            splat.once("load", () => {
-              console.log(
-                `Asset restored from cached binary data for ${
-                  url.split("/").pop()
-                }, hasResource: ${!!splat.resource}`,
-              );
-              // Clean up the blob URL
-              URL.revokeObjectURL(blobUrl);
-            });
-
-            // Load the asset with the cached data
-            app.assets.load(splat);
-            return; // Exit early, let the load event trigger this effect again
-          } catch (error) {
-            console.error("Error restoring from cached binary data:", error);
-            // Fall back to network fetch
-            binaryDataCache.delete(url);
-          }
-        }
-
-        // No cached data or restoration failed, load normally
-        console.log(
-          "No cached binary data, loading asset normally:",
-          url.split("/").pop(),
-        );
-        // Add load event listener to track when reload completes
-        splat.once("load", () => {
-          console.log("LOADEDDAATAAAA:", splat.resource);
-          console.log(
-            `Asset load completed for ${
-              url.split("/").pop()
-            }, hasResource: ${!!splat.resource}`,
-          );
-        });
+        console.log("Loading asset (from blob URL):", url.split("/").pop());
         app.assets.load(splat);
-        return; // Exit early, let the load event trigger this effect again
+        return;
       }
 
       const entity = gsplatRef.current;
@@ -220,8 +67,9 @@ export const useSplatLoading = (
           app.renderNextFrame = true;
         });
 
-        // Don't cache binary data on first load - only cache when needed for unloading
-        // This avoids duplicate network requests during initial loading
+        console.log(
+          "✅ GSplat instance ready - binary data was cached during fetch",
+        );
       }
     }
   }, [splat, splat?.loaded, app, url]);
@@ -239,65 +87,16 @@ export const useSplatLoading = (
     // Update ref to track current active state to avoid stale closures
     activeRef.current = active;
 
-    const handleUnload = async () => {
+    const handleUnload = () => {
       const splatAsset = splat;
-      console.log("handleUnload called for:", {
-        hasAsset: !!splatAsset,
-        assetLoaded: splatAsset?.loaded,
-        assetId: splatAsset?.id,
-        url: url.split("/").pop(),
-      });
 
       if (splatAsset && splatAsset.loaded) {
-        console.log("Caching binary data and unloading asset:", splatAsset.id);
-
-        // Cache the binary data if not already cached
-        if (!binaryDataCache.has(url)) {
-          try {
-            console.log(
-              `🔄 [${hookId}] Fetching and caching binary data before unload:`,
-              url,
-            );
-            await fetchAndCacheBinaryData(url);
-          } catch (error) {
-            console.error(
-              `❌ [${hookId}] Failed to cache binary data before unload:`,
-              error,
-            );
-          }
-        } else {
-          console.log(
-            `✅ [${hookId}] Binary data already cached, skipping fetch for:`,
-            url,
-          );
-        }
-
-        // Debug asset state before unloading
-        console.log("Asset state before unload:", {
-          loaded: splatAsset.loaded,
-          loading: splatAsset.loading,
-          hasResource: !!splatAsset.resource,
-          resourceType: splatAsset.resource?.constructor?.name,
-        });
-
         // Unload from PlayCanvas app to free VRAM
         splatAsset.unload();
 
-        // Debug asset state after unloading
-        console.log("Asset state after unload:", {
-          loaded: splatAsset.loaded,
-          loading: splatAsset.loading,
-          hasResource: !!splatAsset.resource,
-          resourceType: splatAsset.resource?.constructor?.name,
-        });
-
-        console.log("Asset unloaded, VRAM should be freed for:", splatAsset.id);
-
-        // Debug PlayCanvas app state after unloading
-        debugPlayCanvasAssets(app);
-
-        // DO NOT remove from registry - this breaks React Query cache consistency
-        // app.assets.remove(splatAsset);
+        console.log(
+          `✅ [${hookId}] Asset unloaded, VRAM freed. Binary data remains cached.`,
+        );
       }
     };
 
