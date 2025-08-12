@@ -27,7 +27,7 @@ const Landscape = ({
   };
   opacityOverride?: number;
 }) => {
-  const { splat, gsplatRef, scriptRef } = useSplatLoading(
+  const { entityRef, splat, gsplatRef, scriptRef } = useSplatLoading(
     url,
     load,
     updateProgress,
@@ -44,6 +44,7 @@ const Landscape = ({
       ref={gsplatRef}
     >
       <CustomGSplat
+        ref={entityRef}
         asset={splat as Asset}
         active={active}
       />

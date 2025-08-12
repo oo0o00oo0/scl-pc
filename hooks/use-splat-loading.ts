@@ -31,6 +31,9 @@ export const useSplatLoading = (
   const scriptRef = useRef<LandscapeScript | null>(null);
   const gsplatRef = useRef<PcEntity | null>(null);
   const activeRef = useRef(active);
+  const entityRef = useRef<
+    { getEntity: () => PcEntity | null; destroyEntity: () => void } | null
+  >(null);
 
   // Create a unique identifier for this hook instance for debugging
   const instanceId = useRef(Math.random().toString(36).substr(2, 9));
@@ -159,6 +162,20 @@ export const useSplatLoading = (
             );
           }
           landscapeScript.animateToOpacity(0, 1000, () => {
+            console.log(
+              `🗑️ [${hookId}] Animation completed - destroying entity via ref`,
+            );
+
+            // Destroy the entity using the forward ref
+            if (entityRef.current) {
+              console.log(`🗑️ [${hookId}] Destroying entity via forward ref`);
+              entityRef.current.destroyEntity();
+            } else {
+              console.warn(
+                `🗑️ [${hookId}] No entity ref available - entity may have already been destroyed`,
+              );
+            }
+
             // if (!activeRef.current) {
             handleUnload();
             app.renderNextFrame = true;
@@ -167,6 +184,8 @@ export const useSplatLoading = (
         }
       }, 0);
     }
+
+    console.log("entityRef:::::::", entityRef.current);
 
     // Cleanup function to cancel pending timeouts
     return () => {
@@ -180,6 +199,7 @@ export const useSplatLoading = (
   }, [active, splat, load, app, url, hasLoaded]);
 
   return {
+    entityRef,
     splat,
     gsplatRef,
     scriptRef,
