@@ -9,14 +9,6 @@ import { clearSplatCaches, getSplatCacheStats } from "./use-splat-with-id";
 export const getBinaryDataCacheStats = getSplatCacheStats;
 export const clearBinaryDataCache = clearSplatCaches;
 
-type GSplatComponent = {
-  instance: {
-    sorter: {
-      on: (event: string, callback: () => void) => void;
-    };
-  };
-};
-
 export const useSplatLoading = (
   url: string,
   load: boolean,
@@ -44,14 +36,28 @@ export const useSplatLoading = (
     }
   }, [splat, splat?.loaded, app, url]);
 
+  const handleEntityReady = () => {
+    console.log("🎬 Entity ready - starting animation");
+    if (!scriptRef.current) return;
+    scriptRef.current.animateToOpacity(1, 1800, () => {
+      if (active) {
+        onReady(url);
+        app.renderNextFrame = true;
+      }
+    });
+  };
+
   useEffect(() => {
     if (!splat) return;
     const landscapeScript = scriptRef.current;
 
     if (!landscapeScript) return;
 
-    let activateTimeout: ReturnType<typeof setTimeout> | null = null;
     let deactivateTimeout: ReturnType<typeof setTimeout> | null = null;
+
+    splat.once("load", () => {
+      console.log("Asset loaded hellooo");
+    });
 
     const handleUnload = () => {
       const splatAsset = splat;
@@ -65,14 +71,9 @@ export const useSplatLoading = (
     };
 
     if (active) {
-      activateTimeout = setTimeout(() => {
-        landscapeScript.animateToOpacity(1, 1800, () => {
-          if (active) {
-            onReady(url);
-            app.renderNextFrame = true;
-          }
-        });
-      }, 400);
+      // Animation is triggered by onEntityReady callback from CustomGSplat
+      // No timeout needed - entity creation drives the animation
+      console.log("🎬 Landscape activated - waiting for entity creation");
     } else {
       if (!splat.loaded) return;
       deactivateTimeout = setTimeout(() => {
@@ -84,9 +85,6 @@ export const useSplatLoading = (
 
     // Cleanup function to cancel pending timeouts
     return () => {
-      if (activateTimeout) {
-        clearTimeout(activateTimeout);
-      }
       if (deactivateTimeout) {
         clearTimeout(deactivateTimeout);
       }
@@ -97,6 +95,7 @@ export const useSplatLoading = (
     entityRef,
     splat,
     gsplatRef,
+    handleEntityReady,
     scriptRef,
   };
 };

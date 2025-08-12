@@ -6,6 +6,7 @@ import vertex from "../../shaders/vert.vert?raw";
 interface GsplatProps {
   asset: Asset;
   active: boolean;
+  onEntityReady?: () => void;
 }
 
 interface CustomGSplatRef {
@@ -13,10 +14,14 @@ interface CustomGSplatRef {
 }
 
 export const CustomGSplat = forwardRef<CustomGSplatRef, GsplatProps>(
-  ({ asset, active }, ref) => {
+  ({ asset, active, onEntityReady }, ref) => {
     const parent: PcEntity = useParent();
     const assetRef = useRef<PcEntity | null>(null);
+    const activeRef = useRef(active);
     const app = useApp();
+
+    // Keep activeRef in sync with current active state
+    activeRef.current = active;
 
     useImperativeHandle(ref, () => ({
       destroyEntity: () => {
@@ -30,15 +35,18 @@ export const CustomGSplat = forwardRef<CustomGSplatRef, GsplatProps>(
     }));
 
     const createEntity = () => {
-      if (!asset?.resource || !active || assetRef.current) return;
+      if (!asset?.resource || !activeRef.current || assetRef.current) return;
 
       const resource = asset.resource as any;
       if (resource && typeof resource.instantiate === "function") {
         try {
-          console.log("🎯 Creating GSplat entity using asset event");
+          console.log("🎯 Creating GSplat entity");
           assetRef.current = resource.instantiate({ vertex });
           parent.addChild(assetRef.current!);
           app.renderNextFrame = true;
+
+          // Notify parent that entity is ready
+          onEntityReady?.();
         } catch (error) {
           console.error("Error creating splat entity:", error);
         }
@@ -50,12 +58,7 @@ export const CustomGSplat = forwardRef<CustomGSplatRef, GsplatProps>(
 
       // Function to handle when asset resource becomes available
       const handleAssetReady = () => {
-        console.log("🎯 Asset ready event fired", {
-          assetId: asset.id,
-          hasResource: !!asset.resource,
-          active,
-          currentEntity: !!assetRef.current,
-        });
+        console.log("🎯 Asset ready event fired");
         createEntity();
       };
 
@@ -68,11 +71,8 @@ export const CustomGSplat = forwardRef<CustomGSplatRef, GsplatProps>(
       ) => {
         if (property === "resource") {
           console.log("🎯 Asset resource changed", {
-            assetId: asset.id,
             oldResource: !!oldValue,
             newResource: !!newValue,
-            active,
-            currentEntity: !!assetRef.current,
           });
           createEntity();
         }
@@ -90,11 +90,11 @@ export const CustomGSplat = forwardRef<CustomGSplatRef, GsplatProps>(
       return () => {
         asset.off("change", handleResourceChange);
       };
-    }, [asset]); // Remove 'active' from deps so callbacks don't get recreated when active changes
+    }, [asset]);
 
-    // Handle active state changes
     useEffect(() => {
       if (active && asset?.loaded && asset?.resource && !assetRef.current) {
+        console.log("🎯 Active state changed to true with ready asset");
         createEntity();
       }
     }, [active]);

@@ -27,13 +27,14 @@ const Landscape = ({
   };
   opacityOverride?: number;
 }) => {
-  const { entityRef, splat, gsplatRef, scriptRef } = useSplatLoading(
-    url,
-    load,
-    updateProgress,
-    onReady,
-    active,
-  );
+  const { entityRef, splat, gsplatRef, scriptRef, handleEntityReady } =
+    useSplatLoading(
+      url,
+      load,
+      updateProgress,
+      onReady,
+      active,
+    );
 
   return (
     <Entity
@@ -47,6 +48,7 @@ const Landscape = ({
         ref={entityRef}
         asset={splat as Asset}
         active={active}
+        onEntityReady={handleEntityReady}
       />
       <ScriptComponent ref={scriptRef} script={LandscapeScript} />
     </Entity>
