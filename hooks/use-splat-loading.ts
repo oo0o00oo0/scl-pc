@@ -123,13 +123,6 @@ export const useSplatLoading = (
             hasResource: !!splat?.resource,
           });
 
-          // Cancel any ongoing animation before starting new one
-          if (landscapeScript.isAnimating()) {
-            console.log(
-              "Canceling ongoing animation before activating",
-              url.split("/").pop(),
-            );
-          }
           landscapeScript.animateToOpacity(1, 1800, () => {
             if (activeRef.current) {
               console.log(
@@ -154,13 +147,6 @@ export const useSplatLoading = (
       deactivateTimeout = setTimeout(() => {
         // Check if still inactive when timeout executes
         if (!activeRef.current) {
-          // Cancel any ongoing animation before starting new one
-          if (landscapeScript.isAnimating()) {
-            console.log(
-              "Canceling ongoing animation before deactivating",
-              url.split("/").pop(),
-            );
-          }
           landscapeScript.animateToOpacity(0, 1000, () => {
             console.log(
               `🗑️ [${hookId}] Animation completed - destroying entity via ref`,
@@ -168,7 +154,12 @@ export const useSplatLoading = (
 
             // Destroy the entity using the forward ref
             if (entityRef.current) {
-              console.log(`🗑️ [${hookId}] Destroying entity via forward ref`);
+              const entity = entityRef.current.getEntity();
+              console.log(`🗑️ [${hookId}] Destroying entity via forward ref`, {
+                hasEntity: !!entity,
+                entityName: entity?.name,
+                stillActive: activeRef.current,
+              });
               entityRef.current.destroyEntity();
             } else {
               console.warn(
@@ -176,20 +167,10 @@ export const useSplatLoading = (
               );
             }
 
-            // Delay handleUnload to prevent race conditions with other landscapes
-            // that might need the same asset
-            setTimeout(() => {
-              if (!activeRef.current) {
-                console.log(
-                  `🗑️ [${hookId}] Delayed unload - checking if still inactive`,
-                );
-                handleUnload();
-              } else {
-                console.log(
-                  `🗑️ [${hookId}] Skipping unload - landscape became active again`,
-                );
-              }
-            }, 0); // Longer delay to let other landscapes activate and load assets
+            // Unload the asset after animation completes
+            if (!activeRef.current) {
+              handleUnload();
+            }
 
             app.renderNextFrame = true;
           });
