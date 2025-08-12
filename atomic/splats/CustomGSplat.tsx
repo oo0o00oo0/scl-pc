@@ -22,6 +22,8 @@ export const CustomGSplat: FC<GsplatProps> = (
 
     const handleAssetLoad = () => {
       console.log(`Asset load event received for ${asset.id}, forcing update`);
+
+      console.log("asset:::::::::::::::", asset.resource);
       setForceUpdate((prev) => prev + 1);
     };
 
@@ -60,17 +62,40 @@ export const CustomGSplat: FC<GsplatProps> = (
         `[${timestamp}] Creating new splat entity for asset:`,
         asset.id,
       );
-      try {
-        assetRef.current = (asset.resource as any).instantiate({
-          vertex,
-        });
 
-        parent.addChild(assetRef.current!);
-        console.log(
-          `[${timestamp}] Successfully added entity to parent. Parent now has ${parent.children.length} children`,
-        );
-      } catch (error) {
-        console.error(`[${timestamp}] Error creating splat entity:`, error);
+      // Additional safety checks for the resource
+      const resource = asset.resource as any;
+      console.log(`[${timestamp}] Resource validation:`, {
+        hasResource: !!resource,
+        hasInstantiate: typeof resource.instantiate === "function",
+        isCompressed: resource.isCompressed,
+        resourceType: resource.constructor?.name,
+      });
+
+      // Only proceed if resource looks valid
+      if (resource && typeof resource.instantiate === "function") {
+        try {
+          assetRef.current = resource.instantiate({
+            vertex,
+          });
+
+          parent.addChild(assetRef.current!);
+          console.log(
+            `[${timestamp}] Successfully added entity to parent. Parent now has ${parent.children.length} children`,
+          );
+        } catch (error) {
+          console.error(`[${timestamp}] Error creating splat entity:`, error);
+          console.error(`[${timestamp}] Resource state during error:`, {
+            resource: resource,
+            isCompressed: resource?.isCompressed,
+            keys: Object.keys(resource || {}),
+          });
+        }
+      } else {
+        console.warn(`[${timestamp}] Resource not ready for instantiation:`, {
+          hasResource: !!resource,
+          hasInstantiate: typeof resource?.instantiate === "function",
+        });
       }
     } else if (asset && !asset.resource) {
       console.log(
@@ -91,10 +116,21 @@ export const CustomGSplat: FC<GsplatProps> = (
         `[${cleanupTimestamp}] Cleaning up splat entity for asset:`,
         asset?.id,
       );
-      parent.removeChild(assetRef.current);
+
+      // More thorough entity cleanup
+      const entity = assetRef.current;
+      console.log(`[${cleanupTimestamp}] Entity cleanup details:`, {
+        entityName: entity.name,
+        childrenCount: entity.children.length,
+        entityEnabled: entity.enabled,
+      });
+
+      // Destroy the entity completely to free GPU resources
+      entity.destroy();
       assetRef.current = null;
+
       console.log(
-        `[${cleanupTimestamp}] After cleanup, parent has ${parent.children.length} children`,
+        `[${cleanupTimestamp}] Entity destroyed, parent has ${parent.children.length} children`,
       );
     };
   }, [asset, asset?.resource, asset?.loaded, active, parent, app, forceUpdate]);
