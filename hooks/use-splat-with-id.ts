@@ -5,14 +5,14 @@ import type { UseQueryOptions } from "@tanstack/react-query";
 import { Application, Asset } from "playcanvas";
 
 // TODO - dynamic logic for cache size based on device memory
-const getMaxCacheSize = () => {
-  const memory = (navigator as any).deviceMemory || 4; // GB
-  const isMobile = /Mobile|Tablet/.test(navigator.userAgent);
+// const getMaxCacheSize = () => {
+//   const memory = (navigator as any).deviceMemory || 4; // GB
+//   const isMobile = /Mobile|Tablet/.test(navigator.userAgent);
 
-  if (memory <= 2) return 50; // Low-end: 50MB
-  if (memory <= 4 || isMobile) return 100; // Mid-range: 100MB
-  return 200; // High-end: 200MB
-};
+//   if (memory <= 2) return 50; // Low-end: 50MB
+//   if (memory <= 4 || isMobile) return 100; // Mid-range: 100MB
+//   return 200; // High-end: 200MB
+// };
 
 // const checkMemoryPressure = () => {
 //   if ('memory' in performance) {
@@ -93,7 +93,6 @@ const fetchSplat = async (
     if (!asset) {
       try {
         // Single fetch: get binary data first
-        console.log("🌐 Single fetch for binary data:", src);
 
         let arrayBuffer: ArrayBuffer;
         let blobUrl: string;
@@ -101,7 +100,6 @@ const fetchSplat = async (
         // Check if we have cached binary data
         const cachedBinary = binaryDataCache.get(src);
         if (cachedBinary) {
-          console.log("✅ Using cached binary data for:", src);
           arrayBuffer = cachedBinary;
         } else {
           // Fetch binary data with progress tracking
@@ -167,7 +165,7 @@ const fetchSplat = async (
           const blob = new Blob([arrayBuffer]);
           blobUrl = URL.createObjectURL(blob);
           blobUrlCache.set(src, blobUrl);
-          console.log("🔗 Created blob URL for:", src);
+          // console.log("🔗 Created blob URL for:", src);
         }
 
         // Create asset using blob URL
@@ -181,7 +179,7 @@ const fetchSplat = async (
         (asset as any).originalUrl = src; // Keep reference to original URL
         (asset as any).blobUrl = blobUrl; // Keep reference to blob URL
 
-        console.log("app.assets.add(asset)");
+        // console.log("app.assets.add(asset)");
         app.assets.add(asset);
       } catch (error) {
         console.error("Error in single fetch approach:", error);

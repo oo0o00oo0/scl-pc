@@ -16,7 +16,6 @@ interface GsplatProps {
 }
 
 interface CustomGSplatRef {
-  getEntity: () => PcEntity | null;
   destroyEntity: () => void;
 }
 
@@ -30,13 +29,10 @@ export const CustomGSplat = forwardRef<CustomGSplatRef, GsplatProps>(
     const [forceUpdate, setForceUpdate] = useState(0);
 
     useImperativeHandle(ref, () => ({
-      getEntity: () => assetRef.current,
       destroyEntity: () => {
         if (assetRef.current) {
-          console.log("Destroying entity via ref");
           assetRef.current.destroy();
           parent.removeChild(assetRef.current);
-          console.log("cleaning up existing entity");
           assetRef.current = null;
         }
       },
@@ -45,20 +41,10 @@ export const CustomGSplat = forwardRef<CustomGSplatRef, GsplatProps>(
     // Track asset resource changes more explicitly
     useEffect(() => {
       const hasResource = !!(asset && asset.resource);
-      const isLoaded = !!(asset && asset.loaded);
 
-      console.log("Resource tracking effect:", {
-        assetId: asset?.id,
-        hasResource,
-        isLoaded,
-        previousResourceState: lastAssetResourceState.current,
-        resourceObj: asset?.resource,
-      });
+      console.log("hasResource", hasResource);
 
       if (hasResource !== lastAssetResourceState.current) {
-        console.log(
-          `🔄 Resource state changed: ${lastAssetResourceState.current} -> ${hasResource}`,
-        );
         lastAssetResourceState.current = hasResource;
         setResourceVersion((prev) => prev + 1);
       }
@@ -71,9 +57,6 @@ export const CustomGSplat = forwardRef<CustomGSplatRef, GsplatProps>(
       const interval = setInterval(() => {
         const hasResource = !!(asset && asset.resource);
         if (hasResource !== lastAssetResourceState.current) {
-          console.log(
-            `🔄 [POLLING] Resource state changed: ${lastAssetResourceState.current} -> ${hasResource}`,
-          );
           lastAssetResourceState.current = hasResource;
           setForceUpdate((prev) => prev + 1);
         }
@@ -85,21 +68,9 @@ export const CustomGSplat = forwardRef<CustomGSplatRef, GsplatProps>(
     useLayoutEffect(() => {
       const timestamp = Date.now();
       const hasResource = !!(asset && asset.resource);
-      const resourceChanged = hasResource !== lastAssetResourceState.current;
 
       // Update the resource state tracking
       lastAssetResourceState.current = hasResource;
-
-      console.log(`[${timestamp}] GSplat effect triggered:`, {
-        assetId: asset?.id,
-        hasResource,
-        resourceChanged,
-        resourceVersion,
-        forceUpdate,
-        active,
-        hasEntity: !!assetRef.current,
-        loaded: asset?.loaded,
-      });
 
       // Clean up existing entity first if it exists and create new one if conditions are met
       if (asset && asset.resource && active) {
@@ -112,48 +83,17 @@ export const CustomGSplat = forwardRef<CustomGSplatRef, GsplatProps>(
           !assetRef.current
         ) {
           try {
-            console.log(
-              `[${timestamp}] Creating new GSplat entity for:`,
-              asset.id,
-            );
+            console.log("INSTANTIATING");
             assetRef.current = resource.instantiate({
               vertex,
             });
 
             parent.addChild(assetRef.current!);
-            console.log(
-              `[${timestamp}] GSplat entity created and added to parent`,
-            );
           } catch (error) {
             console.error(`[${timestamp}] Error creating splat entity:`, error);
           }
-        } else if (!resource || typeof resource.instantiate !== "function") {
-          console.warn(`[${timestamp}] Resource not ready for instantiation:`, {
-            hasResource: !!resource,
-            hasInstantiate: typeof resource?.instantiate === "function",
-          });
-        } else if (assetRef.current) {
-          console.log(
-            `[${timestamp}] Entity already exists, skipping creation`,
-          );
         }
-      } else if (asset && !asset.resource) {
-        console.log(
-          `[${timestamp}] Asset exists but no resource - asset may be unloaded:`,
-          asset.id,
-        );
-      } else if (asset && asset.resource && !active) {
-        console.log(
-          `[${timestamp}] Asset loaded but landscape inactive - not creating entity:`,
-          asset.id,
-        );
       }
-
-      return () => {
-        // Don't cleanup here - let the animation callback handle entity destruction
-        // This prevents the entity from being destroyed before the fade-out animation completes
-        console.log("CustomGSplat cleanup - skipping entity destruction");
-      };
     }, [
       asset,
       asset?.resource,
