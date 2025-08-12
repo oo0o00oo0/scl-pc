@@ -21,71 +21,74 @@ export const useSplatLoading = (
   const entityRef = useRef<
     { destroyEntity: () => void } | null
   >(null);
-
   const app = useApp();
 
   const { data: splat } = useDelayedSplat(url, load, updateProgress);
 
   useEffect(() => {
     if (splat) {
+      console.log("Asset state check:", {
+        url: url.split("/").pop(),
+        loaded: splat.loaded,
+        loading: splat.loading,
+        hasResource: !!splat.resource,
+      });
+
       if (!splat.loaded && !splat.loading) {
-        console.log("Loading asset (from blob URL):", url.split("/").pop());
+        console.log("🔄 Loading asset (from blob URL):", url.split("/").pop());
         app.assets.load(splat);
         return;
       }
     }
-  }, [splat, splat?.loaded, app, url]);
+  }, [splat, splat?.loaded, app, url, active]); // Add active to deps
 
   const handleEntityReady = () => {
     console.log("🎬 Entity ready - starting animation");
     if (!scriptRef.current) return;
+
     scriptRef.current.animateToOpacity(1, 1800, () => {
-      if (active) {
-        onReady(url);
-        app.renderNextFrame = true;
-      }
+      onReady(url);
+      app.renderNextFrame = true;
     });
   };
 
   useEffect(() => {
     if (!splat) return;
-    const landscapeScript = scriptRef.current;
 
+    const landscapeScript = scriptRef.current;
     if (!landscapeScript) return;
 
-    let deactivateTimeout: ReturnType<typeof setTimeout> | null = null;
-
-    const handleUnload = () => {
-      const splatAsset = splat;
-
-      if (splatAsset && splatAsset.loaded) {
-        splatAsset.unload();
-      }
-      if (entityRef.current) {
-        entityRef.current.destroyEntity();
-      }
-    };
+    let animationTimeout: ReturnType<typeof setTimeout> | null = null;
 
     if (active) {
-      // Animation is triggered by onEntityReady callback from CustomGSplat
-      // No timeout needed - entity creation drives the animation
-      console.log("🎬 Landscape activated - waiting for entity creation");
+      console.log("🎬 Landscape activated");
+      // Entity creation will trigger handleEntityReady which starts animation
     } else {
-      if (!splat.loaded) return;
-      deactivateTimeout = setTimeout(() => {
+      console.log("🎬 Landscape deactivated");
+      animationTimeout = setTimeout(() => {
         landscapeScript.animateToOpacity(0, 1000, () => {
-          handleUnload();
+          console.log("🎬 Deactivation animation complete - cleaning up");
+          // Destroy entity first
+          if (entityRef.current) {
+            console.log("🗑️ Destroying entity");
+            entityRef.current.destroyEntity();
+          }
+          // Then unload asset
+          if (splat && splat.loaded) {
+            console.log("🗑️ Unloading asset");
+            splat.unload();
+            console.log("🗑️ Asset unloaded, loaded state:", splat.loaded);
+          }
         });
       }, 0);
     }
 
-    // Cleanup function to cancel pending timeouts
     return () => {
-      if (deactivateTimeout) {
-        clearTimeout(deactivateTimeout);
+      if (animationTimeout) {
+        clearTimeout(animationTimeout);
       }
     };
-  }, [active, splat, splat?.loaded, load, app, url]);
+  }, [active, splat]);
 
   return {
     entityRef,
