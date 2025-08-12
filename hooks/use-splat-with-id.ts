@@ -255,7 +255,7 @@ export const useDelayedSplat = (
 ) => {
   const app = useApp();
 
-  const queryKey = [app.root?.getGuid(), src, "gsplat-blob"];
+  const queryKey = [app.root?.getGuid(), src];
 
   const queryOptions: UseQueryOptions<
     Asset | null,
@@ -265,6 +265,7 @@ export const useDelayedSplat = (
   > = {
     queryKey,
     queryFn: async () => {
+      console.log("FETCHING");
       return fetchSplat(app, src, onProgress);
     },
     enabled: shouldLoad,

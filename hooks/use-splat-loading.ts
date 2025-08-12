@@ -41,22 +41,6 @@ export const useSplatLoading = (
         app.assets.load(splat);
         return;
       }
-
-      const entity = gsplatRef.current;
-
-      const gsplatComponent = entity?.findComponent("gsplat") as
-        | GSplatComponent
-        | undefined;
-
-      const gsplatInstance = gsplatComponent?.instance;
-
-      if (gsplatInstance) {
-        // setHasLoaded(true);
-
-        gsplatInstance.sorter.on("updated", () => {
-          app.renderNextFrame = true;
-        });
-      }
     }
   }, [splat, splat?.loaded, app, url]);
 
@@ -75,33 +59,26 @@ export const useSplatLoading = (
       if (splatAsset && splatAsset.loaded) {
         splatAsset.unload();
       }
+      if (entityRef.current) {
+        entityRef.current.destroyEntity();
+      }
     };
 
     if (active) {
       activateTimeout = setTimeout(() => {
-        if (active) {
-          landscapeScript.animateToOpacity(1, 1800, () => {
-            if (active) {
-              onReady(url);
-              app.renderNextFrame = true;
-            }
-          });
-        }
+        landscapeScript.animateToOpacity(1, 1800, () => {
+          if (active) {
+            onReady(url);
+            app.renderNextFrame = true;
+          }
+        });
       }, 400);
     } else {
       if (!splat.loaded) return;
       deactivateTimeout = setTimeout(() => {
-        if (!active) {
-          landscapeScript.animateToOpacity(0, 1000, () => {
-            // Destroy the entity using the forward ref
-            if (entityRef.current) {
-              entityRef.current.destroyEntity();
-            }
-            handleUnload();
-
-            app.renderNextFrame = true;
-          });
-        }
+        landscapeScript.animateToOpacity(0, 1000, () => {
+          handleUnload();
+        });
       }, 0);
     }
 
@@ -114,7 +91,7 @@ export const useSplatLoading = (
         clearTimeout(deactivateTimeout);
       }
     };
-  }, [active, splat, load, app, url]);
+  }, [active, splat, splat?.loaded, load, app, url]);
 
   return {
     entityRef,

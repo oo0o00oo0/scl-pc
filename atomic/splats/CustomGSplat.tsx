@@ -42,6 +42,8 @@ export const CustomGSplat = forwardRef<CustomGSplatRef, GsplatProps>(
     useEffect(() => {
       const hasResource = !!(asset && asset.resource);
 
+      console.log("lastAssetResourceState", lastAssetResourceState.current);
+
       console.log("hasResource", hasResource);
 
       if (hasResource !== lastAssetResourceState.current) {
