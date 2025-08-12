@@ -30,18 +30,14 @@ export const useSplatLoading = (
 ) => {
   const scriptRef = useRef<LandscapeScript | null>(null);
   const gsplatRef = useRef<PcEntity | null>(null);
-  const activeRef = useRef(active);
   const entityRef = useRef<
     { getEntity: () => PcEntity | null; destroyEntity: () => void } | null
   >(null);
 
-  // Create a unique identifier for this hook instance for debugging
   const instanceId = useRef(Math.random().toString(36).substr(2, 9));
   const hookId = `${url.split("/").pop()}-${instanceId.current}`;
 
   const app = useApp();
-
-  const [hasLoaded, setHasLoaded] = useState(false);
 
   const { data: splat } = useDelayedSplat(url, load, updateProgress);
 
@@ -64,8 +60,6 @@ export const useSplatLoading = (
       const gsplatInstance = gsplatComponent?.instance;
 
       if (gsplatInstance) {
-        setHasLoaded(true);
-
         gsplatInstance.sorter.on("updated", () => {
           app.renderNextFrame = true;
         });
@@ -79,17 +73,12 @@ export const useSplatLoading = (
 
   useEffect(() => {
     if (!splat) return;
-    // console.log("RERAN", url.split("/").pop());
     const landscapeScript = scriptRef.current;
 
     if (!landscapeScript) return;
 
-    // Store timeout IDs for cleanup
     let activateTimeout: ReturnType<typeof setTimeout> | null = null;
     let deactivateTimeout: ReturnType<typeof setTimeout> | null = null;
-
-    // Update ref to track current active state to avoid stale closures
-    activeRef.current = active;
 
     const handleUnload = () => {
       const splatAsset = splat;
@@ -98,8 +87,7 @@ export const useSplatLoading = (
         // Unload from PlayCanvas app to free VRAM
         splatAsset.unload();
         entityRef.current?.destroyEntity();
-
-        // splat.destroy();
+        app.renderNextFrame = true;
 
         console.log(
           `✅ [${hookId}] Asset unloaded, VRAM freed. Binary data remains cached.`,
@@ -109,20 +97,11 @@ export const useSplatLoading = (
 
     if (active) {
       activateTimeout = setTimeout(() => {
-        // Check if still active when timeout executes
-        if (activeRef.current) {
-          landscapeScript.animateToOpacity(1, 1800, () => {
-            if (activeRef.current) {
-              console.log(
-                `Animation completed for ${
-                  url.split("/").pop()
-                }, calling onReady`,
-              );
-              onReady(url);
-              app.renderNextFrame = true;
-            }
-          });
-        }
+        landscapeScript.animateToOpacity(1, 1800, () => {
+          console.log(`Animation completed for ${url.split("/").pop()}`);
+          onReady(url);
+          app.renderNextFrame = true;
+        });
       }, 400);
     } else {
       console.log(
@@ -133,14 +112,9 @@ export const useSplatLoading = (
 
       if (!splat.loaded) return;
       deactivateTimeout = setTimeout(() => {
-        // Check if still inactive when timeout executes
-        if (!activeRef.current) {
-          landscapeScript.animateToOpacity(0, 1000, () => {
-            handleUnload();
-
-            app.renderNextFrame = true;
-          });
-        }
+        landscapeScript.animateToOpacity(0, 1000, () => {
+          handleUnload();
+        });
       }, 0);
     }
 
@@ -152,7 +126,7 @@ export const useSplatLoading = (
         clearTimeout(deactivateTimeout);
       }
     };
-  }, [active, splat, load, app, url, hasLoaded]);
+  }, [active, splat, load, app, url]);
 
   return {
     entityRef,

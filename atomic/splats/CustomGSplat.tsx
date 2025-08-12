@@ -23,7 +23,6 @@ export const CustomGSplat = forwardRef<CustomGSplatRef, GsplatProps>(
   ({ asset, active }, ref) => {
     const parent: PcEntity = useParent();
     const assetRef = useRef<PcEntity | null>(null);
-    const app = useApp();
 
     useImperativeHandle(ref, () => ({
       getEntity: () => assetRef.current,
