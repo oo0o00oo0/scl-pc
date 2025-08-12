@@ -21,6 +21,7 @@ export const useSplatLoading = (
 ) => {
   const scriptRef = useRef<LandscapeScript | null>(null);
   const gsplatRef = useRef<PcEntity | null>(null);
+  const activeRef = useRef(active);
 
   const app = useApp();
 
@@ -52,34 +53,78 @@ export const useSplatLoading = (
     // console.log("RERAN", url.split("/").pop());
     const landscapeScript = scriptRef.current;
 
-    const currentOpacity = landscapeScript?.opacity;
-
     if (!landscapeScript) return;
+
+    // Store timeout IDs for cleanup
+    let activateTimeout: ReturnType<typeof setTimeout> | null = null;
+    let deactivateTimeout: ReturnType<typeof setTimeout> | null = null;
+
+    // Update ref to track current active state to avoid stale closures
+    activeRef.current = active;
+
     const handleUnload = () => {
       const splatAsset = splat;
       if (splatAsset && splatAsset.loaded) {
+        // Only unload the asset data, keep it in the registry for reuse
         splatAsset.unload();
-        app.assets.remove(splatAsset);
+        // DO NOT remove from registry - this breaks React Query cache consistency
+        // app.assets.remove(splatAsset);
       }
     };
 
     if (active) {
-      setTimeout(() => {
-        console.log("animate to on from active", url.split("/").pop());
-        landscapeScript.animateToOpacity(1, 1800, () => {
-          onReady(url);
-          app.renderNextFrame = true;
-        });
+      activateTimeout = setTimeout(() => {
+        // Check if still active when timeout executes
+        if (activeRef.current) {
+          console.log("animate to ON from active", url.split("/").pop());
+          // Cancel any ongoing animation before starting new one
+          if (landscapeScript.isAnimating()) {
+            console.log(
+              "Canceling ongoing animation before activating",
+              url.split("/").pop(),
+            );
+          }
+          landscapeScript.animateToOpacity(1, 1800, () => {
+            // Double-check active state before calling onReady
+            if (activeRef.current) {
+              onReady(url);
+              app.renderNextFrame = true;
+            }
+          });
+        }
       }, 400);
-    } else if (currentOpacity === 1) {
-      console.log("animate to off from not active", url.split("/").pop());
-      setTimeout(() => {
-        landscapeScript.animateToOpacity(0, 1000, () => {
-          handleUnload();
-          app.renderNextFrame = true;
-        });
+    } else {
+      console.log("animate to OFF from not active", url.split("/").pop());
+      deactivateTimeout = setTimeout(() => {
+        // Check if still inactive when timeout executes
+        if (!activeRef.current) {
+          // Cancel any ongoing animation before starting new one
+          if (landscapeScript.isAnimating()) {
+            console.log(
+              "Canceling ongoing animation before deactivating",
+              url.split("/").pop(),
+            );
+          }
+          landscapeScript.animateToOpacity(0, 1000, () => {
+            // Double-check inactive state before unloading
+            if (!activeRef.current) {
+              // handleUnload();
+              app.renderNextFrame = true;
+            }
+          });
+        }
       }, 0);
     }
+
+    // Cleanup function to cancel pending timeouts
+    return () => {
+      if (activateTimeout) {
+        clearTimeout(activateTimeout);
+      }
+      if (deactivateTimeout) {
+        clearTimeout(deactivateTimeout);
+      }
+    };
   }, [active, splat, load, app, url, hasLoaded]);
 
   return {
