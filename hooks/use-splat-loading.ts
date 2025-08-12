@@ -70,7 +70,7 @@ export const useSplatLoading = (
           onReady(url);
           app.renderNextFrame = true;
         });
-      }, 800);
+      }, 400);
     } else if (currentOpacity === 1) {
       console.log("animate to off from not active", url.split("/").pop());
       setTimeout(() => {
