@@ -56,30 +56,9 @@ export const CustomGSplat = forwardRef<CustomGSplatRef, GsplatProps>(
           } catch (error) {
             console.error(`[${timestamp}] Error creating splat entity:`, error);
           }
-        } else {
-          console.warn(`[${timestamp}] Resource not ready for instantiation:`, {
-            hasResource: !!resource,
-            hasInstantiate: typeof resource?.instantiate === "function",
-          });
         }
-      } else if (asset && !asset.resource) {
-        console.log(
-          `[${timestamp}] Asset exists but no resource - asset may be unloaded:`,
-          asset.id,
-        );
-      } else if (asset && asset.resource && !active) {
-        console.log(
-          `[${timestamp}] Asset loaded but landscape inactive - not creating entity:`,
-          asset.id,
-        );
       }
-
-      return () => {
-        // Don't cleanup here - let the animation callback handle entity destruction
-        // This prevents the entity from being destroyed before the fade-out animation completes
-        console.log("CustomGSplat cleanup - skipping entity destruction");
-      };
-    }, [asset, asset?.resource, asset?.loaded, active, parent, app]);
+    }, [asset, asset?.resource, asset?.loaded, active, parent]);
 
     return null;
   },

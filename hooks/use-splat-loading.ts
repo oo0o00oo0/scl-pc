@@ -176,10 +176,22 @@ export const useSplatLoading = (
               );
             }
 
-            // if (!activeRef.current) {
-            handleUnload();
+            // Delay handleUnload to prevent race conditions with other landscapes
+            // that might need the same asset
+            setTimeout(() => {
+              if (!activeRef.current) {
+                console.log(
+                  `🗑️ [${hookId}] Delayed unload - checking if still inactive`,
+                );
+                handleUnload();
+              } else {
+                console.log(
+                  `🗑️ [${hookId}] Skipping unload - landscape became active again`,
+                );
+              }
+            }, 0); // Longer delay to let other landscapes activate and load assets
+
             app.renderNextFrame = true;
-            // }
           });
         }
       }, 0);
