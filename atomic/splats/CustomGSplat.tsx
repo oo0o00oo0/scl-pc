@@ -76,6 +76,7 @@ export const CustomGSplat = forwardRef<CustomGSplatRef, GsplatProps>(
       if (asset && asset.resource && active) {
         // Additional safety checks for the resource
         const resource = asset.resource as any;
+        console.log("RESOURCE", resource);
 
         // Only proceed if resource looks valid and we don't already have an entity
         if (
