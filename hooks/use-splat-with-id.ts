@@ -4,6 +4,44 @@ import { useQuery } from "@tanstack/react-query";
 import type { UseQueryOptions } from "@tanstack/react-query";
 import { Application, Asset } from "playcanvas";
 
+// TODO - dynamic logic for cache size based on device memory
+const getMaxCacheSize = () => {
+  const memory = (navigator as any).deviceMemory || 4; // GB
+  const isMobile = /Mobile|Tablet/.test(navigator.userAgent);
+
+  if (memory <= 2) return 50; // Low-end: 50MB
+  if (memory <= 4 || isMobile) return 100; // Mid-range: 100MB
+  return 200; // High-end: 200MB
+};
+
+// const checkMemoryPressure = () => {
+//   if ('memory' in performance) {
+//     const mem = (performance as any).memory;
+//     const usage = mem.usedJSHeapSize / mem.jsHeapSizeLimit;
+
+//     if (usage > 0.8) {
+//       // Aggressively clear cache
+//       clearOldestAssets();
+//     }
+//   }
+// };
+
+// // LRU eviction when approaching limits
+// const evictLeastRecentlyUsed = () => {
+//   // Remove oldest assets first
+//   // Keep currently active assets
+//   // Free up memory before it becomes critical
+// };
+
+// const cleanupBlobUrl = (url: string) => {
+//   const blobUrl = blobUrlCache.get(url);
+//   if (blobUrl) {
+//     URL.revokeObjectURL(blobUrl);
+//     blobUrlCache.delete(url);
+//   }
+// };
+
+//
 export type AssetMeta = {
   /**
    * The normalized progress of the asset loading.

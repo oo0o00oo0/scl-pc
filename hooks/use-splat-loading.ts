@@ -75,6 +75,7 @@ export const useSplatLoading = (
   }, [splat, splat?.loaded, app, url]);
 
   useEffect(() => {
+    if (!splat) return;
     // console.log("RERAN", url.split("/").pop());
     const landscapeScript = scriptRef.current;
 
@@ -93,6 +94,7 @@ export const useSplatLoading = (
       if (splatAsset && splatAsset.loaded) {
         // Unload from PlayCanvas app to free VRAM
         splatAsset.unload();
+        // splat.destroy();
 
         console.log(
           `✅ [${hookId}] Asset unloaded, VRAM freed. Binary data remains cached.`,
@@ -126,7 +128,6 @@ export const useSplatLoading = (
             );
           }
           landscapeScript.animateToOpacity(1, 1800, () => {
-            // Double-check active state before calling onReady
             if (activeRef.current) {
               console.log(
                 `Animation completed for ${
@@ -140,7 +141,13 @@ export const useSplatLoading = (
         }
       }, 400);
     } else {
-      console.log("animate to OFF from not active", url.split("/").pop());
+      console.log(
+        "animate to OFF from not active",
+        splat,
+        url.split("/").pop(),
+      );
+
+      if (!splat.loaded) return;
       deactivateTimeout = setTimeout(() => {
         // Check if still inactive when timeout executes
         if (!activeRef.current) {
@@ -152,11 +159,10 @@ export const useSplatLoading = (
             );
           }
           landscapeScript.animateToOpacity(0, 1000, () => {
-            // Double-check inactive state before unloading
-            if (!activeRef.current) {
-              handleUnload();
-              app.renderNextFrame = true;
-            }
+            // if (!activeRef.current) {
+            handleUnload();
+            app.renderNextFrame = true;
+            // }
           });
         }
       }, 0);

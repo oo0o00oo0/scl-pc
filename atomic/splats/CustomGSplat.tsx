@@ -20,6 +20,7 @@ export const CustomGSplat: FC<GsplatProps> = (
 
     // Clean up existing entity first if it exists
     if (assetRef.current) {
+      console.log("cleaning up existing entity");
       parent.removeChild(assetRef.current);
       assetRef.current = null;
     }
@@ -59,6 +60,7 @@ export const CustomGSplat: FC<GsplatProps> = (
     }
 
     return () => {
+      console.log("CLEANING UP");
       if (!assetRef.current) return;
 
       // More thorough entity cleanup
