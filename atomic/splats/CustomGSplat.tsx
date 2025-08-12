@@ -30,9 +30,8 @@ export const CustomGSplat = forwardRef<CustomGSplatRef, GsplatProps>(
       destroyEntity: () => {
         if (assetRef.current) {
           console.log("Destroying entity via ref");
-          assetRef.current.destroy();
           parent.removeChild(assetRef.current);
-          console.log("cleaning up existing entity");
+          assetRef.current.destroy();
           assetRef.current = null;
         }
       },
@@ -41,7 +40,7 @@ export const CustomGSplat = forwardRef<CustomGSplatRef, GsplatProps>(
     useLayoutEffect(() => {
       const timestamp = Date.now();
 
-      // Clean up existing entity first if it exists
+      // Only create entity if asset has resource AND landscape is active
       if (asset && asset.resource && active && assetRef) {
         // Additional safety checks for the resource
         const resource = asset.resource as any;
