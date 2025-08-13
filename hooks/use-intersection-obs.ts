@@ -1,9 +1,8 @@
 import { useEffect, useRef } from "react";
-import sceneStore from "@/state/sceneState";
 
-export function useScrollSystem() {
+export function useScrollSystem(sceneStore: any) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const setLayoutData = sceneStore((s) => s.setLayoutData);
+  const setLayoutData = sceneStore((s: any) => s.setLayoutData);
 
   const measureHeights = () => {
     const sections = containerRef.current?.querySelectorAll<HTMLDivElement>(
