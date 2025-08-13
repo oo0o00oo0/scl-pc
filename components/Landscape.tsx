@@ -36,6 +36,7 @@ const Landscape = ({
       active,
     );
 
+  console.log("splat", splat);
   return (
     <Entity
       position={transform?.position || [0, 0, 0]}

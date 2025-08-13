@@ -232,7 +232,8 @@ class CameraControls extends Script {
    * @type {HTMLElement}
    * @private
    */
-  _element = this.app.graphicsDevice.canvas;
+  _element = document.getElementById("canvas-wrapper") ??
+    this.app.graphicsDevice.canvas;
   // _element = document.getElementById("test");
 
   /**
@@ -389,6 +390,7 @@ class CameraControls extends Script {
   zoomScaleMin = 0;
 
   initialize() {
+    console.log(this._element);
     this._onWheel = this._onWheel.bind(this);
     this._onPointerDown = this._onPointerDown.bind(this);
     this._onPointerMove = this._onPointerMove.bind(this);

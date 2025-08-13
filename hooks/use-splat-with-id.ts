@@ -149,11 +149,11 @@ const fetchSplat = async (
 
           // Cache the binary data
           binaryDataCache.set(src, arrayBuffer);
-          console.log(
-            `💾 Cached binary data for ${src} (${
-              (arrayBuffer.byteLength / 1024 / 1024).toFixed(2)
-            }MB)`,
-          );
+          // console.log(
+          //   `💾 Cached binary data for ${src} (${
+          //     (arrayBuffer.byteLength / 1024 / 1024).toFixed(2)
+          //   }MB)`,
+          // );
         }
 
         // Check if we have a cached blob URL
@@ -220,9 +220,9 @@ const fetchSplat = async (
 
 // Utility functions for cache management
 export const clearSplatCaches = () => {
-  console.log(
-    `Clearing splat caches: ${binaryDataCache.size} binary, ${blobUrlCache.size} blob URLs`,
-  );
+  // console.log(
+  //   `Clearing splat caches: ${binaryDataCache.size} binary, ${blobUrlCache.size} blob URLs`,
+  // );
 
   // Clean up blob URLs before clearing cache
   for (const blobUrl of blobUrlCache.values()) {
@@ -265,7 +265,6 @@ export const useDelayedSplat = (
   > = {
     queryKey,
     queryFn: async () => {
-      console.log("FETCHING");
       return fetchSplat(app, src, onProgress);
     },
     enabled: shouldLoad,

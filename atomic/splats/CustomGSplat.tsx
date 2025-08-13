@@ -40,7 +40,7 @@ export const CustomGSplat = forwardRef<CustomGSplatRef, GsplatProps>(
       const resource = asset.resource as any;
       if (resource && typeof resource.instantiate === "function") {
         try {
-          console.log("🎯 Creating GSplat entity");
+          // console.log("🎯 Creating GSplat entity");
           assetRef.current = resource.instantiate({ vertex });
           parent.addChild(assetRef.current!);
           app.renderNextFrame = true;
@@ -58,7 +58,7 @@ export const CustomGSplat = forwardRef<CustomGSplatRef, GsplatProps>(
 
       // Function to handle when asset resource becomes available
       const handleAssetReady = () => {
-        console.log("🎯 Asset ready event fired");
+        // console.log("🎯 Asset ready event fired");
         createEntity();
       };
 

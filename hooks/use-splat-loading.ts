@@ -27,15 +27,15 @@ export const useSplatLoading = (
 
   useEffect(() => {
     if (splat) {
-      console.log("Asset state check:", {
-        url: url.split("/").pop(),
-        loaded: splat.loaded,
-        loading: splat.loading,
-        hasResource: !!splat.resource,
-      });
+      // console.log("Asset state check:", {
+      //   url: url.split("/").pop(),
+      //   loaded: splat.loaded,
+      //   loading: splat.loading,
+      //   hasResource: !!splat.resource,
+      // });
 
       if (!splat.loaded && !splat.loading) {
-        console.log("🔄 Loading asset (from blob URL):", url.split("/").pop());
+        // console.log("🔄 Loading asset (from blob URL):", url.split("/").pop());
         app.assets.load(splat);
         return;
       }
@@ -43,7 +43,7 @@ export const useSplatLoading = (
   }, [splat, splat?.loaded, app, url, active]); // Add active to deps
 
   const handleEntityReady = () => {
-    console.log("🎬 Entity ready - starting animation");
+    // console.log("🎬 Entity ready - starting animation");
     if (!scriptRef.current) return;
 
     scriptRef.current.animateToOpacity(1, 1800, () => {
@@ -54,20 +54,20 @@ export const useSplatLoading = (
 
   useEffect(() => {
     if (!splat) return;
-
+    onReady(url);
     const landscapeScript = scriptRef.current;
     if (!landscapeScript) return;
 
     let animationTimeout: ReturnType<typeof setTimeout> | null = null;
 
     if (active) {
-      console.log("🎬 Landscape activated");
+      // console.log("🎬 Landscape activated");
       // Entity creation will trigger handleEntityReady which starts animation
     } else {
-      console.log("🎬 Landscape deactivated");
+      // console.log("🎬 Landscape deactivated");
       animationTimeout = setTimeout(() => {
         landscapeScript.animateToOpacity(0, 1000, () => {
-          console.log("🎬 Deactivation animation complete - cleaning up");
+          // console.log("🎬 Deactivation animation complete - cleaning up");
           // Destroy entity first
           if (entityRef.current) {
             console.log("🗑️ Destroying entity");
