@@ -52,6 +52,8 @@ export const useSplatLoading = (
     });
   };
 
+  // console.log(app.assets);
+
   useEffect(() => {
     if (!splat) return;
 
@@ -61,13 +63,13 @@ export const useSplatLoading = (
     let animationTimeout: ReturnType<typeof setTimeout> | null = null;
 
     if (active) {
-      console.log("🎬 Landscape activated");
+      // console.log("🎬 Landscape activated");
       // Entity creation will trigger handleEntityReady which starts animation
     } else {
-      console.log("🎬 Landscape deactivated");
+      // console.log("🎬 Landscape deactivated");
       animationTimeout = setTimeout(() => {
         landscapeScript.animateToOpacity(0, 1000, () => {
-          console.log("🎬 Deactivation animation complete - cleaning up");
+          // console.log("🎬 Deactivation animation complete - cleaning up");
           // Destroy entity first
           if (entityRef.current) {
             console.log("🗑️ Destroying entity");

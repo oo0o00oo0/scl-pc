@@ -86,6 +86,7 @@ const fetchSplat = async (
   onProgress?: (meta: AssetMeta, key: string) => void,
 ): Promise<Asset> => {
   return new Promise(async (resolve, reject) => {
+    console.log("FETCH");
     let propsKey = src;
 
     let asset = app.assets.find(propsKey, "gsplat");
@@ -149,11 +150,11 @@ const fetchSplat = async (
 
           // Cache the binary data
           binaryDataCache.set(src, arrayBuffer);
-          console.log(
-            `💾 Cached binary data for ${src} (${
-              (arrayBuffer.byteLength / 1024 / 1024).toFixed(2)
-            }MB)`,
-          );
+          // console.log(
+          //   `💾 Cached binary data for ${src} (${
+          //     (arrayBuffer.byteLength / 1024 / 1024).toFixed(2)
+          //   }MB)`,
+          // );
         }
 
         // Check if we have a cached blob URL
@@ -169,6 +170,7 @@ const fetchSplat = async (
         }
 
         // Create asset using blob URL
+        console.log("CREATE NEW ASSET");
         asset = new Asset(
           propsKey,
           "gsplat",
@@ -189,6 +191,7 @@ const fetchSplat = async (
     }
 
     const handleLoaded = () => {
+      console.log("HANDLE LOADED");
       cleanup();
       onProgress?.({ progress: 1 }, propsKey);
       resolve(asset);

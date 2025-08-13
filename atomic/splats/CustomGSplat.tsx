@@ -28,7 +28,6 @@ export const CustomGSplat = forwardRef<CustomGSplatRef, GsplatProps>(
         if (assetRef.current) {
           console.log("Destroying entity via ref");
           assetRef.current.destroy();
-          parent.removeChild(assetRef.current);
           assetRef.current = null;
         }
       },
@@ -40,7 +39,7 @@ export const CustomGSplat = forwardRef<CustomGSplatRef, GsplatProps>(
       const resource = asset.resource as any;
       if (resource && typeof resource.instantiate === "function") {
         try {
-          console.log("🎯 Creating GSplat entity");
+          // console.log("🎯 Creating GSplat entity");
           assetRef.current = resource.instantiate({ vertex });
           parent.addChild(assetRef.current!);
           app.renderNextFrame = true;
@@ -89,6 +88,7 @@ export const CustomGSplat = forwardRef<CustomGSplatRef, GsplatProps>(
 
       return () => {
         asset.off("change", handleResourceChange);
+        asset.off("ready", handleAssetReady);
       };
     }, [asset]);
 
