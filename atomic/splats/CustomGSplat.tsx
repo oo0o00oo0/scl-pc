@@ -66,7 +66,7 @@ export const CustomGSplat = forwardRef<CustomGSplatRef, GsplatProps>(
     useEffect(() => {
       // turn off → destroy our child and exit
       if (!active) {
-        destroyChild();
+        // destroyChild();
         return;
       }
 
@@ -92,9 +92,9 @@ export const CustomGSplat = forwardRef<CustomGSplatRef, GsplatProps>(
 
     // unmount cleanup
     useEffect(() => {
-      return () => {
-        destroyChild();
-      };
+      // return () => {
+      //   destroyChild();
+      // };
     }, []);
 
     return null;

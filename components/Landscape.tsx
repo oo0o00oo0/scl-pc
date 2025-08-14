@@ -1,14 +1,10 @@
 import { Entity } from "@playcanvas/react";
 import { type Asset } from "playcanvas";
-import {
-  GSplat,
-  Script as ScriptComponent,
-} from "@playcanvas/react/components";
+import { Script as ScriptComponent } from "@playcanvas/react/components";
 import { CustomGSplat } from "../atomic/splats/CustomGSplat";
 import LandscapeScript from "../scripts/landscape";
 import { useSplatLoading } from "../hooks/use-splat-loading";
 import { type AssetMeta } from "../hooks/use-splat-with-id";
-import { useSplat } from "@playcanvas/react/hooks";
 
 const Landscape = ({
   url,
