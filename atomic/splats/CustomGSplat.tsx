@@ -1,4 +1,4 @@
-import { forwardRef, useEffect, useImperativeHandle, useRef } from "react";
+import { forwardRef, useEffect, useImperativeHandle } from "react";
 import { type Asset, Entity as PcEntity } from "playcanvas";
 import { useApp, useParent } from "@playcanvas/react/hooks";
 import vertex from "../../shaders/vert.vert?raw";
@@ -17,16 +17,9 @@ export const CustomGSplat = forwardRef<CustomGSplatRef, GsplatProps>(
     const parent = useParent() as PcEntity;
     const app = useApp();
 
-    // we own this child entity; destroy it in cleanup
-    const childRef = useRef<PcEntity | null>(null);
-
     const destroyChild = () => {
-      console.log("destroying child");
-      if (childRef.current) {
-        childRef.current.destroy();
-        childRef.current = null;
-        if (app) app.renderNextFrame = true;
-      }
+      if (!parent.gsplat) return;
+      parent.removeComponent("gsplat");
     };
 
     useImperativeHandle(ref, () => ({
@@ -36,31 +29,26 @@ export const CustomGSplat = forwardRef<CustomGSplatRef, GsplatProps>(
     const attachGSplat = () => {
       if (!asset || !asset.loaded || !active) return;
 
-      // ensure child entity
-      if (!childRef.current) {
-        const child = new PcEntity("gsplat-entity");
-        childRef.current = child;
-        parent.addChild(child);
-      }
-
-      const child = childRef.current!;
-      const comp = (child as any).gsplat;
+      const comp = parent.gsplat;
 
       if (!comp) {
         // add gsplat with default material/shader
-        child.addComponent("gsplat", { asset });
+        parent.addComponent("gsplat", { asset });
       } else {
         // component exists; just swap/assign asset
         comp.asset = asset;
       }
 
       // if you later want to override shaders, do it AFTER material exists:
-      const material = (child as any).gsplat?.material;
-      console.log("material", material);
+      const material = parent.gsplat?.material;
       if (material) material.getShaderChunks("glsl").set("gsplatVS", vertex);
 
-      app.renderNextFrame = true;
-      onEntityReady?.();
+      // onEntityReady?.();
+      const timeout = setTimeout(() => {
+        onEntityReady?.();
+      }, 500);
+
+      return () => clearTimeout(timeout);
     };
 
     // main effect: react to asset / active

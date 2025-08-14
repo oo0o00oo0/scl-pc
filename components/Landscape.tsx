@@ -27,24 +27,21 @@ const Landscape = ({
   };
   opacityOverride?: number;
 }) => {
-  const { entityRef, splat, gsplatRef, scriptRef, handleEntityReady } =
-    useSplatLoading(
-      url,
-      load,
-      updateProgress,
-      onReady,
-      active,
-    );
+  const { entityRef, splat, scriptRef, handleEntityReady } = useSplatLoading(
+    url,
+    load,
+    updateProgress,
+    onReady,
+    active,
+  );
 
   return (
     <Entity
       position={transform?.position || [0, 0, 0]}
       rotation={transform?.rotation || [0, 0, 0]}
       scale={transform?.scale || [1, 1, 1]}
-      name="splat"
-      ref={gsplatRef}
     >
-      <Entity rotation={[0, 0, 180]}>
+      <Entity name={url.split("/").pop() || "splat"} rotation={[0, 0, 180]}>
         <CustomGSplat
           ref={entityRef}
           asset={splat as Asset}

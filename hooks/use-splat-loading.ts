@@ -33,7 +33,6 @@ export const useSplatLoading = (
   }, [splat, app, url, splat?.loaded, active]);
 
   const handleEntityReady = () => {
-    console.log("🎬 Entity ready - starting animation");
     if (!scriptRef.current) return;
 
     scriptRef.current.animateToOpacity(1, 1800, () => {
@@ -54,7 +53,7 @@ export const useSplatLoading = (
 
     if (!active) {
       animationTimeout = setTimeout(() => {
-        landscapeScript.animateToOpacity(0, 1000, () => {
+        landscapeScript.animateToOpacity(0, 1500, () => {
           if (entityRef.current) {
             console.log("CALLED HERE?");
             entityRef.current.destroyEntity();
