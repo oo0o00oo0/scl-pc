@@ -3,11 +3,7 @@ import { type AssetMeta, useDelayedSplat } from "./use-splat-with-id";
 import { useApp } from "@playcanvas/react/hooks";
 import { Entity as PcEntity } from "playcanvas";
 import type LandscapeScript from "../scripts/landscape";
-
-import { clearSplatCaches, getSplatCacheStats } from "./use-splat-with-id";
-
-export const getBinaryDataCacheStats = getSplatCacheStats;
-export const clearBinaryDataCache = clearSplatCaches;
+import sceneStore from "@/state/sceneStore";
 
 export const useSplatLoading = (
   url: string,
@@ -53,9 +49,12 @@ export const useSplatLoading = (
   };
 
   // console.log(app.assets);
+  const setIsTransitioning = sceneStore((state) => state.setIsTransitioning);
 
   useEffect(() => {
     if (!splat) return;
+
+    setIsTransitioning(true);
 
     const landscapeScript = scriptRef.current;
     if (!landscapeScript) return;
@@ -84,6 +83,9 @@ export const useSplatLoading = (
         });
       }, 0);
     }
+    setTimeout(() => {
+      setIsTransitioning(false);
+    }, 2200);
 
     return () => {
       if (animationTimeout) {

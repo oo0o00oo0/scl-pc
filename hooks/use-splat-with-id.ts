@@ -77,7 +77,6 @@ export type FetchAssetOptions = {
 };
 
 // Global cache for binary data and blob URLs
-const binaryDataCache = new Map<string, ArrayBuffer>();
 const blobUrlCache = new Map<string, string>();
 
 const fetchSplat = async (
@@ -98,66 +97,49 @@ const fetchSplat = async (
         let arrayBuffer: ArrayBuffer;
         let blobUrl: string;
 
-        // Check if we have cached binary data
-        const cachedBinary = binaryDataCache.get(src);
-        if (cachedBinary) {
-          arrayBuffer = cachedBinary;
-        } else {
-          // Fetch binary data with progress tracking
-          const response = await fetch(src);
-          if (!response.ok) {
-            throw new Error(`Failed to fetch ${src}: ${response.statusText}`);
-          }
+        const response = await fetch(src);
+        if (!response.ok) {
+          throw new Error(`Failed to fetch ${src}: ${response.statusText}`);
+        }
 
-          const contentLength = response.headers.get("content-length");
-          const total = contentLength ? parseInt(contentLength, 10) : 0;
+        const contentLength = response.headers.get("content-length");
+        const total = contentLength ? parseInt(contentLength, 10) : 0;
 
-          if (total && onProgress) {
-            // Stream with progress tracking
-            const reader = response.body?.getReader();
-            const chunks: Uint8Array[] = [];
-            let received = 0;
+        if (total && onProgress) {
+          // Stream with progress tracking
+          const reader = response.body?.getReader();
+          const chunks: Uint8Array[] = [];
+          let received = 0;
 
-            if (reader) {
-              while (true) {
-                const { done, value } = await reader.read();
-                if (done) break;
+          if (reader) {
+            while (true) {
+              const { done, value } = await reader.read();
+              if (done) break;
 
-                chunks.push(value);
-                received += value.length;
+              chunks.push(value);
+              received += value.length;
 
-                onProgress({
-                  progress: received / total,
-                  totalReceived: received,
-                  totalRequired: total,
-                }, propsKey);
-              }
-
-              // Combine chunks into ArrayBuffer
-              const combinedArray = new Uint8Array(received);
-              let offset = 0;
-              for (const chunk of chunks) {
-                combinedArray.set(chunk, offset);
-                offset += chunk.length;
-              }
-              arrayBuffer = combinedArray.buffer;
-            } else {
-              arrayBuffer = await response.arrayBuffer();
+              onProgress({
+                progress: received / total,
+                totalReceived: received,
+                totalRequired: total,
+              }, propsKey);
             }
+
+            const combinedArray = new Uint8Array(received);
+            let offset = 0;
+            for (const chunk of chunks) {
+              combinedArray.set(chunk, offset);
+              offset += chunk.length;
+            }
+            arrayBuffer = combinedArray.buffer;
           } else {
             arrayBuffer = await response.arrayBuffer();
           }
-
-          // Cache the binary data
-          binaryDataCache.set(src, arrayBuffer);
-          // console.log(
-          //   `💾 Cached binary data for ${src} (${
-          //     (arrayBuffer.byteLength / 1024 / 1024).toFixed(2)
-          //   }MB)`,
-          // );
+        } else {
+          arrayBuffer = await response.arrayBuffer();
         }
 
-        // Check if we have a cached blob URL
         const cachedBlobUrl = blobUrlCache.get(src);
         if (cachedBlobUrl) {
           blobUrl = cachedBlobUrl;
@@ -170,7 +152,6 @@ const fetchSplat = async (
         }
 
         // Create asset using blob URL
-        console.log("CREATE NEW ASSET");
         asset = new Asset(
           propsKey,
           "gsplat",
@@ -222,35 +203,6 @@ const fetchSplat = async (
 };
 
 // Utility functions for cache management
-export const clearSplatCaches = () => {
-  console.log(
-    `Clearing splat caches: ${binaryDataCache.size} binary, ${blobUrlCache.size} blob URLs`,
-  );
-
-  // Clean up blob URLs before clearing cache
-  for (const blobUrl of blobUrlCache.values()) {
-    URL.revokeObjectURL(blobUrl);
-  }
-
-  binaryDataCache.clear();
-  blobUrlCache.clear();
-};
-
-export const getSplatCacheStats = () => ({
-  binaryCache: {
-    size: binaryDataCache.size,
-    keys: Array.from(binaryDataCache.keys()),
-    totalSizeMB: Array.from(binaryDataCache.values()).reduce(
-      (total, buffer) => total + buffer.byteLength,
-      0,
-    ) / (1024 * 1024),
-  },
-  blobUrlCache: {
-    size: blobUrlCache.size,
-    keys: Array.from(blobUrlCache.keys()),
-  },
-});
-
 export const useDelayedSplat = (
   src: string,
   shouldLoad = true,
