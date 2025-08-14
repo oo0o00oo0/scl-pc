@@ -1,7 +1,6 @@
 import { useEffect, useRef } from "react";
 import { type AssetMeta, useDelayedSplat } from "./use-splat-with-id";
 import { useApp } from "@playcanvas/react/hooks";
-import { Entity as PcEntity } from "playcanvas";
 import type LandscapeScript from "../scripts/landscape";
 import sceneStore from "@/state/sceneStore";
 
@@ -15,7 +14,6 @@ export const useSplatLoading = (
   const setIsTransitioning = sceneStore((state) => state.setIsTransitioning);
 
   const scriptRef = useRef<LandscapeScript | null>(null);
-  const gsplatRef = useRef<PcEntity | null>(null);
   const entityRef = useRef<
     { destroyEntity: () => void } | null
   >(null);
@@ -25,7 +23,6 @@ export const useSplatLoading = (
   const { data: splat } = useDelayedSplat(url, load, updateProgress);
 
   useEffect(() => {
-    // console.log("gsplatRef", gsplatRef.current);
     if (splat && active) {
       if (!splat.loaded && !splat.loading) {
         console.log("🔄 Loading asset (from blob URL):", url.split("/").pop());
@@ -59,6 +56,7 @@ export const useSplatLoading = (
       animationTimeout = setTimeout(() => {
         landscapeScript.animateToOpacity(0, 1000, () => {
           if (entityRef.current) {
+            console.log("CALLED HERE?");
             entityRef.current.destroyEntity();
           }
           if (splat && splat.loaded) {
@@ -81,7 +79,6 @@ export const useSplatLoading = (
   return {
     entityRef,
     splat,
-    gsplatRef,
     handleEntityReady,
     scriptRef,
   };

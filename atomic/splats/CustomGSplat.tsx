@@ -21,6 +21,7 @@ export const CustomGSplat = forwardRef<CustomGSplatRef, GsplatProps>(
     const childRef = useRef<PcEntity | null>(null);
 
     const destroyChild = () => {
+      console.log("destroying child");
       if (childRef.current) {
         childRef.current.destroy();
         childRef.current = null;
@@ -65,12 +66,9 @@ export const CustomGSplat = forwardRef<CustomGSplatRef, GsplatProps>(
     // main effect: react to asset / active
     useEffect(() => {
       // turn off → destroy our child and exit
-      if (!active) {
-        // destroyChild();
+      if (!active || !asset) {
         return;
       }
-
-      if (!asset) return;
 
       let cancelled = false;
       const onReady = () => {
@@ -92,9 +90,9 @@ export const CustomGSplat = forwardRef<CustomGSplatRef, GsplatProps>(
 
     // unmount cleanup
     useEffect(() => {
-      // return () => {
-      //   destroyChild();
-      // };
+      return () => {
+        destroyChild();
+      };
     }, []);
 
     return null;
