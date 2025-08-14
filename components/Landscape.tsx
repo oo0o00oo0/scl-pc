@@ -1,10 +1,14 @@
 import { Entity } from "@playcanvas/react";
 import { type Asset } from "playcanvas";
-import { Script as ScriptComponent } from "@playcanvas/react/components";
+import {
+  GSplat,
+  Script as ScriptComponent,
+} from "@playcanvas/react/components";
 import { CustomGSplat } from "../atomic/splats/CustomGSplat";
 import LandscapeScript from "../scripts/landscape";
 import { useSplatLoading } from "../hooks/use-splat-loading";
 import { type AssetMeta } from "../hooks/use-splat-with-id";
+import { useSplat } from "@playcanvas/react/hooks";
 
 const Landscape = ({
   url,
@@ -44,14 +48,15 @@ const Landscape = ({
       name="splat"
       ref={gsplatRef}
     >
-      {/* <GSplat asset={asset as Asset} /> */}
-      <CustomGSplat
-        ref={entityRef}
-        asset={splat as Asset}
-        active={active}
-        onEntityReady={handleEntityReady}
-      />
-      <ScriptComponent ref={scriptRef} script={LandscapeScript} />
+      <Entity rotation={[0, 0, 180]}>
+        <CustomGSplat
+          ref={entityRef}
+          asset={splat as Asset}
+          active={active}
+          onEntityReady={handleEntityReady}
+        />
+        <ScriptComponent ref={scriptRef} script={LandscapeScript} />
+      </Entity>
     </Entity>
   );
 };

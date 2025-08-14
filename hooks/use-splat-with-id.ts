@@ -157,7 +157,7 @@ const fetchSplat = async (
           { url: blobUrl },
         );
 
-        (asset as any).id = propsKey;
+        // (asset as any).id = propsKey;
         (asset as any).originalUrl = src; // Keep reference to original URL
         (asset as any).blobUrl = blobUrl; // Keep reference to blob URL
 
