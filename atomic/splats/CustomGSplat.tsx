@@ -12,6 +12,7 @@ interface GsplatProps {
 interface CustomGSplatRef {
   destroyEntity: () => void;
 }
+//
 
 export const CustomGSplat = forwardRef<CustomGSplatRef, GsplatProps>(
   ({ asset, active, onEntityReady }, ref) => {
