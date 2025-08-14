@@ -44,6 +44,7 @@ const Landscape = ({
       name="splat"
       ref={gsplatRef}
     >
+      {/* <GSplat asset={asset as Asset} /> */}
       <CustomGSplat
         ref={entityRef}
         asset={splat as Asset}

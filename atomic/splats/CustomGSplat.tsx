@@ -20,7 +20,6 @@ export const CustomGSplat = forwardRef<CustomGSplatRef, GsplatProps>(
     const activeRef = useRef(active);
     const app = useApp();
 
-    // Keep activeRef in sync with current active state
     activeRef.current = active;
 
     useImperativeHandle(ref, () => ({
@@ -36,6 +35,7 @@ export const CustomGSplat = forwardRef<CustomGSplatRef, GsplatProps>(
       if (!asset?.resource || !activeRef.current || assetRef.current) return;
 
       const resource = asset.resource as any;
+
       if (resource && typeof resource.instantiate === "function") {
         try {
           assetRef.current = resource.instantiate({ vertex });
@@ -51,7 +51,7 @@ export const CustomGSplat = forwardRef<CustomGSplatRef, GsplatProps>(
     };
 
     useEffect(() => {
-      if (!asset) return;
+      if (!asset || !active) return;
 
       // Function to handle when asset resource becomes available
       const handleAssetReady = () => {
@@ -88,7 +88,7 @@ export const CustomGSplat = forwardRef<CustomGSplatRef, GsplatProps>(
         asset.off("change", handleResourceChange);
         asset.off("ready", handleAssetReady);
       };
-    }, [asset]);
+    }, [asset, active]);
 
     useEffect(() => {
       if (active && asset?.loaded && asset?.resource && !assetRef.current) {

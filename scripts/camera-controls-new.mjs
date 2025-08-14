@@ -1233,3 +1233,4 @@ class CameraControls extends Script {
 }
 
 export { CameraControls };
+

@@ -33,9 +33,9 @@ const CameraControls = (
         ref={scriptRef}
         script={CameraControlsScript}
         // script={CameraControlsOriginal}
-        enableZoom={false}
-        enablePan={false}
-        enableOrbit={false}
+        enableZoom={true}
+        enablePan={true}
+        enableOrbit={true}
       />
       <Camera
         nearClip={1}

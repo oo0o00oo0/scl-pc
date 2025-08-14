@@ -25,6 +25,7 @@ export const useSplatLoading = (
   const { data: splat } = useDelayedSplat(url, load, updateProgress);
 
   useEffect(() => {
+    console.log("gsplatRef", gsplatRef.current);
     if (splat && active) {
       if (!splat.loaded && !splat.loading) {
         console.log("🔄 Loading asset (from blob URL):", url.split("/").pop());
