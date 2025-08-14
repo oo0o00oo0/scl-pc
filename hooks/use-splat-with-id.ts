@@ -85,7 +85,6 @@ const fetchSplat = async (
   onProgress?: (meta: AssetMeta, key: string) => void,
 ): Promise<Asset> => {
   return new Promise(async (resolve, reject) => {
-    console.log("FETCH");
     let propsKey = src;
 
     let asset = app.assets.find(propsKey, "gsplat");
@@ -172,7 +171,6 @@ const fetchSplat = async (
     }
 
     const handleLoaded = () => {
-      console.log("HANDLE LOADED");
       cleanup();
       onProgress?.({ progress: 1 }, propsKey);
       resolve(asset);
@@ -220,7 +218,6 @@ export const useDelayedSplat = (
   > = {
     queryKey,
     queryFn: async () => {
-      console.log("FETCHING");
       return fetchSplat(app, src, onProgress);
     },
     enabled: shouldLoad,

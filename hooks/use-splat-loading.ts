@@ -12,31 +12,27 @@ export const useSplatLoading = (
   onReady: (url: string) => void,
   active: boolean,
 ) => {
+  const setIsTransitioning = sceneStore((state) => state.setIsTransitioning);
+
   const scriptRef = useRef<LandscapeScript | null>(null);
   const gsplatRef = useRef<PcEntity | null>(null);
   const entityRef = useRef<
     { destroyEntity: () => void } | null
   >(null);
+
   const app = useApp();
 
   const { data: splat } = useDelayedSplat(url, load, updateProgress);
 
   useEffect(() => {
-    if (splat) {
-      console.log("Asset state check:", {
-        url: url.split("/").pop(),
-        loaded: splat.loaded,
-        loading: splat.loading,
-        hasResource: !!splat.resource,
-      });
-
+    if (splat && active) {
       if (!splat.loaded && !splat.loading) {
         console.log("🔄 Loading asset (from blob URL):", url.split("/").pop());
         app.assets.load(splat);
         return;
       }
     }
-  }, [splat, splat?.loaded, app, url, active]); // Add active to deps
+  }, [splat, app, url, splat?.loaded, active]);
 
   const handleEntityReady = () => {
     console.log("🎬 Entity ready - starting animation");
@@ -48,9 +44,6 @@ export const useSplatLoading = (
     });
   };
 
-  // console.log(app.assets);
-  const setIsTransitioning = sceneStore((state) => state.setIsTransitioning);
-
   useEffect(() => {
     if (!splat) return;
 
@@ -61,24 +54,14 @@ export const useSplatLoading = (
 
     let animationTimeout: ReturnType<typeof setTimeout> | null = null;
 
-    if (active) {
-      // console.log("🎬 Landscape activated");
-      // Entity creation will trigger handleEntityReady which starts animation
-    } else {
-      // console.log("🎬 Landscape deactivated");
+    if (!active) {
       animationTimeout = setTimeout(() => {
         landscapeScript.animateToOpacity(0, 1000, () => {
-          // console.log("🎬 Deactivation animation complete - cleaning up");
-          // Destroy entity first
           if (entityRef.current) {
-            console.log("🗑️ Destroying entity");
             entityRef.current.destroyEntity();
           }
-          // Then unload asset
           if (splat && splat.loaded) {
-            console.log("🗑️ Unloading asset");
             splat.unload();
-            console.log("🗑️ Asset unloaded, loaded state:", splat.loaded);
           }
         });
       }, 0);
