@@ -27,7 +27,6 @@ const Landscape = ({
   };
   opacityOverride?: number;
 }) => {
-  console.log("LANDSACPE RENDERING");
   const { entityRef, splat, scriptRef, handleEntityReady } = useSplatLoading(
     url,
     load,
