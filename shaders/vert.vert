@@ -68,7 +68,7 @@ void main(void) {
 
 // m = 0.85 delays the curve so it stays low most of the time
 // k = 3.0 keeps the slope soft (increase toward 6–8 if you want snappier)
-  float w = logistic01(t, /*m*/ 0.5, /*k*/ 6.0);
+  float w = logistic01(t, /*m*/ 0.9, /*k*/ 8.0);
 
 // Keep it from ever reaching 0:
   float minVal = 0.05;
