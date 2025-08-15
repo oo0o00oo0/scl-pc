@@ -20,11 +20,11 @@ export const useSplatLoading = (
   const { data: splat } = useDelayedSplat(
     url,
     load,
-    // () => console.log("UPDATE PROGRESS"),
     updateProgress,
   );
 
   useEffect(() => {
+    console.log("ACTIVE", active, url.split("/").pop());
     if (splat && active) {
       if (!splat.loaded && !splat.loading) {
         console.log("🔄 Loading asset (from blob URL):", url.split("/").pop());
@@ -37,6 +37,7 @@ export const useSplatLoading = (
   const handleEntityReady = () => {
     if (!scriptRef.current) return;
 
+    console.log("ENTITY READY", url.split("/").pop());
     scriptRef.current.animateToOpacity(1, 1800, () => {
       onReady(url);
       app.renderNextFrame = true;
@@ -46,8 +47,7 @@ export const useSplatLoading = (
   useEffect(() => {
     if (!splat) return;
 
-    const landscapeScript = scriptRef.current;
-    if (!landscapeScript) return;
+    const landscapeScript = scriptRef.current!;
 
     let animationTimeout: ReturnType<typeof setTimeout> | null = null;
 
