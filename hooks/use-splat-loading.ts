@@ -20,7 +20,12 @@ export const useSplatLoading = (
 
   const app = useApp();
 
-  const { data: splat } = useDelayedSplat(url, load, updateProgress);
+  const { data: splat } = useDelayedSplat(
+    url,
+    load,
+    // () => console.log("UPDATE PROGRESS"),
+    updateProgress,
+  );
 
   useEffect(() => {
     if (splat && active) {
