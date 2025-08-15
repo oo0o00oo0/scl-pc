@@ -37,7 +37,6 @@ export const useSplatLoading = (
   const handleEntityReady = () => {
     if (!scriptRef.current) return;
 
-    console.log("ENTITY READY", url.split("/").pop());
     scriptRef.current.animateToOpacity(1, 1800, () => {
       onReady(url);
       app.renderNextFrame = true;
