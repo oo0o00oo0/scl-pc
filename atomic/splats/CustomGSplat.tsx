@@ -52,7 +52,7 @@ export const CustomGSplat = forwardRef<CustomGSplatRef, GsplatProps>(
       // onEntityReady?.();
       const timeout = setTimeout(() => {
         onEntityReady?.();
-      }, 500);
+      }, 400);
 
       return () => clearTimeout(timeout);
     };

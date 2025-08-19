@@ -11,14 +11,16 @@ type CamData = {
 };
 
 export const HtmlMarker = (
-  { worldPosition, size = 150, isActive, onClick, useCamStore, label }: {
-    worldPosition: Vec3;
-    size?: number;
-    isActive: boolean;
-    onClick: () => void;
-    useCamStore: () => CamData;
-    label: any;
-  },
+  { worldPosition, size = 150, isActive, onClick, useCamStore, label, pending }:
+    {
+      worldPosition: Vec3;
+      pending?: boolean;
+      size?: number;
+      isActive: boolean;
+      onClick: () => void;
+      useCamStore: () => CamData;
+      label: any;
+    },
 ) => {
   const ref = useRef<HTMLDivElement>(null);
   const svgRef = useRef<SVGSVGElement>(null);
@@ -77,6 +79,8 @@ export const HtmlMarker = (
       onPointerLeave={() => setHover(false)}
       ref={ref}
       style={{
+        opacity: pending ? 0.2 : 1,
+        transition: "opacity 0.3s ease-in-out",
         pointerEvents: isActive ? "auto" : "none",
         position: "absolute",
         top: 0,
