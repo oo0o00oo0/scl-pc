@@ -14,6 +14,7 @@ varying float vLinearDepth;
 #endif
 
 uniform float uSplatOpacity;    // Overall scaling factor for splat size
+uniform float uOpacityOverride;
 
 void main(void) {
   SplatSource source;
@@ -58,7 +59,7 @@ void main(void) {
 
   gl_Position = center.proj + vec4(blend, 0, 0);
   gaussianUV = corner.uv;
-  gaussianColor = vec4(prepareOutputFromGamma(max(clr.xyz, 0.0)), clr.w);
+  gaussianColor = vec4(prepareOutputFromGamma(max(clr.xyz, 0.0)), clr.w * 1.0);
 
     #ifndef DITHER_NONE
   id = float(source.id);

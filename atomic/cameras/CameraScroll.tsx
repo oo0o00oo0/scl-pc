@@ -7,9 +7,10 @@ import { CameraControls as CameraControlsScript } from "@/libs/scripts/camera-co
 import type { CamState } from "@/libs/types/camera.ts";
 import { Mat4, Vec4 } from "playcanvas";
 import { useRenderOnCameraChange } from "@/libs/hooks/use-render-on-camera-change";
-import useCameraControls from "./useCameraControls";
+// import useCameraControls from "./useCameraControls";
+import useScrollCamera from "./use-scroll-camera";
 
-const CameraControls = (
+const CameraScroll = (
   { camState, clearColor, onChange = () => {} }: {
     camState: CamState;
     clearColor: string;
@@ -23,7 +24,8 @@ const CameraControls = (
 ) => {
   const { entity } = useRenderOnCameraChange(onChange);
 
-  const scriptRef = useCameraControls(camState);
+  // const scriptRef = useCameraControls(camState);
+  const scriptRef = useScrollCamera(camState);
 
   return (
     <Entity
@@ -33,10 +35,9 @@ const CameraControls = (
       <Script
         ref={scriptRef}
         script={CameraControlsScript}
-        // script={CameraControlsOriginal}
         enableZoom={false}
         enablePan={false}
-        enableOrbit={true}
+        enableOrbit={false}
       />
       <Camera
         nearClip={1}
@@ -47,4 +48,4 @@ const CameraControls = (
   );
 };
 
-export default CameraControls;
+export default CameraScroll;

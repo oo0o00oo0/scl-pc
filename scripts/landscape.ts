@@ -9,13 +9,32 @@ class LandscapeScript extends Script {
   private animationDuration: number = 50; // milliseconds
   private elapsedTime: number = 0;
   private onComplete: () => void = () => {};
+  private material: any;
+  private _opacityOverride: number = 1;
 
   get opacity() {
     return this.currentOpacity;
   }
 
+  public set opacityOverride(value: number) {
+    console.log("opacityOverride", value);
+    const gsplatComponent = this.entity.findComponent("gsplat") as any;
+    const material = gsplatComponent?.material;
+    console.log("material", material);
+    this._opacityOverride = value;
+
+    if (material?.setParameter) {
+      material.setParameter(
+        "uOpacityOverride",
+        value,
+      );
+    }
+  }
+
   initialize() {
     this.entity.enabled = false;
+    console.log(this.entity);
+
     // this.entity.on("gsplat:ready", () => {
     //   this.currentOpacity = 0;
     //   this.targetOpacity = 0;
@@ -52,12 +71,16 @@ class LandscapeScript extends Script {
       this.app.autoRender = false;
     }
 
-    // Always update material parameter while animating or when reaching target
     const gsplatComponent = this.entity.findComponent("gsplat") as any;
+
     const material = gsplatComponent?.material;
 
+    // Always update material parameter while animating or when reaching target
     if (material?.setParameter) {
-      material.setParameter("uSplatOpacity", this.currentOpacity);
+      material.setParameter(
+        "uSplatOpacity",
+        this.currentOpacity * this._opacityOverride,
+      );
     }
 
     // [RENDER:ANIM] Request render during animation

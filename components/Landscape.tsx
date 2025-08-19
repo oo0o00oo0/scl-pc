@@ -13,6 +13,7 @@ const Landscape = ({
   onReady,
   load = false,
   transform,
+  opacityOverride,
 }: {
   active: boolean;
   updateProgress: (meta: AssetMeta, key: string) => void;
@@ -48,7 +49,11 @@ const Landscape = ({
           active={active}
           onEntityReady={handleEntityReady}
         />
-        <ScriptComponent ref={scriptRef} script={LandscapeScript} />
+        <ScriptComponent
+          opacityOverride={opacityOverride}
+          ref={scriptRef}
+          script={LandscapeScript}
+        />
       </Entity>
     </Entity>
   );

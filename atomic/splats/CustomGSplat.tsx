@@ -41,7 +41,11 @@ export const CustomGSplat = forwardRef<CustomGSplatRef, GsplatProps>(
 
       // if you later want to override shaders, do it AFTER material exists:
       const material = parent.gsplat?.material;
-      if (material) material.getShaderChunks("glsl").set("gsplatVS", vertex);
+
+      if (material) {
+        material.getShaderChunks("glsl").set("gsplatVS", vertex);
+        material.setParameter("uSplatOpacity", 0);
+      }
 
       // onEntityReady?.();
       const timeout = setTimeout(() => {
@@ -75,13 +79,6 @@ export const CustomGSplat = forwardRef<CustomGSplatRef, GsplatProps>(
       };
       // parent/app are stable from hooks; including them is fine but not required
     }, [asset, active, parent, app]);
-
-    // unmount cleanup
-    useEffect(() => {
-      return () => {
-        destroyChild();
-      };
-    }, []);
 
     return null;
   },

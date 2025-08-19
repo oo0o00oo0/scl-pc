@@ -232,7 +232,8 @@ class CameraControls extends Script {
    * @type {HTMLElement}
    * @private
    */
-  _element = this.app.graphicsDevice.canvas;
+  _element = document.getElementById("canvas-root") ??
+    this.app.graphicsDevice.canvas;
   // _element = document.getElementById("test");
 
   /**
