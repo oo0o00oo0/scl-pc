@@ -49,6 +49,7 @@ const useScrollCamera = (
       cameraConstraints,
     } = camState;
 
+    console.log(cameraConstraints);
     // const { pitchRange, azimuth } = cameraConstraints;
 
     // const clampAnglesHandler = (angles: Vec2) => {
