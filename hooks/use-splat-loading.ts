@@ -35,6 +35,11 @@ export const useSplatLoading = (
   const handleEntityReady = () => {
     if (!scriptRef.current) return;
 
+    console.log("Entity ready - initializing material");
+    // Initialize the material now that the gsplat component is ready
+    scriptRef.current.initializeMaterial();
+
+    console.log("Starting fade-in animation");
     scriptRef.current.animateToOpacity(1, 1800, () => {
       onReady(url);
       app.renderNextFrame = true;

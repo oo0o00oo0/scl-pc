@@ -16,31 +16,7 @@ class LandscapeScript extends Script {
     return this.currentOpacity;
   }
 
-  public set opacityOverride(value: number) {
-    console.log("opacityOverride", value);
-    const gsplatComponent = this.entity.findComponent("gsplat") as any;
-    const material = gsplatComponent?.material;
-    console.log("material", material);
-    this._opacityOverride = value;
-
-    if (material?.setParameter) {
-      material.setParameter(
-        "uOpacityOverride",
-        value,
-      );
-    }
-  }
-
   initialize() {
-    this.entity.enabled = false;
-    console.log(this.entity);
-
-    // this.entity.on("gsplat:ready", () => {
-    //   this.currentOpacity = 0;
-    //   this.targetOpacity = 0;
-    //   // [RENDER:INIT] Request render after gsplat ready
-    //   this.app.renderNextFrame = true;
-    // });
   }
 
   update(dt: number) {
@@ -67,17 +43,12 @@ class LandscapeScript extends Script {
       if (this.targetOpacity === 0) {
         this.entity.enabled = false;
       }
-
       this.app.autoRender = false;
     }
 
-    const gsplatComponent = this.entity.findComponent("gsplat") as any;
-
-    const material = gsplatComponent?.material;
-
     // Always update material parameter while animating or when reaching target
-    if (material?.setParameter) {
-      material.setParameter(
+    if (this.material?.setParameter) {
+      this.material.setParameter(
         "uSplatOpacity",
         this.currentOpacity * this._opacityOverride,
       );
@@ -111,6 +82,26 @@ class LandscapeScript extends Script {
 
   public isAnimating(): boolean {
     return this.animating;
+  }
+
+  public initializeMaterial(): void {
+    const gsplatComponent = this.entity.findComponent("gsplat") as any;
+    const material = gsplatComponent?.material;
+
+    if (material) {
+      console.log("Material found and initialized:", material);
+      this.material = material;
+
+      // Set initial opacity to 0
+      material.setParameter("uSplatOpacity", 0);
+
+      // Apply opacity override if set
+      if (this._opacityOverride !== 1) {
+        material.setParameter("uOpacityOverride", this._opacityOverride);
+      }
+    } else {
+      console.log("Material not ready yet");
+    }
   }
 }
 

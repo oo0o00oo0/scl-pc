@@ -24,7 +24,6 @@ const CameraScroll = (
 ) => {
   const { entity } = useRenderOnCameraChange(onChange);
 
-  // const scriptRef = useCameraControls(camState);
   const scriptRef = useScrollCamera(camState);
 
   return (

@@ -47,10 +47,10 @@ const Landscape = ({
           ref={entityRef}
           asset={splat as Asset}
           active={active}
+          opacityOverride={opacityOverride}
           onEntityReady={handleEntityReady}
         />
         <ScriptComponent
-          opacityOverride={opacityOverride}
           ref={scriptRef}
           script={LandscapeScript}
         />

@@ -61,6 +61,7 @@ export const HtmlMarker = (
       ease: "power2.inOut",
     });
   }, [hover]);
+
   useEffect(() => {
     gsap.to(svgRef.current, {
       opacity: isActive ? 1 : 0,

@@ -5,6 +5,7 @@ import vertex from "../../shaders/vert.vert?raw";
 interface GsplatProps {
   asset: Asset;
   active: boolean;
+  opacityOverride?: number;
   onEntityReady?: () => void;
 }
 
@@ -13,7 +14,7 @@ interface CustomGSplatRef {
 }
 
 export const CustomGSplat = forwardRef<CustomGSplatRef, GsplatProps>(
-  ({ asset, active, onEntityReady }, ref) => {
+  ({ asset, active, onEntityReady, opacityOverride = 1 }, ref) => {
     const parent = useParent() as PcEntity;
     const app = useApp();
 
@@ -44,7 +45,8 @@ export const CustomGSplat = forwardRef<CustomGSplatRef, GsplatProps>(
 
       if (material) {
         material.getShaderChunks("glsl").set("gsplatVS", vertex);
-        material.setParameter("uSplatOpacity", 0);
+        material.setParameter("uOpacityOverride", opacityOverride);
+        // material.setParameter("uSplatOpacity", 0);
       }
 
       // onEntityReady?.();
