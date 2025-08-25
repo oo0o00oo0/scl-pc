@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { Children, useEffect, useRef, useState } from "react";
 import { Mat4, Vec3, Vec4 } from "playcanvas";
 import gsap from "gsap";
 import { worldToScreenStandalone } from "../utils";
@@ -11,21 +11,28 @@ type CamData = {
 };
 
 export const HtmlMarker = (
-  { worldPosition, size = 150, isActive, onClick, useCamStore, label, pending }:
-    {
-      worldPosition: Vec3;
-      pending?: boolean;
-      size?: number;
-      isActive: boolean;
-      onClick: () => void;
-      useCamStore: () => CamData;
-      label: any;
-    },
+  {
+    worldPosition,
+    size,
+    isActive,
+    onClick,
+    useCamStore,
+    label,
+    pending,
+    children,
+  }: {
+    worldPosition: Vec3;
+    size: number;
+    pending?: boolean;
+    isActive: boolean;
+    onClick: () => void;
+    useCamStore: () => CamData;
+    label: any;
+    children: React.ReactNode;
+  },
 ) => {
   const ref = useRef<HTMLDivElement>(null);
-  const svgRef = useRef<SVGSVGElement>(null);
   const screenPos = useRef<Vec3>(new Vec3());
-  const [hover, setHover] = useState<boolean>(false);
 
   const camData = useCamStore();
 
@@ -55,27 +62,11 @@ export const HtmlMarker = (
     }px, ${result.screenCoord.y - size / 2}px)`;
   }, [worldPosition, isActive, camData]);
 
-  useEffect(() => {
-    gsap.to(svgRef.current, {
-      stroke: hover ? "#" : "#EFEFE6",
-      strokeWidth: hover ? 2 : 1.2,
-      duration: 0.3,
-      ease: "power2.inOut",
-    });
-  }, [hover]);
-  useEffect(() => {
-    gsap.to(svgRef.current, {
-      opacity: isActive ? 1 : 0,
-      duration: 0.3,
-      ease: "power2.inOut",
-    });
-  }, [isActive]);
-
   return (
     <div
       onClick={onClick}
-      onPointerEnter={() => setHover(true)}
-      onPointerLeave={() => setHover(false)}
+      // onPointerEnter={() => setHover(true)}
+      // onPointerLeave={() => setHover(false)}
       ref={ref}
       style={{
         opacity: pending ? 0.2 : 1,
@@ -92,7 +83,7 @@ export const HtmlMarker = (
     >
       <div
         style={{
-          opacity: hover ? 1 : 0,
+          // opacity: hover ? 1 : 0,
           transition: "opacity 0.3s ease-in-out",
           backgroundColor: "#1F3C6D",
           color: "#fff",
@@ -107,23 +98,7 @@ export const HtmlMarker = (
       >
         {label.name}
       </div>
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width={size}
-        height={size}
-        viewBox="0 0 24 24"
-        fill="none"
-        // stroke={color}
-        strokeWidth="1"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        className="lucide lucide-target-icon lucide-target"
-        ref={svgRef}
-      >
-        <circle fill={"#1F3C6D"} cx="12" cy="12" r="10" />
-        <circle cx="12" cy="12" r="6" />
-        <circle cx="12" cy="12" r="2" />
-      </svg>
+      {children}
     </div>
   );
 };

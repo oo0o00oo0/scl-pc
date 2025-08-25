@@ -39,7 +39,7 @@ const CameraControls = (
       />
       <Camera
         nearClip={1}
-        farClip={100}
+        farClip={1000}
         clearColor={clearColor}
       />
     </Entity>
