@@ -65,6 +65,8 @@ export const CustomGSplat = forwardRef<CustomGSplatRef, GsplatProps>(
       }
 
       let cancelled = false;
+
+      // console.log("cancelled", cancelled);
       const onReady = () => {
         if (!cancelled) attachGSplat();
       };

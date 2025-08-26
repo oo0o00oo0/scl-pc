@@ -1,42 +1,25 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useLayoutEffect, useRef } from "react";
 import type { CamState } from "@/libs/types/camera";
-import { Script, Vec3 } from "playcanvas";
+import { Script, Vec2, Vec3 } from "playcanvas";
 import camStore from "@/state/camStore";
 import sceneStore from "@/state/sceneState";
 import {
   getCameraInterpolationData,
   getCurrentSectionIndex,
 } from "@/libs/utils/scrollUtils";
-import SceneConfig from "@/data/articles/3DUXD/3DUXD-config";
+import { SCENE_CONFIG } from "@/data/articles/3DUXD/3DUXD-config";
+import { clampAzimuthAngle } from "../utils/cameraUtils";
 
 const useScrollCamera = (
   camState: CamState,
 ) => {
   const scriptRef = useRef<Script>(null);
   const setScriptRef = camStore((s) => s.setScriptRef);
-  const setActive = sceneStore((s) => s.setActive);
   const layoutData = sceneStore((state) => state.layoutData);
 
-  // Section index tracking - independent of camera movement
-  useEffect(() => {
-    if (!layoutData?.heights) return;
-
-    const sub = camStore.subscribe(
-      (state) => state.scrollPosition,
-      (scrollPosition: number) => {
-        const currentSectionIndex = getCurrentSectionIndex(
-          scrollPosition,
-          layoutData.heights,
-        );
-
-        setActive(currentSectionIndex);
-      },
-    );
-
-    return () => {
-      sub();
-    };
-  }, [layoutData, setActive]);
+  useLayoutEffect(() => {
+    setScriptRef(scriptRef.current);
+  }, []);
 
   useEffect(() => {
     if (!camState || !layoutData?.heights) return;
@@ -49,47 +32,32 @@ const useScrollCamera = (
       cameraConstraints,
     } = camState;
 
-    console.log(cameraConstraints);
-    // const { pitchRange, azimuth } = cameraConstraints;
+    const { pitchRange, azimuth } = cameraConstraints;
 
-    // const clampAnglesHandler = (angles: Vec2) => {
-    //   angles.x = Math.max(
-    //     pitchRange.min,
-    //     Math.min(pitchRange.max, angles.x),
-    //   );
-    //   angles.y = clampAzimuthAngle(angles.y, azimuth);
-    // };
+    const clampAnglesHandler = (angles: Vec2) => {
+      if (!pitchRange || !azimuth) return;
+      angles.x = Math.max(
+        pitchRange.min,
+        Math.min(pitchRange.max, angles.x),
+      );
+      angles.y = clampAzimuthAngle(angles.y, azimuth);
+    };
 
     const cameraControlsScript = scriptRef.current!;
-    // cameraControlsScript.on("clamp:angles", clampAnglesHandler);
-    setScriptRef(scriptRef.current);
+    cameraControlsScript.on("clamp:angles", clampAnglesHandler);
 
     if (isScroll) {
-      // For scroll-enabled sections, interpolate based on scroll progress within the section
       const sub = camStore.subscribe(
         (state) => state.scrollPosition,
         (scrollPosition: number) => {
-          const { camStateTest } = SceneConfig;
-
           const interpolationData = getCameraInterpolationData(
             scrollPosition,
             layoutData.heights,
-            camStateTest,
+            SCENE_CONFIG,
           );
 
           const { fromCamState, toCamState, progress, shouldInterpolate } =
             interpolationData;
-
-          // console.log("Camera interpolation:", {
-          //   shouldInterpolate,
-          //   progress: progress.toFixed(2),
-          //   from: fromCamState
-          //     ? getCurrentSectionIndex(scrollPosition, layoutData.heights)
-          //     : null,
-          //   to: toCamState
-          //     ? getCurrentSectionIndex(scrollPosition, layoutData.heights) + 1
-          //     : null,
-          // });
 
           if (shouldInterpolate && fromCamState && toCamState) {
             // Interpolate position between sections
@@ -111,7 +79,6 @@ const useScrollCamera = (
               true,
             );
           } else if (fromCamState) {
-            // Use current section's camera position
             //@ts-ignore
             cameraControlsScript.focus(
               fromCamState.target,
@@ -124,7 +91,7 @@ const useScrollCamera = (
 
       return () => {
         sub();
-        // cameraControlsScript.off("clamp:angles", clampAnglesHandler);
+        cameraControlsScript.off("clamp:angles", clampAnglesHandler);
       };
     } else {
       // For non-scroll sections, move directly to position after delay
@@ -134,7 +101,7 @@ const useScrollCamera = (
       }, delay);
 
       return () => {
-        // cameraControlsScript.off("clamp:angles", clampAnglesHandler);
+        cameraControlsScript.off("clamp:angles", clampAnglesHandler);
       };
     }
   }, [camState, layoutData]);

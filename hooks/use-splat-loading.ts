@@ -51,6 +51,7 @@ export const useSplatLoading = (
   };
 
   useEffect(() => {
+    console.log("ACTIVE", active, url.split("/").pop());
     if (!splat) return;
 
     // setIsTransitioning(true);
@@ -72,9 +73,9 @@ export const useSplatLoading = (
         });
       }, 0);
     }
-    setTimeout(() => {
-      // setIsTransitioning(false);
-    }, 2200);
+    // setTimeout(() => {
+    //   // setIsTransitioning(false);
+    // }, 2200);
 
     return () => {
       if (animationTimeout) {
