@@ -16,6 +16,6 @@ export interface CamState {
   position: Vec3;
   target: Vec3;
   delay?: number;
-  isScroll?: boolean;
+  isScrollTarget?: boolean;
   cameraConstraints: CameraConstraints;
 }

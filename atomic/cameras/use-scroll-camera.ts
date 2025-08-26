@@ -28,7 +28,7 @@ const useScrollCamera = (
       position,
       target,
       delay = 0,
-      isScroll = false,
+      isScrollTarget = false,
       cameraConstraints,
     } = camState;
 
@@ -46,7 +46,7 @@ const useScrollCamera = (
     const cameraControlsScript = scriptRef.current!;
     cameraControlsScript.on("clamp:angles", clampAnglesHandler);
 
-    if (isScroll) {
+    if (isScrollTarget) {
       const sub = camStore.subscribe(
         (state) => state.scrollPosition,
         (scrollPosition: number) => {
