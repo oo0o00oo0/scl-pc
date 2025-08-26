@@ -1,6 +1,5 @@
-import { Children, useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { Mat4, Vec3, Vec4 } from "playcanvas";
-import gsap from "gsap";
 import { worldToScreenStandalone } from "../utils";
 
 type CamData = {
