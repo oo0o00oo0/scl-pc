@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Mat4, Vec3, Vec4 } from "playcanvas";
 import { worldToScreenStandalone } from "../utils";
 
@@ -32,6 +32,7 @@ export const HtmlMarker = (
 ) => {
   const ref = useRef<HTMLDivElement>(null);
   const screenPos = useRef<Vec3>(new Vec3());
+  const [hover, setHover] = useState<boolean>(false);
 
   const camData = useCamStore();
 
@@ -64,8 +65,14 @@ export const HtmlMarker = (
   return (
     <div
       onClick={onClick}
-      // onPointerEnter={() => setHover(true)}
-      // onPointerLeave={() => setHover(false)}
+      onPointerEnter={() => {
+        document.body.style.cursor = "pointer";
+        setHover(true);
+      }}
+      onPointerLeave={() => {
+        document.body.style.cursor = "default";
+        setHover(false);
+      }}
       ref={ref}
       style={{
         opacity: pending ? 0.2 : 1,
@@ -82,7 +89,8 @@ export const HtmlMarker = (
     >
       <div
         style={{
-          // opacity: hover ? 1 : 0,
+          opacity: hover ? 1 : 0,
+          pointerEvents: "none",
           transition: "opacity 0.3s ease-in-out",
           backgroundColor: "#1F3C6D",
           color: "#fff",

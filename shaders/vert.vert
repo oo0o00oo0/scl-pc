@@ -75,6 +75,12 @@ void main(void) {
   float minVal = 0.05;
   w = mix(minVal, 1.0, w);
 
+  // float minVal = 0.05;
+
+  // w = mix(minVal, 1.0, w);
+
+  // vec3 blendColor = mix(vec3(0.95, 0.95, 0.96), prepareOutputFromGamma(max(clr.xyz, 0.0)), w);
+
 // Apply to your blend
   vec2 blend = mix(normalizedOffset, corner.offset, w);
   vec3 blendColor = mix(vec3(0.95, 0.95, 0.96), prepareOutputFromGamma(max(clr.xyz, 0.0)), w);
