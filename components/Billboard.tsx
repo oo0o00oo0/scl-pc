@@ -46,6 +46,7 @@ const Billboard = ({
   }, [active, model]);
 
   if (!model) return null;
+
   return (
     <Entity
       position={[label.position[0], label.position[1], label.position[2]]}
@@ -79,7 +80,7 @@ class TestScript extends Script {
   initialize() {
     if (!this.entity.children[0]) return;
 
-    this.entity.enabled = true;
+    this.entity.enabled = false;
     this.camera = this.app.root.children[0];
     this._models = this.entity.children[0].children;
     this.material = new StandardMaterial();
@@ -104,7 +105,6 @@ class TestScript extends Script {
     if (!this.entity) return;
 
     this.entity.on("click", () => {
-      console.log("CLICKED");
       if (this.callback) {
         this.callback({ id: this.name, position: this.entity.getPosition() });
       }
