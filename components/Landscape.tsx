@@ -5,6 +5,7 @@ import { CustomGSplat } from "../atomic/splats/CustomGSplat";
 import LandscapeScript from "../scripts/landscape";
 import { useSplatLoading } from "../hooks/use-splat-loading";
 import { type AssetMeta } from "../hooks/use-splat-with-id";
+import useSplat from "../hooks/use-splat";
 
 const Landscape = ({
   url,
@@ -28,7 +29,15 @@ const Landscape = ({
   };
   opacityOverride?: number;
 }) => {
-  const { entityRef, splat, scriptRef, handleEntityReady } = useSplatLoading(
+  // const { entityRef, splat, scriptRef, handleEntityReady } = useSplatLoading(
+  //   url,
+  //   load,
+  //   updateProgress,
+  //   onReady,
+  //   active,
+  // );
+
+  const { parent_ref, script_ref } = useSplat(
     url,
     load,
     updateProgress,
@@ -42,16 +51,22 @@ const Landscape = ({
       rotation={transform?.rotation || [0, 0, 0]}
       scale={transform?.scale || [1, 1, 1]}
     >
-      <Entity name={url.split("/").pop() || "splat"} rotation={[0, 0, 180]}>
-        <CustomGSplat
+      <Entity
+        ref={parent_ref}
+        name={url.split("/").pop() || "splat"}
+        rotation={[0, 0, 180]}
+      >
+        {
+          /* <CustomGSplat
           ref={entityRef}
           asset={splat as Asset}
           active={active}
           opacityOverride={opacityOverride}
           onEntityReady={handleEntityReady}
-        />
+        /> */
+        }
         <ScriptComponent
-          ref={scriptRef}
+          ref={script_ref}
           script={LandscapeScript}
         />
       </Entity>

@@ -48,6 +48,7 @@ class LandscapeScript extends Script {
 
     // Always update material parameter while animating or when reaching target
     if (this.material?.setParameter) {
+      console.log("Animating opacity:", this.currentOpacity);
       this.material.setParameter(
         "uSplatOpacity",
         this.currentOpacity * this._opacityOverride,
@@ -84,21 +85,24 @@ class LandscapeScript extends Script {
     return this.animating;
   }
 
-  public initializeMaterial(): void {
+  public initializeMaterial(vertex: string): void {
     const gsplatComponent = this.entity.findComponent("gsplat") as any;
     const material = gsplatComponent?.material;
+
+    material.getShaderChunks("glsl").set("gsplatVS", vertex);
 
     if (material) {
       console.log("Material found and initialized:", material);
       this.material = material;
 
       // Set initial opacity to 0
-      material.setParameter("uSplatOpacity", 0);
+      material.setParameter("uSplatOpacity", 0.5);
+      material.setParameter("uOpacityOverride", 1);
 
       // Apply opacity override if set
-      if (this._opacityOverride !== 1) {
-        material.setParameter("uOpacityOverride", this._opacityOverride);
-      }
+      // if (this._opacityOverride !== 1) {
+      //   material.setParameter("uOpacityOverride", this._opacityOverride);
+      // }
     } else {
       console.log("Material not ready yet");
     }
