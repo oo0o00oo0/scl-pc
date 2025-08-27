@@ -1,7 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useApp } from "@playcanvas/react/hooks";
-import { useQuery } from "@tanstack/react-query";
-import type { UseQueryOptions } from "@tanstack/react-query";
 import { Application, Asset } from "playcanvas";
 
 // TODO - dynamic logic for cache size based on device memory
@@ -79,7 +76,7 @@ export type FetchAssetOptions = {
 // Global cache for binary data and blob URLs
 const blobUrlCache = new Map<string, string>();
 
-const fetchSplat = async (
+const fetchBlobSplat = async (
   app: Application,
   src: string,
   onProgress?: (meta: AssetMeta, key: string) => void,
@@ -197,28 +194,4 @@ const fetchSplat = async (
   });
 };
 
-// Utility functions for cache management
-export const useDelayedSplat = (
-  src: string,
-  shouldLoad = true,
-  onProgress?: (meta: AssetMeta, key: string) => void,
-) => {
-  const app = useApp();
-
-  const queryKey = [app.root?.getGuid(), src];
-
-  const queryOptions: UseQueryOptions<
-    Asset | null,
-    Error,
-    Asset | null,
-    (string | number | {} | null)[]
-  > = {
-    queryKey,
-    queryFn: async () => {
-      return fetchSplat(app, src, onProgress);
-    },
-    enabled: shouldLoad,
-  };
-
-  return useQuery(queryOptions);
-};
+export default fetchBlobSplat;

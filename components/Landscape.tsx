@@ -1,10 +1,7 @@
 import { Entity } from "@playcanvas/react";
-import { type Asset } from "playcanvas";
 import { Script as ScriptComponent } from "@playcanvas/react/components";
-import { CustomGSplat } from "../atomic/splats/CustomGSplat";
 import LandscapeScript from "../scripts/landscape";
-import { useSplatLoading } from "../hooks/use-splat-loading";
-import { type AssetMeta } from "../hooks/use-splat-with-id";
+import { type AssetMeta } from "../hooks/fetch-splat";
 import useSplat from "../hooks/use-splat";
 
 const Landscape = ({
@@ -14,7 +11,6 @@ const Landscape = ({
   onReady,
   load = false,
   transform,
-  opacityOverride,
 }: {
   active: boolean;
   updateProgress: (meta: AssetMeta, key: string) => void;
@@ -29,14 +25,6 @@ const Landscape = ({
   };
   opacityOverride?: number;
 }) => {
-  // const { entityRef, splat, scriptRef, handleEntityReady } = useSplatLoading(
-  //   url,
-  //   load,
-  //   updateProgress,
-  //   onReady,
-  //   active,
-  // );
-
   const { parent_ref, script_ref } = useSplat(
     url,
     load,
@@ -56,15 +44,6 @@ const Landscape = ({
         name={url.split("/").pop() || "splat"}
         rotation={[0, 0, 180]}
       >
-        {
-          /* <CustomGSplat
-          ref={entityRef}
-          asset={splat as Asset}
-          active={active}
-          opacityOverride={opacityOverride}
-          onEntityReady={handleEntityReady}
-        /> */
-        }
         <ScriptComponent
           ref={script_ref}
           script={LandscapeScript}

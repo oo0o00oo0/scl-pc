@@ -65,11 +65,9 @@ void main(void) {
   float normalizedSize = 0.0; // Adjust this value to control uniform splat size
   vec2 normalizedOffset = normalize(corner.offset) * normalizedSize;
 
-  float t = clamp(uSplatOpacity, 0.0, 1.0);
-
 // m = 0.85 delays the curve so it stays low most of the time
 // k = 3.0 keeps the slope soft (increase toward 6–8 if you want snappier)
-  float w = logistic01(t, /*m*/ 0.9, /*k*/ 8.0);
+  float w = logistic01(uSplatOpacity, /*m*/ 0.9, /*k*/ 8.0);
 
 // Keep it from ever reaching 0:
   float minVal = 0.05;
@@ -87,7 +85,7 @@ void main(void) {
 
   gl_Position = center.proj + vec4(blend, 0, 0);
   gaussianUV = corner.uv;
-  gaussianColor = vec4(prepareOutputFromGamma(max(clr.xyz, 0.0)), clr.w * uOpacityOverride);
+  gaussianColor = vec4(prepareOutputFromGamma(max(blendColor.xyz, 0.0)), clr.w * uOpacityOverride);
   // gaussianColor = vec4(blendColor, clr.w * 1.0);
 
     #ifndef DITHER_NONE

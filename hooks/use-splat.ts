@@ -1,33 +1,61 @@
 import { useEffect, useRef } from "react";
-import { type AssetMeta, useDelayedSplat } from "./use-splat-with-id";
-import { Entity as PcEntity } from "playcanvas";
 import { useApp } from "@playcanvas/react/hooks";
+import { useQuery } from "@tanstack/react-query";
+import type { UseQueryOptions } from "@tanstack/react-query";
+import type { AssetMeta } from "./fetch-splat";
+import { Asset, Entity as PcEntity } from "playcanvas";
 import vertex from "../shaders/vert.vert?raw";
 import type LandscapeScript from "../scripts/landscape";
+import fetchBlobSplat from "./fetch-splat";
+
+export const useDelayedSplat = (
+  src: string,
+  shouldLoad = true,
+  onProgress?: (meta: AssetMeta, key: string) => void,
+) => {
+  const app = useApp();
+
+  const queryKey = [app.root?.getGuid(), src];
+
+  const queryOptions: UseQueryOptions<
+    Asset | null,
+    Error,
+    Asset | null,
+    (string | number | {} | null)[]
+  > = {
+    queryKey,
+    queryFn: async () => {
+      return fetchBlobSplat(app, src, onProgress);
+    },
+    enabled: shouldLoad,
+  };
+
+  return useQuery(queryOptions);
+};
 
 const instantiateAsset = async (
   app: any,
   asset: any,
   parent: any,
   script: any,
+  onReady?: () => void,
 ) => {
-  if (!asset.loaded && !asset.loading) app.assets.load(asset);
+  app.assets.load(asset);
 
-  if (!parent.gsplat) {
+  asset.ready(() => {
     parent.addComponent("gsplat", { asset });
-  }
-
-  await Promise.resolve();
-  const mat = parent.gsplat?.material;
-  if (mat && script) {
-    script.initializeMaterial(vertex);
-  }
+    script.initializeMaterial(vertex, () => {
+      script.animateToOpacity(1, 1800, () => {
+        app.renderNextFrame = true;
+        onReady?.();
+      });
+    });
+  });
 };
 
 const unmountAsset = (asset: any, _parent: any, script: any) => {
-  if (asset?.loaded) asset.unload();
-  script?.animateToOpacity(0, 1800, () => {
-    console.log("ANIAMTED OUT");
+  script.animateToOpacity(0, 1800, () => {
+    asset.unload();
   });
 };
 
@@ -49,16 +77,9 @@ const useSplat = (
     const parent = parent_ref.current;
     const script = script_ref.current;
 
-    console.log(asset.loaded);
-
     if (active) {
-      instantiateAsset(app, asset, parent, script).then(() => {
-        console.log("script", script);
-        script?.animateToOpacity(1, 1800, () => {
-          console.log("ANIAMTEDIN", url.split("/").pop());
-          onReady(url);
-          app.renderNextFrame = true;
-        });
+      instantiateAsset(app, asset, parent, script, () => {
+        onReady(url);
       });
     } else {
       unmountAsset(asset, parent, script);
