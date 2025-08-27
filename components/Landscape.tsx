@@ -4,6 +4,8 @@ import LandscapeScript from "../scripts/landscape";
 import { type AssetMeta } from "../hooks/fetch-splat";
 import useSplat from "../hooks/use-splat";
 
+type Transform = [number, number, number];
+
 const Landscape = ({
   url,
   active,
@@ -19,9 +21,9 @@ const Landscape = ({
   onReady: (url: string) => void;
   delay?: number;
   transform?: {
-    position?: [number, number, number];
-    rotation?: [number, number, number];
-    scale?: [number, number, number];
+    position?: Transform;
+    rotation?: Transform;
+    scale?: Transform;
   };
   opacityOverride?: number;
 }) => {
@@ -33,11 +35,14 @@ const Landscape = ({
     active,
   );
 
+  const { position, rotation, scale } = transform ||
+    { position: [0, 0, 0], rotation: [0, 0, 0], scale: [1, 1, 1] };
+
   return (
     <Entity
-      position={transform?.position || [0, 0, 0]}
-      rotation={transform?.rotation || [0, 0, 0]}
-      scale={transform?.scale || [1, 1, 1]}
+      position={position}
+      rotation={rotation}
+      scale={scale}
     >
       <Entity
         ref={parent_ref}
