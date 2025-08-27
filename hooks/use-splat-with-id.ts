@@ -85,14 +85,12 @@ const fetchSplat = async (
   onProgress?: (meta: AssetMeta, key: string) => void,
 ): Promise<Asset> => {
   return new Promise(async (resolve, reject) => {
-    let propsKey = src;
+    const propsKey = src;
 
     let asset = app.assets.find(propsKey, "gsplat");
 
     if (!asset) {
       try {
-        // Single fetch: get binary data first
-
         let arrayBuffer: ArrayBuffer;
         let blobUrl: string;
 
@@ -105,7 +103,6 @@ const fetchSplat = async (
         const total = contentLength ? parseInt(contentLength, 10) : 0;
 
         if (total && onProgress) {
-          // Stream with progress tracking
           const reader = response.body?.getReader();
           const chunks: Uint8Array[] = [];
           let received = 0;

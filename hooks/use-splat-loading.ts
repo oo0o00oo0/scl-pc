@@ -11,8 +11,6 @@ export const useSplatLoading = (
   onReady: (url: string) => void,
   active: boolean,
 ) => {
-  // const setIsTransitioning = sceneStore((state) => state.setIsTransitioning);
-
   const scriptRef = useRef<LandscapeScript | null>(null);
   const entityRef = useRef<
     { destroyEntity: () => void } | null
@@ -29,7 +27,6 @@ export const useSplatLoading = (
   useEffect(() => {
     if (splat && active) {
       if (!splat.loaded && !splat.loading) {
-        // console.log("🔄 Loading asset (from blob URL):", url.split("/").pop());
         app.assets.load(splat);
         return;
       }
@@ -39,11 +36,8 @@ export const useSplatLoading = (
   const handleEntityReady = () => {
     if (!scriptRef.current) return;
 
-    console.log("Entity ready - initializing material");
-    // Initialize the material now that the gsplat component is ready
     scriptRef.current.initializeMaterial();
 
-    console.log("Starting fade-in animation");
     scriptRef.current.animateToOpacity(1, 1800, () => {
       onReady(url);
       app.renderNextFrame = true;
@@ -51,10 +45,7 @@ export const useSplatLoading = (
   };
 
   useEffect(() => {
-    console.log("ACTIVE", active, url.split("/").pop());
     if (!splat) return;
-
-    // setIsTransitioning(true);
 
     const landscapeScript = scriptRef.current;
     if (!landscapeScript) return;
@@ -73,9 +64,6 @@ export const useSplatLoading = (
         });
       }, 0);
     }
-    // setTimeout(() => {
-    //   // setIsTransitioning(false);
-    // }, 2200);
 
     return () => {
       if (animationTimeout) {
