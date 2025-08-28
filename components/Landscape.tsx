@@ -46,11 +46,11 @@ const Landscape = ({
     >
       <Entity
         ref={parent_ref}
-        name={url.split("/").pop() || "splat"}
         rotation={[0, 0, 180]}
       >
         <ScriptComponent
           ref={script_ref}
+          url={url.split("/").pop()}
           script={LandscapeScript}
         />
       </Entity>

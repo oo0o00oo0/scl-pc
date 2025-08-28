@@ -14,7 +14,6 @@ varying float vLinearDepth;
 #endif
 
 uniform float uSplatOpacity;    // Overall scaling factor for splat size
-uniform float uOpacityOverride;
 // Normalized logistic S-curve in [0,1] with center m and slope k.
 // m in [0,1] sets where the curve is 0.5; k controls steepness (lower = softer).
 float logistic01(float t, float m, float k) {
@@ -85,7 +84,7 @@ void main(void) {
 
   gl_Position = center.proj + vec4(blend, 0, 0);
   gaussianUV = corner.uv;
-  gaussianColor = vec4(prepareOutputFromGamma(max(blendColor.xyz, 0.0)), clr.w * uOpacityOverride);
+  gaussianColor = vec4(prepareOutputFromGamma(max(blendColor.xyz, 0.0)), clr.w * uSplatOpacity);
   // gaussianColor = vec4(blendColor, clr.w * 1.0);
 
     #ifndef DITHER_NONE

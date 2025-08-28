@@ -11,6 +11,15 @@ class LandscapeScript extends Script {
   private onComplete: () => void = () => {};
   private material: any;
   private _opacityOverride: number = 1;
+  private _url: string = "";
+
+  set url(url: string) {
+    this._url = url;
+  }
+
+  get url(): string {
+    return this._url;
+  }
 
   get opacity() {
     return this.currentOpacity;
@@ -63,6 +72,9 @@ class LandscapeScript extends Script {
     durationMs: number = 1000,
     onComplete: () => void,
   ): void {
+    console.log(this.url);
+    console.log("TARGET", targetOpacity);
+    console.log("----");
     this.onComplete = onComplete;
     this.targetOpacity = Math.max(0, Math.min(1, targetOpacity));
     this.animationDuration = Math.max(16, durationMs);
@@ -92,12 +104,6 @@ class LandscapeScript extends Script {
     this.material.getShaderChunks("glsl").set("gsplatVS", vertex);
     this.material.setParameter("uSplatOpacity", 0);
 
-    // Apply opacity override if set
-    if (this._opacityOverride !== 1) {
-      material.setParameter("uOpacityOverride", this._opacityOverride);
-    } else {
-      material.setParameter("uOpacityOverride", 1);
-    }
     onInitialize?.();
   }
 }
