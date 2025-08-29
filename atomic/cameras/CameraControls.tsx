@@ -33,8 +33,8 @@ const CameraControls = (
       <Script
         ref={scriptRef}
         script={CameraControlsScript}
-        enableZoom={true}
-        enablePan={true}
+        enableZoom={false}
+        enablePan={false}
         enableOrbit={true}
       />
       <Camera

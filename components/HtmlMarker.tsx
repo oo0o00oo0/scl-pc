@@ -16,7 +16,7 @@ export const HtmlMarker = (
     isActive,
     onClick,
     useCamStore,
-    label,
+    title,
     pending,
     children,
   }: {
@@ -26,7 +26,7 @@ export const HtmlMarker = (
     isActive: boolean;
     onClick: () => void;
     useCamStore: () => CamData;
-    label: any;
+    title: string;
     children: React.ReactNode;
   },
 ) => {
@@ -92,18 +92,18 @@ export const HtmlMarker = (
           opacity: hover ? 1 : 0,
           pointerEvents: "none",
           transition: "opacity 0.3s ease-in-out",
-          backgroundColor: "#1F3C6D",
-          color: "#fff",
+          backgroundColor: "#fff",
+          color: "#1F3C6D",
           padding: "5px 10px",
-          borderRadius: "5px",
           position: "absolute",
           top: "100%",
           left: "50%",
+          textWrap: "nowrap",
           transform: "translate(-50%, 0)",
           zIndex: 2,
         }}
       >
-        {label.name}
+        {title}
       </div>
       {children}
     </div>
