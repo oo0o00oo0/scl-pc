@@ -15,7 +15,7 @@ const CameraScroll = (
     camState: CamState;
     clearColor: string;
     onChange: (camData: {
-      // viewProjMatrix: Mat4;
+      viewProjMatrix: Mat4;
       cameraRect: Vec4;
       canvasWidth: number;
       canvasHeight: number;
