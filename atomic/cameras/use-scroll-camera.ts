@@ -3,10 +3,7 @@ import type { CamState } from "@/libs/types/camera";
 import { Script, Vec2, Vec3 } from "playcanvas";
 import camStore from "@/state/camStore";
 import sceneStore from "@/state/sceneState";
-import {
-  getCameraInterpolationData,
-  getCurrentSectionIndex,
-} from "@/libs/utils/scrollUtils";
+import { getCameraInterpolationData } from "@/libs/utils/scrollUtils";
 import { SCENE_CONFIG } from "@/data/articles/3DUXD/3DUXD-config";
 import { clampAzimuthAngle } from "../utils/cameraUtils";
 
