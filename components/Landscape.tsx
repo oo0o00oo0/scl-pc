@@ -4,7 +4,11 @@ import LandscapeScript from "../scripts/landscape";
 import { type AssetMeta } from "../hooks/fetch-splat";
 import useSplat from "../hooks/use-splat";
 
-type Transform = [number, number, number];
+type Transform = {
+  position?: [number, number, number];
+  rotation?: [number, number, number];
+  scale?: [number, number, number];
+};
 
 const Landscape = ({
   url,
@@ -19,12 +23,9 @@ const Landscape = ({
   url: string;
   load: boolean;
   onReady: (url: string) => void;
+  //
   delay?: number;
-  transform?: {
-    position?: Transform;
-    rotation?: Transform;
-    scale?: Transform;
-  };
+  transform?: Transform | undefined;
   opacityOverride?: number;
 }) => {
   const { parent_ref, script_ref } = useSplat(
@@ -35,8 +36,7 @@ const Landscape = ({
     active,
   );
 
-  const { position, rotation, scale } = transform ||
-    { position: [0, 0, 0], rotation: [0, 0, 0], scale: [1, 1, 1] };
+  const { position, rotation, scale } = transform || {};
 
   return (
     <Entity

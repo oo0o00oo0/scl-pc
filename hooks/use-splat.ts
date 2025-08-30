@@ -79,10 +79,6 @@ const useSplat = (
     const parent = parent_ref.current;
     const script = script_ref.current;
 
-    if (script) {
-      script.url = url;
-    }
-
     if (isInstantiated.current && currentUrl.current !== url) {
       unmountAsset(asset, parent, script);
       isInstantiated.current = false;
