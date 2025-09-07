@@ -699,9 +699,6 @@ class CameraControls extends Script {
     const startFly = this._isStartFly(event);
     const startOrbit = this._isStartOrbit(event);
 
-    console.log("startFly", startFly);
-    console.log("startOrbit", startOrbit);
-
     if (this._focusing) {
       this._cancelSmoothTransform();
       this._focusing = false;

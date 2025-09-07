@@ -89,7 +89,7 @@ export const HtmlMarkerConnect = (
     onClick,
     useCamStore,
     label,
-    anchorPoint = { x: .7, y: .5 }, // Default to top-right
+    anchorPoint = { x: .8, y: .9 }, // Default to top-right
     pathType = "smooth", // Default to smooth curves
     pathStyle = {
       stroke: "#FFD700",
