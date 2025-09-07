@@ -123,24 +123,13 @@ export function getCameraInterpolationData(
 
   // Get current and next camera states
   const currentCamState = camStates[currentSectionIndex];
+
   const nextSectionIndex = Math.min(
     currentSectionIndex + 1,
     heights.length - 1,
   );
-  const nextCamState = camStates[nextSectionIndex];
 
-  // If we're in the last section or no next state exists, don't interpolate
-  if (
-    currentSectionIndex === heights.length - 1 || !nextCamState ||
-    !currentCamState
-  ) {
-    return {
-      fromCamState: currentCamState,
-      toCamState: currentCamState,
-      progress: 1,
-      shouldInterpolate: false,
-    };
-  }
+  const nextCamState = camStates[nextSectionIndex];
 
   return {
     fromCamState: currentCamState,

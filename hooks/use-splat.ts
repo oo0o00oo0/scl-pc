@@ -39,6 +39,7 @@ const instantiateAsset = async (
   script: any,
   onReady?: () => void,
 ) => {
+  console.log("instantiateAsset", asset);
   app.assets.load(asset);
 
   asset.ready(() => {

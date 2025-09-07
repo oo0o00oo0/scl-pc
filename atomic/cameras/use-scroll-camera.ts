@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import type { CamState } from "@/libs/types/camera";
 import { Script, Vec2, Vec3 } from "playcanvas";
 import camStore from "@/state/camStore";
@@ -7,24 +7,26 @@ import { getCameraInterpolationData } from "@/libs/utils/scrollUtils";
 import { SCENE_CONFIG } from "@/data/articles/3DUXD/3DUXD-config";
 import { clampAzimuthAngle } from "../utils/cameraUtils";
 
+type ScrollCameraScript = Script & {
+  focus: (target: Vec3, position: Vec3, immediate?: boolean) => void;
+};
+
 const useScrollCamera = (
   camState: CamState,
 ) => {
-  const scriptRef = useRef<Script>(null);
-  const setScriptRef = camStore((s) => s.setScriptRef);
+  const scriptRef = useRef<ScrollCameraScript>(null);
   const layoutData = sceneStore((state) => state.layoutData);
 
-  useLayoutEffect(() => {
-    setScriptRef(scriptRef.current);
-  }, []);
+  console.log("layoutData", layoutData);
 
   useEffect(() => {
-    if (!camState || !layoutData?.heights) return;
+    if (!camState) return;
+
+    const cameraControlsScript = scriptRef.current!;
 
     const {
       position,
       target,
-      delay = 0,
       isScrollTarget = false,
       cameraConstraints,
     } = camState;
@@ -40,10 +42,9 @@ const useScrollCamera = (
       angles.y = clampAzimuthAngle(angles.y, azimuth);
     };
 
-    const cameraControlsScript = scriptRef.current!;
     cameraControlsScript.on("clamp:angles", clampAnglesHandler);
 
-    if (isScrollTarget) {
+    if (isScrollTarget && layoutData?.heights) {
       const sub = camStore.subscribe(
         (state) => state.scrollPosition,
         (scrollPosition: number) => {
@@ -69,14 +70,14 @@ const useScrollCamera = (
             const interpolatedTarget = new Vec3();
             interpolatedTarget.lerp(fromTarget, toTarget, progress);
 
-            //@ts-ignore
+            // console.log("interpolatedTarget", interpolatedTarget);
+
             cameraControlsScript.focus(
               interpolatedTarget,
               interpolatedPos,
               true,
             );
           } else if (fromCamState) {
-            //@ts-ignore
             cameraControlsScript.focus(
               fromCamState.target,
               fromCamState.position,
@@ -91,12 +92,7 @@ const useScrollCamera = (
         cameraControlsScript.off("clamp:angles", clampAnglesHandler);
       };
     } else {
-      // For non-scroll sections, move directly to position after delay
-      setTimeout(() => {
-        //@ts-ignore
-        cameraControlsScript.focus(target, position);
-      }, delay);
-
+      cameraControlsScript.focus(target, position);
       return () => {
         cameraControlsScript.off("clamp:angles", clampAnglesHandler);
       };
