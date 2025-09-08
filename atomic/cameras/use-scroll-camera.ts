@@ -2,9 +2,9 @@ import { useEffect, useRef } from "react";
 import type { CamState } from "@/libs/types/camera";
 import { Script, Vec2, Vec3 } from "playcanvas";
 import camStore from "@/state/camStore";
-import sceneStore from "@/state/sceneState";
-import { getCameraInterpolationData } from "@/libs/utils/scrollUtils";
 import { SCENE_CONFIG } from "@/data/articles/3DUXD/3DUXD-config";
+import { getCameraInterpolationData } from "@/scrollUtils";
+
 import { clampAzimuthAngle } from "../utils/cameraUtils";
 
 type ScrollCameraScript = Script & {
@@ -13,11 +13,9 @@ type ScrollCameraScript = Script & {
 
 const useScrollCamera = (
   camState: CamState,
+  layoutData?: any,
 ) => {
   const scriptRef = useRef<ScrollCameraScript>(null);
-  const layoutData = sceneStore((state) => state.layoutData);
-
-  console.log("layoutData", layoutData);
 
   useEffect(() => {
     if (!camState) return;
@@ -30,6 +28,8 @@ const useScrollCamera = (
       isScrollTarget = false,
       cameraConstraints,
     } = camState;
+
+    // CONSTRAINTS
 
     const { pitchRange, azimuth } = cameraConstraints;
 
@@ -44,20 +44,19 @@ const useScrollCamera = (
 
     cameraControlsScript.on("clamp:angles", clampAnglesHandler);
 
-    if (isScrollTarget && layoutData?.heights) {
+    if (layoutData && isScrollTarget) {
       const sub = camStore.subscribe(
         (state) => state.scrollPosition,
         (scrollPosition: number) => {
           const interpolationData = getCameraInterpolationData(
             scrollPosition,
-            layoutData.heights,
+            layoutData,
             SCENE_CONFIG,
           );
 
-          const { fromCamState, toCamState, progress, shouldInterpolate } =
-            interpolationData;
+          const { fromCamState, toCamState, progress } = interpolationData;
 
-          if (shouldInterpolate && fromCamState && toCamState) {
+          if (fromCamState && toCamState) {
             // Interpolate position between sections
             const fromPos = fromCamState.position;
             const toPos = toCamState.position;
@@ -70,17 +69,9 @@ const useScrollCamera = (
             const interpolatedTarget = new Vec3();
             interpolatedTarget.lerp(fromTarget, toTarget, progress);
 
-            // console.log("interpolatedTarget", interpolatedTarget);
-
             cameraControlsScript.focus(
               interpolatedTarget,
               interpolatedPos,
-              true,
-            );
-          } else if (fromCamState) {
-            cameraControlsScript.focus(
-              fromCamState.target,
-              fromCamState.position,
               true,
             );
           }

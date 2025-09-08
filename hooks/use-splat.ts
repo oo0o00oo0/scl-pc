@@ -54,6 +54,7 @@ const instantiateAsset = async (
 
 const unmountAsset = (asset: any, _parent: any, script: any) => {
   script.animateToOpacity(0, 1800, () => {
+    _parent.removeComponent("gsplat");
     asset.unload();
   });
 };

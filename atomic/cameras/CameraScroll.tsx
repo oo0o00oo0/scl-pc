@@ -11,9 +11,10 @@ import { useRenderOnCameraChange } from "@/libs/hooks/use-render-on-camera-chang
 import useScrollCamera from "./use-scroll-camera";
 
 const CameraScroll = (
-  { camState, clearColor, onChange = () => {} }: {
+  { camState, clearColor, onChange = () => {}, layoutData }: {
     camState: CamState;
     clearColor: string;
+    layoutData: any;
     onChange: (camData: {
       viewProjMatrix: Mat4;
       cameraRect: Vec4;
@@ -24,7 +25,9 @@ const CameraScroll = (
 ) => {
   const { entity } = useRenderOnCameraChange(onChange);
 
-  const scriptRef = useScrollCamera(camState);
+  console.log("layoutData", layoutData);
+
+  const scriptRef = useScrollCamera(camState, layoutData);
 
   return (
     <Entity

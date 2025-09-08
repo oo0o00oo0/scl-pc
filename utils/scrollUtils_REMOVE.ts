@@ -102,19 +102,18 @@ export function getCameraInterpolationData(
   fromCamState: any;
   toCamState: any;
   progress: number;
-  shouldInterpolate: boolean;
 } {
   if (!heights || heights.length === 0 || !camStates) {
     return {
       fromCamState: null,
       toCamState: null,
       progress: 0,
-      shouldInterpolate: false,
     };
   }
 
   // Get current section and progress within it
   const currentSectionIndex = getCurrentSectionIndex(scrollPosition, heights);
+
   const sectionProgress = getSectionProgress(
     scrollPosition,
     currentSectionIndex,
@@ -135,6 +134,5 @@ export function getCameraInterpolationData(
     fromCamState: currentCamState,
     toCamState: nextCamState,
     progress: sectionProgress,
-    shouldInterpolate: true,
   };
 }
