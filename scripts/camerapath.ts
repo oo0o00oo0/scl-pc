@@ -1,12 +1,4 @@
-import {
-  Curve,
-  CURVE_LINEAR,
-  CURVE_SPLINE,
-  Entity,
-  math,
-  Script,
-  Vec3,
-} from "playcanvas";
+import { Curve, CURVE_SPLINE, Entity, math, Script, Vec3 } from "playcanvas";
 
 export class CameraPath extends Script {
   time: number = 0;
