@@ -41,13 +41,6 @@ const CameraControls = (
       position={[camState.position.x, camState.position.y, camState.position.z]}
       name="camera"
     >
-      {
-        /* <Script
-        // ref={scriptRef}
-        script={CameraPathScript}
-        points={points}
-      /> */
-      }
       <Script
         ref={scriptRef}
         script={CameraControlsScript}
