@@ -174,52 +174,21 @@ export class CameraPath extends Script {
       this.uz.add(t, 0);
       // Removed the extra i++ here - it was causing the loop to skip every other point
     }
-
-    console.log("Camera path created with", this.points.length, "points");
-    console.log("Position curve X:", this.px);
   }
 
   setTime(time: number): void {
-    console.log("SET TIME", time);
     this.time = time;
     // Force an update when time changes
     this.update();
   }
 
-  getCurvePointFromTime(time: number, animate: boolean = false): Vec3 {
+  getCurvePointFromTime(time: number): Vec3 {
     const percent = math.clamp(time, 0, 1);
     const targetPosition = new Vec3(
       this.px.value(percent),
       this.py.value(percent),
       this.pz.value(percent),
     );
-
-    if (animate && this.entity) {
-      // Calculate target look-at position
-      this.lookAt.set(
-        this.tx.value(percent),
-        this.ty.value(percent),
-        this.tz.value(percent),
-      );
-
-      // Calculate up vector
-      this.up.set(
-        this.ux.value(percent),
-        this.uy.value(percent),
-        this.uz.value(percent),
-      );
-
-      // Animate the camera to the target position
-      this.entity.setPosition(
-        targetPosition.x,
-        targetPosition.y,
-        targetPosition.z,
-      );
-      this.entity.lookAt(this.lookAt, this.up);
-
-      // Update internal time to maintain consistency
-      this.time = time;
-    }
 
     return targetPosition;
   }

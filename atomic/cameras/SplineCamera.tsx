@@ -64,7 +64,6 @@ const SplineCamera = (
             // scriptRef.current.setTime(normalizedTime);
             const curvePoint = scriptRef.current.getCurvePointFromTime(
               normalizedTime,
-              false,
             );
 
             cameraControlsScript.focus(
