@@ -689,8 +689,6 @@ class CameraControls extends Script {
       return;
     }
 
-    console.log("onPointerDown", event);
-
     this._element.setPointerCapture(event.pointerId);
     this._pointerEvents.set(event.pointerId, event);
 
@@ -813,12 +811,11 @@ class CameraControls extends Script {
    * @param {PointerEvent} event - The pointer event.
    */
   _look(event) {
-    // Allow events from canvas or custom control elements
-    const isValidTarget = event.target === this.app.graphicsDevice.canvas ||
-      event.target === this._element;
-    if (!isValidTarget) {
-      return;
-    }
+    const canvasEl = this.app.graphicsDevice.canvas;
+    const t = event.target;
+
+    const isValidTarget = !!t && (t === canvasEl || this._element.contains(t));
+    if (!isValidTarget) return;
     const movementX = event.movementX || 0;
     const movementY = event.movementY || 0;
     this._dir.x -= movementY * this.rotateSpeed;
