@@ -179,142 +179,49 @@ export class CameraPath extends Script {
     console.log("Position curve X:", this.px);
   }
 
-  // addUi(): void {
-  //   // Create and add CSS styles
-  //   const style = document.createElement("style");
-  //   document.head.appendChild(style);
-  //   style.innerHTML = `
-  //     .camera-path-container {
-  //       position: fixed;
-  //       bottom: 20px;
-  //       left: 20px;
-  //       background: rgba(0, 0, 0, 0.8);
-  //       border-radius: 8px;
-  //       padding: 15px;
-  //       color: white;
-  //       font-family: Arial, sans-serif;
-  //       z-index: 1000;
-  //       min-width: 300px;
-  //     }
-
-  //     .camera-path-title {
-  //       margin: 0 0 10px 0;
-  //       font-size: 14px;
-  //       font-weight: bold;
-  //     }
-
-  //     .camera-path-controls {
-  //       display: flex;
-  //       flex-direction: column;
-  //       gap: 10px;
-  //     }
-
-  //     .camera-path-slider-container {
-  //       display: flex;
-  //       flex-direction: column;
-  //       gap: 5px;
-  //     }
-
-  //     .camera-path-slider {
-  //       width: 100%;
-  //       height: 6px;
-  //       border-radius: 3px;
-  //       background: #333;
-  //       outline: none;
-  //       -webkit-appearance: none;
-  //       appearance: none;
-  //     }
-
-  //     .camera-path-slider::-webkit-slider-thumb {
-  //       -webkit-appearance: none;
-  //       appearance: none;
-  //       width: 16px;
-  //       height: 16px;
-  //       border-radius: 50%;
-  //       background: #fff;
-  //       cursor: pointer;
-  //     }
-
-  //     .camera-path-slider::-moz-range-thumb {
-  //       width: 16px;
-  //       height: 16px;
-  //       border-radius: 50%;
-  //       background: #fff;
-  //       cursor: pointer;
-  //       border: none;
-  //     }
-
-  //     .camera-path-button {
-  //       background: #007acc;
-  //       color: white;
-  //       border: none;
-  //       padding: 8px 16px;
-  //       border-radius: 4px;
-  //       cursor: pointer;
-  //       font-size: 12px;
-  //       transition: background-color 0.2s;
-  //     }
-
-  //     .camera-path-button:hover {
-  //       background: #005a99;
-  //     }
-
-  //     .camera-path-button:disabled {
-  //       background: #555;
-  //       cursor: not-allowed;
-  //     }
-
-  //     .camera-path-info {
-  //       font-size: 11px;
-  //       color: #ccc;
-  //       margin-top: 5px;
-  //     }
-  //   `;
-
-  //   // Create main container
-  //   this.div = document.createElement("div");
-  //   this.div.classList.add("camera-path-container");
-  //   document.body.appendChild(this.div);
-
-  //   // Create title
-  //   const title = document.createElement("h3");
-  //   title.classList.add("camera-path-title");
-  //   title.textContent = "Camera Path Controls";
-  //   this.div.appendChild(title);
-
-  //   // Create controls container
-  //   const controlsContainer = document.createElement("div");
-  //   controlsContainer.classList.add("camera-path-controls");
-  //   this.div.appendChild(controlsContainer);
-
-  //   // Create slider container
-  //   const sliderContainer = document.createElement("div");
-  //   sliderContainer.classList.add("camera-path-slider-container");
-  //   controlsContainer.appendChild(sliderContainer);
-
-  //   // Create slider label
-  //   const sliderLabel = document.createElement("label");
-  //   sliderLabel.textContent = "Path Position:";
-  //   sliderLabel.style.fontSize = "12px";
-  //   sliderContainer.appendChild(sliderLabel);
-
-  //   // Create path slider
-  //   this.pathSlider = document.createElement("input");
-  //   this.pathSlider.type = "range";
-  //   this.pathSlider.min = "0";
-  //   this.pathSlider.max = "100";
-  //   this.pathSlider.value = "0";
-  //   this.pathSlider.classList.add("camera-path-slider");
-  //   sliderContainer.appendChild(this.pathSlider);
-
-  //   // Create info text
-  // }
-
   setTime(time: number): void {
     console.log("SET TIME", time);
     this.time = time;
     // Force an update when time changes
     this.update();
+  }
+
+  getCurvePointFromTime(time: number, animate: boolean = false): Vec3 {
+    const percent = math.clamp(time, 0, 1);
+    const targetPosition = new Vec3(
+      this.px.value(percent),
+      this.py.value(percent),
+      this.pz.value(percent),
+    );
+
+    if (animate && this.entity) {
+      // Calculate target look-at position
+      this.lookAt.set(
+        this.tx.value(percent),
+        this.ty.value(percent),
+        this.tz.value(percent),
+      );
+
+      // Calculate up vector
+      this.up.set(
+        this.ux.value(percent),
+        this.uy.value(percent),
+        this.uz.value(percent),
+      );
+
+      // Animate the camera to the target position
+      this.entity.setPosition(
+        targetPosition.x,
+        targetPosition.y,
+        targetPosition.z,
+      );
+      this.entity.lookAt(this.lookAt, this.up);
+
+      // Update internal time to maintain consistency
+      this.time = time;
+    }
+
+    return targetPosition;
   }
 
   /**

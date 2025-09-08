@@ -1,13 +1,15 @@
 import { Entity } from "@playcanvas/react";
 import { Camera, Script } from "@playcanvas/react/components";
 import type { CamState } from "@/libs/types/camera.ts";
-import { Mat4, Vec4 } from "playcanvas";
+import { Mat4, Vec3, Vec4 } from "playcanvas";
 import { useRenderOnCameraChange } from "@/libs/hooks/use-render-on-camera-change";
 // @ts-ignore
 import { CameraPath } from "@/libs/scripts/camerapath";
 import { points } from "@/data/splinetest";
 import { useEffect, useRef } from "react";
 import camStore from "@/state/camStore";
+// @ts-ignore
+import { CameraControls } from "@/libs/scripts/camera-controls-scroll.mjs";
 
 const SplineCamera = (
   {
@@ -33,7 +35,17 @@ const SplineCamera = (
 
   const scriptRef = useRef<CameraPath | null>(null);
 
+  const controlsScriptRef = useRef<CameraControls | null>(null);
+
   useEffect(() => {
+    const {
+      position,
+      target,
+      // isScrollTarget = false,
+      // cameraConstraints,
+    } = camState;
+
+    const cameraControlsScript = controlsScriptRef.current;
     const sub = camStore.subscribe(
       (state) => state.scrollPosition,
       (scrollPosition) => {
@@ -49,11 +61,28 @@ const SplineCamera = (
             const normalizedTime = totalHeight > 0
               ? Math.min(scrollPosition / totalHeight, 1)
               : 0;
-            scriptRef.current.setTime(normalizedTime);
+            // scriptRef.current.setTime(normalizedTime);
+            const curvePoint = scriptRef.current.getCurvePointFromTime(
+              normalizedTime,
+              false,
+            );
+
+            cameraControlsScript.focus(
+              new Vec3(2.749073, 4, 5.169055),
+              curvePoint,
+              true,
+            );
           }
         }
       },
     );
+
+    cameraControlsScript.focus(
+      target,
+      position,
+      true,
+    );
+
     return () => {
       sub();
     };
@@ -70,7 +99,13 @@ const SplineCamera = (
         script={CameraPath}
         points={points}
       />
-
+      <Script
+        ref={controlsScriptRef}
+        script={CameraControls}
+        enableOrbit={true}
+        enableZoom={true}
+        enablePan={true}
+      />
       <Camera
         nearClip={1}
         fov={30}
