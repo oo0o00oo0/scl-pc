@@ -35,6 +35,8 @@ const SplineCamera = (
 
   const scriptRef = useRef<CameraPath | null>(null);
 
+  const setTempCamPosition = camStore((state) => state.setTempCamPosition);
+
   const controlsScriptRef = useRef<CameraControls | null>(null);
 
   useEffect(() => {
@@ -65,7 +67,7 @@ const SplineCamera = (
             const curvePoint = scriptRef.current.getCurvePointFromTime(
               normalizedTime,
             );
-
+            setTempCamPosition(curvePoint);
             cameraControlsScript.focus(
               new Vec3(2.749073, 4, 5.169055),
               curvePoint,
