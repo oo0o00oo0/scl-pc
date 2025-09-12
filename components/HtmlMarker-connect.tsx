@@ -92,7 +92,7 @@ export const HtmlMarkerConnect = (
     anchorPoint = { x: .8, y: .9 }, // Default to top-right
     pathType = "smooth", // Default to smooth curves
     pathStyle = {
-      stroke: "#FFD700",
+      stroke: "#ffffff87",
       strokeWidth: 2,
       strokeDasharray: "5,5",
     },
