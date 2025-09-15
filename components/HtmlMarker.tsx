@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Mat4, Vec3, Vec4 } from "playcanvas";
 import { worldToScreenStandalone } from "../utils";
 
@@ -26,7 +26,7 @@ export const HtmlMarker = (
     isActive: boolean;
     onClick: () => void;
     useCamStore: () => CamData;
-    title?: string;
+    title?: string | React.ReactElement;
     children: React.ReactNode;
   },
 ) => {
