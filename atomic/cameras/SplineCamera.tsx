@@ -5,6 +5,7 @@ import { Mat4, Vec3, Vec4 } from "playcanvas";
 import { useRenderOnCameraChange } from "@/libs/hooks/use-render-on-camera-change";
 // @ts-ignore
 import { CameraPath } from "@/libs/scripts/camerapath";
+// @ts-ignore
 import { points } from "@/data/splinetest";
 import { useEffect, useRef } from "react";
 import camStore from "@/state/camStore";
@@ -35,6 +36,7 @@ const SplineCamera = (
 
   const scriptRef = useRef<CameraPath | null>(null);
 
+  // @ts-ignore
   const setTempCamPosition = camStore((state) => state.setTempCamPosition);
 
   const controlsScriptRef = useRef<CameraControls | null>(null);
@@ -49,6 +51,7 @@ const SplineCamera = (
 
     const cameraControlsScript = controlsScriptRef.current;
     const sub = camStore.subscribe(
+      // @ts-ignore
       (state) => state.scrollPosition,
       (scrollPosition) => {
         if (scriptRef.current) {

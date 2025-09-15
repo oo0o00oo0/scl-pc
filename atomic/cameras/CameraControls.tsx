@@ -14,7 +14,6 @@ const CameraControls = (
     enablePan = true,
     onChange = () => {},
     CameraControlsScript,
-    layoutData = null,
   }: {
     camState: CamState;
     clearColor: string;
