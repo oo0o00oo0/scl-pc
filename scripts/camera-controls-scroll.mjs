@@ -667,7 +667,6 @@ class CameraControls extends Script {
    * @param {number} [lerpFactor=0.1] - Interpolation speed (higher = more responsive)
    */
   setAbsolutePosition(normalizedX, normalizedY, lerpFactor = 0.1) {
-    console.log("setAbsolutePosition", normalizedX, normalizedY);
     if (this._orbiting || this._focusing) {
       return; // Don't apply absolute positioning during active interactions
     }
@@ -903,6 +902,9 @@ class CameraControls extends Script {
     if (!this._camera) {
       return;
     }
+
+    console.log("screenToWorldPan", pos, point);
+
     const mouseW = this._camera.screenToWorld(pos.x, pos.y, 1);
     const cameraPos = this.entity.getPosition();
 
