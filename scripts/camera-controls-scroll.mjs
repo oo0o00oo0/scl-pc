@@ -569,6 +569,7 @@ class CameraControls extends Script {
    * @private
    */
   _isStartOrbit(event) {
+    console.log("isStartOrbit", this.enableOrbit);
     if (!this.enableOrbit) {
       return false;
     }
@@ -625,52 +626,10 @@ class CameraControls extends Script {
   }
 
   /**
-   * Set gentle camera movement based on mouse position
-   * @param {number} xOffset - Horizontal offset in degrees
-   * @param {number} yOffset - Vertical offset in degrees
-   */
-  setGentleMovement(xOffset, yOffset) {
-    if (this._orbiting || this._focusing) {
-      return; // Don't apply gentle movement during active interactions
-    }
-
-    // Store the base target angles if not set
-    if (!this._baseAngles) {
-      this._baseAngles = { x: this._dir.x, y: this._dir.y };
-    }
-
-    // Apply gentle offset to base angles
-    const targetX = this._baseAngles.x + yOffset;
-    const targetY = this._baseAngles.y + xOffset;
-
-    // Smooth interpolation factor (adjust for responsiveness)
-    const lerpFactor = 0.05; // Lower = smoother, higher = more responsive
-
-    // Smoothly interpolate towards target
-    this._dir.x = this._dir.x + (targetX - this._dir.x) * lerpFactor;
-    this._dir.y = this._dir.y + (targetY - this._dir.y) * lerpFactor;
-
-    // Apply constraints
-    this._clampAngles(this._dir);
-  }
-
-  /**
    * Update base angles (call this when camera state changes significantly)
    */
   updateBaseAngles() {
     this._baseAngles = { x: this._dir.x, y: this._dir.y };
-  }
-
-  /**
-   * Set absolute camera position based on normalized screen coordinates
-   * @param {number} normalizedX - Horizontal position (-1 to 1, left to right)
-   * @param {number} normalizedY - Vertical position (-1 to 1, top to bottom)
-   * @param {number} [lerpFactor=0.1] - Interpolation speed (higher = more responsive)
-   */
-  setAbsolutePosition(normalizedX, normalizedY, lerpFactor = 0.1) {
-    if (this._orbiting || this._focusing) {
-      return; // Don't apply absolute positioning during active interactions
-    }
   }
 
   /**
@@ -703,24 +662,16 @@ class CameraControls extends Script {
     }
 
     if (startTouchPan) {
-      // start touch pan
       this._lastPinchDist = this._getPinchDist();
       this._getMidPoint(this._lastPosition);
       this._panning = true;
     }
     if (startMousePan) {
-      // start mouse pan
       this._lastPosition.set(event.clientX, event.clientY);
       this._panning = true;
       this._dragging = true;
     }
-    if (startFly) {
-      // start fly
-      this._switchToFly();
-      this._dragging = true;
-    }
     if (startOrbit) {
-      // start orbit
       this._switchToOrbit();
       this._dragging = true;
     }
