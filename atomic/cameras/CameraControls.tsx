@@ -3,7 +3,7 @@ import { Camera, Script } from "@playcanvas/react/components";
 import type { CamState } from "@/libs/types/camera.ts";
 import { Mat4, Script as PcScript, Vec4 } from "playcanvas";
 import { useRenderOnCameraChange } from "@/libs/hooks/use-render-on-camera-change";
-import useScrollCamera from "./use-scroll-camera";
+import useCameraControls from "./useCameraControls";
 
 const CameraControls = (
   {
@@ -14,7 +14,6 @@ const CameraControls = (
     enablePan = true,
     onChange = () => {},
     CameraControlsScript,
-    layoutData = null,
   }: {
     camState: CamState;
     clearColor: string;
@@ -33,7 +32,7 @@ const CameraControls = (
 ) => {
   const { entity } = useRenderOnCameraChange(onChange);
 
-  const scriptRef = useScrollCamera(camState, layoutData);
+  const scriptRef = useCameraControls(camState);
 
   return (
     <Entity
