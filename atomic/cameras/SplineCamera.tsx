@@ -46,7 +46,6 @@ const SplineCamera = ({
   const setControlsScript = camStore((state: any) => state.setControlsScript);
 
   useEffect(() => {
-    console.log(layoutData);
     if (!layoutData) return;
     if (ghData) {
       setControlsScript(controlsScriptRef.current);
@@ -55,19 +54,14 @@ const SplineCamera = ({
       const path = scriptRef.current;
       if (!controls || !path) return;
 
-      console.log(ghData);
-
-      // Load your GH data into curves (builds p
-
       path.setPathFromGhChunks(ghData);
 
-      // Initial pose from current scroll (or 0)
       const t0 = camStore.getState().normalizedScrollPosition ?? 0;
       const { position: pos0, target: tgt0 } = path.getPose(0, t0);
       controls.focus(tgt0, pos0, true);
 
       const unsubscribe = camStore.subscribe(
-        (state: any) => state.scrollPosition,
+        (state: any) => state.scrollPositionNormalized,
         (scrollPosition: number) => {
           const currentSectionIndex = active;
 
@@ -82,7 +76,8 @@ const SplineCamera = ({
           );
 
           const i = Number(currentSectionIndex.split("-")[1]); // which track/chunk you want
-          const t = sectionProgress; // 0..1
+          // const t = sectionProgress; // 0..1
+          const t = scrollPosition; // 0..1
 
           const { position, target } = path.getPose(i, t);
 
