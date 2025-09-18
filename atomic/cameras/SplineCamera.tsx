@@ -6,7 +6,7 @@ import { CameraPath } from "@/libs/scripts/camerapath";
 import { useEffect, useRef } from "react";
 // @ts-ignore
 import { CameraControls } from "@/libs/scripts/camera-controls-scroll.mjs";
-import { getSectionProgress } from "@/utils/scrollUtils";
+// import { getSectionProgress } from "@/utils/scrollUtils";
 import sceneStore from "@/state/sceneState";
 
 interface SplineCameraProps {
@@ -61,25 +61,29 @@ const SplineCamera = ({
       controls.focus(tgt0, pos0, true);
 
       const unsubscribe = camStore.subscribe(
-        (state: any) => state.scrollPositionNormalized,
+        (state: any) => state.normalizedScrollPosition,
         (scrollPosition: number) => {
           const currentSectionIndex = active;
+
+          console.log("scrollPosition", scrollPosition);
 
           if (
             currentSectionIndex === null || currentSectionIndex === undefined
           ) return;
 
-          const sectionProgress = getSectionProgress(
-            scrollPosition,
-            currentSectionIndex,
-            layoutData,
-          );
+          // const sectionProgress = getSectionProgress(
+          //   scrollPosition,
+          //   currentSectionIndex,
+          //   layoutData,
+          // );
 
-          const i = Number(currentSectionIndex.split("-")[1]); // which track/chunk you want
+          // const i = Number(currentSectionIndex.split("-")[1]); // which track/chunk you want
           // const t = sectionProgress; // 0..1
-          const t = scrollPosition; // 0..1
+          // const t = scrollPosition; // 0..1
 
-          const { position, target } = path.getPose(i, t);
+          const { position, target } = path.getPose(0, scrollPosition);
+
+          console.log(position, target);
 
           controls.focus(target, position, true);
 
