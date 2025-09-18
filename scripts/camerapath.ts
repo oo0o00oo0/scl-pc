@@ -1,194 +1,241 @@
-import {
-  Curve,
-  // CURVE_LINEAR,
-  CURVE_SPLINE,
-  Entity,
-  math,
-  Script,
-  Vec3,
-} from "playcanvas";
+import { Curve, CURVE_SPLINE, Entity, math, Script, Vec3 } from "playcanvas";
 
 type V3 = { x: number; y: number; z: number };
+
+type CurveSet = {
+  px: Curve;
+  py: Curve;
+  pz: Curve; // position
+  fx: Curve;
+  fy: Curve;
+  fz: Curve; // forward/Z (for target)
+  ux: Curve;
+  uy: Curve;
+  uz: Curve; // up (optional; default 0,1,0)
+  tx: Curve;
+  ty: Curve;
+  tz: Curve; // explicit target (compat only)
+  keyCount: number; // cached for epsilon
+};
 
 export class CameraPath extends Script {
   // timeline
   time: number = 0;
 
-  // optional: raw points/planes if you want to populate from elsewhere
-  points: any[] = [];
-  planes: any[] = [];
+  // active chunk to drive this.entity (optional)
+  currentChunkIndex: number = 0;
 
-  // Curves: position
-  px!: Curve;
-  py!: Curve;
-  pz!: Curve;
+  // all curve-sets (one per chunk)
+  private chunks: CurveSet[] = [];
 
-  // Curves: forward/Z direction (used to compute target procedurally)
-  fx!: Curve;
-  fy!: Curve;
-  fz!: Curve;
-
-  // Optional curves: up vector (defaults to 0,1,0 if not used)
-  ux!: Curve;
-  uy!: Curve;
-  uz!: Curve;
-
-  // Optional curves: explicit target (only used if you tell it to)
-  tx!: Curve;
-  ty!: Curve;
-  tz!: Curve;
-
-  // Cached objects
-  lookAt!: Vec3;
-  up!: Vec3;
-
-  // UI (unused here)
-  div!: HTMLDivElement;
-  resumeFlythroughButton!: HTMLButtonElement;
-  pathSlider!: HTMLInputElement;
-
-  // flags
-  flyingThrough!: boolean;
-
-  // attributes
-  pathRoot?: Entity;
-
-  manualPathPoints?: Array<{
-    position: V3;
-    lookAt?: V3;
-    up?: V3;
-  }>;
-
-  duration: number = 10;
-  startTime: number = 0;
-
-  // config: if set, overrides dynamic look distance
-  private _fixedLookDist?: number;
-
-  // temp
+  // cache
+  // @ts-ignore
+  private lookAt!: Vec3;
+  // @ts-ignore
+  private up!: Vec3;
   private _tmpDir = new Vec3();
 
+  // config
+  duration: number = 10;
+  startTime: number = 0;
+  private _fixedLookDist?: number;
+
+  // optional attributes you had before
+  pathRoot?: Entity;
+
   initialize(): void {
-    this.createPath();
     this.time = math.clamp(this.startTime, 0, this.duration);
     this.lookAt = new Vec3();
     this.up = new Vec3(0, 1, 0);
-    this.flyingThrough = false;
   }
 
+  /** Drive the attached camera using currentChunkIndex + time */
   update(): void {
+    if (!this.chunks.length) return;
+
     const t = math.clamp(this.time, 0, 1);
+    const i = math.clamp(this.currentChunkIndex, 0, this.chunks.length - 1);
 
-    if (!this.px || !this.py || !this.pz) {
-      console.warn("CameraPath: position curves not initialized");
-      return;
+    const pos = this.getCurvePoint(i, t);
+    const tgt = this.getTarget(i, t, this._fixedLookDist);
+    const up = this.getUp(i, t);
+
+    this.entity.setPosition(pos);
+    this.entity.lookAt(tgt, up);
+  }
+
+  /** Load a single flat array (back-compat) as one chunk */
+  setPathFromGhData(
+    records: Array<{ O: any; Target?: any; Z?: any }>,
+    curveType = CURVE_SPLINE,
+    fixedLookDist?: number,
+  ): void {
+    this.setPathFromGhChunks([records], curveType, fixedLookDist);
+  }
+
+  /** Load many chunks: ghChunks = [ [ {O,Z,...}, ... ], [ ... ], ... ] */
+  setPathFromGhChunks(
+    ghChunks: Array<Array<{ O: any; Target?: any; Z?: any }>>,
+    curveType = CURVE_SPLINE,
+    fixedLookDist?: number,
+  ): void {
+    this._fixedLookDist = fixedLookDist;
+    this.chunks = [];
+
+    for (const records of ghChunks) {
+      const set = this._buildCurveSet(records, curveType);
+      if (set) this.chunks.push(set);
+    }
+  }
+
+  /** Change which chunk drives update()/the entity */
+  setActiveChunk(index: number) {
+    this.currentChunkIndex = math.clamp(
+      index | 0,
+      0,
+      Math.max(0, this.chunks.length - 1),
+    );
+  }
+
+  /** Helper: build one curve set from a record list */
+  private _buildCurveSet(
+    records: Array<{ O: any; Target?: any; Z?: any }>,
+    curveType = CURVE_SPLINE,
+  ): CurveSet | null {
+    if (!records || records.length < 2) {
+      console.warn("CameraPath: need at least 2 records per chunk");
+      return null;
     }
 
-    // position
-    const x = this.px.value(t);
-    const y = this.py.value(t);
-    const z = this.pz.value(t);
-    this.entity.setPosition(x, y, z);
+    const mk = () => {
+      const c = new Curve();
+      c.type = curveType;
+      return c;
+    };
+    const set: CurveSet = {
+      px: mk(),
+      py: mk(),
+      pz: mk(),
+      fx: mk(),
+      fy: mk(),
+      fz: mk(),
+      ux: mk(),
+      uy: mk(),
+      uz: mk(),
+      tx: mk(),
+      ty: mk(),
+      tz: mk(),
+      keyCount: records.length,
+    };
 
-    // target (procedural from direction curves)
-    this.getTargetFromTime(t, this.lookAt);
+    const v = (x: any) =>
+      x && typeof x === "object"
+        ? ("x" in x && "y" in x && "z" in x
+          ? { x: +x.x, y: +x.y, z: +x.z }
+          : Array.isArray(x) && x.length >= 3
+          ? { x: +x[0], y: +x[1], z: +x[2] }
+          : null)
+        : null;
 
-    // up (optional curves; else default)
-    if (this.ux && this.uy && this.uz) {
-      this.up.set(this.ux.value(t), this.uy.value(t), this.uz.value(t));
-    } else {
-      this.up.set(0, 1, 0);
+    // your axis remap
+    const mapPos = (p: V3) => ({ x: -p.x, y: p.z, z: p.y });
+    const mapDir = (d: V3) => ({ x: -d.x, y: d.z, z: d.y });
+
+    // pre-mapped positions for fallback dir
+    const P: V3[] = records.map((r) => {
+      const O = v(r.O);
+      return O ? mapPos(O) : { x: 0, y: 0, z: 0 };
+    });
+
+    const n = records.length;
+    for (let i = 0; i < n; i++) {
+      const t = i / (n - 1);
+
+      const Oraw = v(records[i].O);
+      if (!Oraw) continue;
+      const O = mapPos(Oraw);
+      set.px.add(t, O.x);
+      set.py.add(t, O.y);
+      set.pz.add(t, O.z);
+
+      const Zraw = v(records[i].Z);
+      if (Zraw) {
+        const D = mapDir(Zraw);
+        set.fx.add(t, D.x);
+        set.fy.add(t, D.y);
+        set.fz.add(t, D.z);
+      } else {
+        const j = Math.max(0, Math.min(n - 1, i < n - 1 ? i + 1 : i - 1));
+        const N = P[j];
+        set.fx.add(t, N.x - O.x);
+        set.fy.add(t, N.y - O.y);
+        set.fz.add(t, N.z - O.z);
+      }
+
+      const Traw = v(records[i].Target);
+      if (Traw) {
+        const Tm = mapPos(Traw);
+        set.tx.add(t, Tm.x);
+        set.ty.add(t, Tm.y);
+        set.tz.add(t, Tm.z);
+      } else {
+        set.tx.add(t, O.x);
+        set.ty.add(t, O.y);
+        set.tz.add(t, O.z);
+      }
+
+      // default up
+      set.ux.add(t, 0);
+      set.uy.add(t, 1);
+      set.uz.add(t, 0);
     }
 
-    this.entity.lookAt(this.lookAt, this.up);
+    return set;
   }
 
-  /** Allocate all curves (defaults to spline). */
-  private _allocCurves(curveMode = CURVE_SPLINE) {
-    // position
-    this.px = new Curve();
-    this.px.type = curveMode;
-    this.py = new Curve();
-    this.py.type = curveMode;
-    this.pz = new Curve();
-    this.pz.type = curveMode;
+  // ---------- Sampling by (chunkIndex, time) ----------
 
-    // forward (Z) direction
-    this.fx = new Curve();
-    this.fx.type = curveMode;
-    this.fy = new Curve();
-    this.fy.type = curveMode;
-    this.fz = new Curve();
-    this.fz.type = curveMode;
-
-    // optional up
-    this.ux = new Curve();
-    this.ux.type = curveMode;
-    this.uy = new Curve();
-    this.uy.type = curveMode;
-    this.uz = new Curve();
-    this.uz.type = curveMode;
-
-    // optional explicit target (kept for compatibility)
-    this.tx = new Curve();
-    this.tx.type = curveMode;
-    this.ty = new Curve();
-    this.ty.type = curveMode;
-    this.tz = new Curve();
-    this.tz.type = curveMode;
-  }
-
-  createPath(): void {
-    this._allocCurves(CURVE_SPLINE);
-
-    // If you want a test path, you can still populate here.
-    // Otherwise, call setPathFromGhData(...) after construction.
-  }
-
-  setTime(time: number): void {
-    this.time = time;
-    this.update();
-  }
-
-  getCurvePointFromTime(time: number, out?: Vec3): Vec3 {
+  getCurvePoint(index: number, time: number, out?: Vec3): Vec3 {
+    const s = this._set(index);
     const t = math.clamp(time, 0, 1);
     const v = out ?? new Vec3();
-    return v.set(this.px.value(t), this.py.value(t), this.pz.value(t));
+    return v.set(s.px.value(t), s.py.value(t), s.pz.value(t));
   }
 
-  getUpFromTime(time: number, out?: Vec3): Vec3 {
+  getUp(index: number, time: number, out?: Vec3): Vec3 {
+    const s = this._set(index);
     const t = math.clamp(time, 0, 1);
     const v = out ?? new Vec3();
-    if (!this.ux || !this.uy || !this.uz) return v.set(0, 1, 0);
-    return v.set(this.ux.value(t), this.uy.value(t), this.uz.value(t));
+    // if you later make up optional, keep default 0,1,0 here
+    return v.set(s.ux.value(t), s.uy.value(t), s.uz.value(t));
   }
 
   /**
-   * Target computed procedurally from forward direction curves.
-   * If _fixedLookDist is set, it is used; otherwise we estimate from local arc length.
+   * Target computed from forward (Z) curves.
+   * If fixedLookDist provided (arg or ctor-level), it’s used; else we
+   * estimate from local arc length.
    */
-  getTargetFromTime(time: number, out?: Vec3): Vec3 {
+  getTarget(
+    index: number,
+    time: number,
+    fixedLookDist?: number,
+    out?: Vec3,
+  ): Vec3 {
+    const s = this._set(index);
     const t = math.clamp(time, 0, 1);
     const v = out ?? new Vec3();
 
-    // pos(t)
-    const px = this.px.value(t), py = this.py.value(t), pz = this.pz.value(t);
+    const px = s.px.value(t), py = s.py.value(t), pz = s.pz.value(t);
 
-    // dir(t) — normalize (fallback to +Z if degenerate)
-    this._tmpDir.set(this.fx.value(t), this.fy.value(t), this.fz.value(t));
+    this._tmpDir.set(s.fx.value(t), s.fy.value(t), s.fz.value(t));
     if (this._tmpDir.lengthSq() < 1e-12) this._tmpDir.set(0, 0, 1);
     else this._tmpDir.normalize();
 
-    // lookDist(t): fixed or derived from local segment length
-    let lookDist = this._fixedLookDist;
+    let lookDist = fixedLookDist ?? this._fixedLookDist;
     if (lookDist == null) {
-      // Use a tiny epsilon based on key count if possible; otherwise a small constant
-      const keys = (this.px as any).keys as number[] | undefined;
-      const eps = keys && keys.length > 1 ? 1 / (keys.length - 1) : 1 / 100;
+      const eps = s.keyCount > 1 ? 1 / (s.keyCount - 1) : 1 / 100;
       const t2 = math.clamp(t + eps, 0, 1);
-      const nx = this.px.value(t2),
-        ny = this.py.value(t2),
-        nz = this.pz.value(t2);
+      const nx = s.px.value(t2), ny = s.py.value(t2), nz = s.pz.value(t2);
       lookDist = Math.max(0.001, Math.hypot(nx - px, ny - py, nz - pz));
     }
 
@@ -200,108 +247,19 @@ export class CameraPath extends Script {
     return v;
   }
 
-  /** Convenience: position + target (+ up) in one call */
-  getPoseFromTime(time: number) {
-    const position = this.getCurvePointFromTime(time);
-    const target = this.getTargetFromTime(time);
-    const up = this.getUpFromTime(time);
+  /** One-shot convenience */
+  getPose(index: number, time: number) {
+    const position = this.getCurvePoint(index, time);
+    const target = this.getTarget(index, time);
+    const up = this.getUp(index, time);
     return { position, target, up };
   }
 
-  /**
-   * Set curves directly from RC/Gh-like data.
-   * Each record supports:
-   *  - O: {x,y,z}            // camera/world position (required)
-   *  - Target?: {x,y,z}      // optional explicit target (kept for compat)
-   *  - Z?: {x,y,z}           // forward direction (preferred)
-   *
-   * Axis remap applied to BOTH position and direction:
-   *   map: { x:-x, y:z, z:y }
-   */
-  setPathFromGhData(
-    records: Array<{ O: any; Target?: any; Z?: any }>,
-    curveType = CURVE_SPLINE,
-    fixedLookDist?: number,
-  ): void {
-    if (!records || records.length < 2) {
-      console.warn("setPathFromGhData: need at least 2 records");
-      return;
-    }
+  // ---------- tiny helpers ----------
 
-    this._allocCurves(curveType);
-    this._fixedLookDist = fixedLookDist;
-
-    const n = records.length;
-
-    const v = (x: any) =>
-      x && typeof x === "object"
-        ? ("x" in x && "y" in x && "z" in x
-          ? { x: +x.x, y: +x.y, z: +x.z }
-          : Array.isArray(x) && x.length >= 3
-          ? { x: +x[0], y: +x[1], z: +x[2] }
-          : null)
-        : null;
-
-    const mapPos = (p: V3) => ({ x: -p.x, y: p.z, z: p.y });
-    const mapDir = (d: V3) => ({ x: -d.x, y: d.z, z: d.y });
-
-    // Pre-map positions (used for fallback direction and arc-length estimates)
-    const P: V3[] = records.map((r) => {
-      const O = v(r.O);
-      return O ? mapPos(O) : { x: 0, y: 0, z: 0 };
-    });
-
-    for (let i = 0; i < n; i++) {
-      const t = i / (n - 1);
-
-      // --- position keys ---
-      const Oraw = v(records[i].O);
-      if (!Oraw) continue;
-      const O = mapPos(Oraw);
-      this.px.add(t, O.x);
-      this.py.add(t, O.y);
-      this.pz.add(t, O.z);
-
-      // --- forward/Z direction keys ---
-      const Zraw = v(records[i].Z);
-      if (Zraw) {
-        const D = mapDir(Zraw);
-        this.fx.add(t, D.x);
-        this.fy.add(t, D.y);
-        this.fz.add(t, D.z);
-      } else {
-        // fallback: approximate forward from neighbor delta
-        const j = Math.max(0, Math.min(n - 1, i < n - 1 ? i + 1 : i - 1));
-        const N = P[j];
-        this.fx.add(t, N.x - O.x);
-        this.fy.add(t, N.y - O.y);
-        this.fz.add(t, N.z - O.z);
-      }
-
-      // --- optional explicit target (kept for compatibility only) ---
-      const Traw = v(records[i].Target);
-      if (Traw) {
-        const Tm = mapPos(Traw);
-        this.tx.add(t, Tm.x);
-        this.ty.add(t, Tm.y);
-        this.tz.add(t, Tm.z);
-      } else {
-        // add something to keep arrays consistent (won’t be used by default)
-        this.tx.add(t, O.x);
-        this.ty.add(t, O.y);
-        this.tz.add(t, O.z);
-      }
-
-      // --- up vector (optional; default 0,1,0) ---
-      this.ux.add(t, 0);
-      this.uy.add(t, 1);
-      this.uz.add(t, 0);
-    }
-  }
-
-  destroy(): void {
-    if (this.div && this.div.parentNode) {
-      this.div.parentNode.removeChild(this.div);
-    }
+  private _set(index: number): CurveSet {
+    if (!this.chunks.length) throw new Error("CameraPath: no chunks loaded");
+    const i = math.clamp(index | 0, 0, this.chunks.length - 1);
+    return this.chunks[i];
   }
 }
