@@ -33,7 +33,7 @@ const EPSILON = 0.0001;
 // const lerpRate = (damping, dt) => 1 - Math.pow(damping, dt * 1000);
 export const lerpRate = (damping, dt) => {
   // const t = 1 - Math.pow(damping, dt * 600);
-  const t = 1 - Math.pow(damping, dt * 500);
+  const t = 1 - Math.pow(damping, dt * 600);
   // const t = 1 - Math.pow(damping, dt * 400);
   // Fast ease-in-out - much more subtle curve
   return t < 0.5 ? 2 * t * t : 1 - 2 * (1 - t) * (1 - t);
@@ -123,6 +123,24 @@ class CameraControls extends Script {
   _cameraDist = 0;
 
   /**
+   * @type {number}
+   * @private
+   */
+  _targetFOV = 0;
+
+  /**
+   * @type {number}
+   * @private
+   */
+  _currentFOV = 0;
+
+  /**
+   * @type {boolean}
+   * @private
+   */
+  _animatingFOV = false;
+
+  /**
    * @type {Map<number, PointerEvent>}
    * @private
    */
@@ -157,12 +175,6 @@ class CameraControls extends Script {
    * @private
    */
   _panning = false;
-
-  /**
-   * @type {boolean}
-   * @private
-   */
-  _flying = false;
 
   /**
    * @type {boolean}
@@ -216,7 +228,7 @@ class CameraControls extends Script {
    * @description The scene size. The zoom, pan and fly speeds are relative to this size.
    * @type {number}
    */
-  sceneSize = 100;
+  sceneSize = 1;
 
   /**
    * Enable orbit camera controls.
@@ -235,14 +247,6 @@ class CameraControls extends Script {
    * @type {boolean}
    */
   enablePan = true;
-
-  /**
-   * @attribute
-   * @title Enable Fly
-   * @description Enable fly camera controls.
-   * @type {boolean}
-   */
-  enableFly = true;
 
   /**
    * @attribute
@@ -347,6 +351,14 @@ class CameraControls extends Script {
    */
   zoomScaleMin = 0;
 
+  /**
+   * @attribute
+   * @title FOV Damping
+   * @description The FOV animation damping. A higher value means more damping. A value of 0 means no damping.
+   * @type {number}
+   */
+  fovDamping = 0.98;
+
   initialize() {
     this._onWheel = this._onWheel.bind(this);
     this._onPointerDown = this._onPointerDown.bind(this);
@@ -363,6 +375,10 @@ class CameraControls extends Script {
     this.pitchRange = this._pitchRange ?? this.pitchRange;
     this.zoomMin = this._zoomMin ?? this.zoomMin;
     this.zoomMax = this._zoomMax ?? this.zoomMax;
+
+    // Initialize FOV values
+    this._currentFOV = this.entity.camera?.fov || 45;
+    this._targetFOV = this._currentFOV;
 
     this.on("destroy", this.destroy, this);
   }
@@ -491,11 +507,7 @@ class CameraControls extends Script {
    * @param {Vec3} position - The position to clamp.
    */
   _clampPosition(position) {
-    if (this._flying) {
-      tmpV1.set(0, 0, 0);
-    } else {
-      this._focusDir(tmpV1);
-    }
+    this._focusDir(tmpV1);
 
     // emit clamp event
     position.sub(tmpV1);
@@ -536,31 +548,13 @@ class CameraControls extends Script {
     if (event.shiftKey) {
       return true;
     }
-    if (!this.enableOrbit && !this.enableFly) {
-      return event.button === 0 || event.button === 1 || event.button === 2;
-    }
-    if (!this.enableOrbit || !this.enableFly) {
-      return event.button === 1 || event.button === 2;
-    }
-    return event.button === 1;
-  }
-
-  /**
-   * @private
-   * @param {PointerEvent} event - The pointer event.
-   * @returns {boolean} Whether the fly should start.
-   */
-  _isStartFly(event) {
-    if (!this.enableFly) {
-      return false;
-    }
-    if (!this.enableOrbit && !this.enablePan) {
+    if (!this.enableOrbit) {
       return event.button === 0 || event.button === 1 || event.button === 2;
     }
     if (!this.enableOrbit) {
-      return event.button === 0;
+      return event.button === 1 || event.button === 2;
     }
-    return event.button === 2;
+    return event.button === 1;
   }
 
   /**
@@ -573,7 +567,7 @@ class CameraControls extends Script {
     if (!this.enableOrbit) {
       return false;
     }
-    if (!this.enableFly && !this.enablePan) {
+    if (!this.enablePan) {
       return event.button === 0 || event.button === 1 || event.button === 2;
     }
     return event.button === 0;
@@ -587,32 +581,7 @@ class CameraControls extends Script {
     if (!this.enableOrbit) {
       return false;
     }
-    if (this._flying) {
-      this._flying = false;
-      this._focusDir(tmpV1);
-      this._origin.add(tmpV1);
-      this._position.add(tmpV1);
-    }
     this._orbiting = true;
-    return true;
-  }
-
-  /**
-   * @private
-   * @returns {boolean} Whether the switch to fly was successful.
-   */
-  _switchToFly() {
-    if (!this.enableFly) {
-      return false;
-    }
-    if (this._orbiting) {
-      this._orbiting = false;
-      this._zoomDist = this._cameraDist;
-      this._origin.copy(this.entity.getPosition());
-      this._position.copy(this._origin);
-      this._cameraTransform.setTranslate(0, 0, 0);
-    }
-    this._flying = true;
     return true;
   }
 
@@ -653,7 +622,6 @@ class CameraControls extends Script {
 
     const startTouchPan = this.enablePan && this._pointerEvents.size === 2;
     const startMousePan = this._isStartMousePan(event);
-    const startFly = this._isStartFly(event);
     const startOrbit = this._isStartOrbit(event);
 
     if (this._focusing) {
@@ -696,7 +664,7 @@ class CameraControls extends Script {
     if (this._pointerEvents.size === 1) {
       if (this._panning) {
         this._pan(tmpVa.set(event.clientX, event.clientY));
-      } else if (this._orbiting || this._flying) {
+      } else if (this._orbiting) {
         this._look(event);
       }
       return;
@@ -739,9 +707,6 @@ class CameraControls extends Script {
     if (this._orbiting) {
       this._orbiting = false;
     }
-    if (this._flying) {
-      this._flying = false;
-    }
   }
 
   /**
@@ -778,10 +743,6 @@ class CameraControls extends Script {
    * @param {number} dt - The delta time.
    */
   _move(dt) {
-    if (!this.enableFly) {
-      return;
-    }
-
     tmpV1.set(0, 0, 0);
     if (this._key.forward) {
       tmpV1.add(this.entity.forward);
@@ -896,15 +857,6 @@ class CameraControls extends Script {
    * @param {number} delta - The delta.
    */
   _zoom(delta) {
-    if (this._flying) {
-      if (this._dragging) {
-        return;
-      }
-      if (!this._switchToOrbit()) {
-        return;
-      }
-    }
-
     if (!this._camera) {
       return;
     }
@@ -930,7 +882,6 @@ class CameraControls extends Script {
    * @param {number} dt - The delta time.
    */
   _smoothTransform(dt) {
-    // console.log("SMOOTH TRANSFORM", dt);
     const ar = dt === -1
       ? 1
       : lerpRate(this._focusing ? this.focusDamping : this.rotateDamping, dt);
@@ -983,6 +934,40 @@ class CameraControls extends Script {
 
   /**
    * @private
+   * @param {number} dt - The delta time.
+   */
+  _smoothFOV(dt) {
+    if (!this._animatingFOV || !this._camera) {
+      return;
+    }
+
+    const a = dt === -1 ? 1 : lerpRate(this.fovDamping, dt);
+    this._currentFOV = math.lerp(this._currentFOV, this._targetFOV, a);
+
+    this._camera.fov = this._currentFOV;
+
+    // Check if animation is complete
+    const fovDelta = Math.abs(this._currentFOV - this._targetFOV);
+    if (fovDelta < EPSILON) {
+      this._animatingFOV = false;
+      this._currentFOV = this._targetFOV;
+      this._camera.fov = this._targetFOV;
+    }
+  }
+
+  /**
+   * @private
+   */
+  _cancelSmoothFOV() {
+    this._currentFOV = this._targetFOV;
+    if (this._camera) {
+      this._camera.fov = this._targetFOV;
+    }
+    this._animatingFOV = false;
+  }
+
+  /**
+   * @private
    */
   _updateTransform() {
     tmpM1.copy(this._baseTransform).mul(this._cameraTransform);
@@ -1001,21 +986,15 @@ class CameraControls extends Script {
     if (!this._camera) {
       return;
     }
-    if (this._flying) {
-      if (this._dragging) {
-        return;
-      }
-      if (!this._switchToOrbit()) {
-        return;
-      }
-    }
 
     if (start) {
       tmpV1.sub2(start, point);
       const elev =
         Math.atan2(tmpV1.y, Math.sqrt(tmpV1.x * tmpV1.x + tmpV1.z * tmpV1.z)) *
         math.RAD_TO_DEG;
+
       const azim = Math.atan2(tmpV1.x, tmpV1.z) * math.RAD_TO_DEG;
+
       this._clampAngles(this._dir.set(-elev, azim));
 
       this._origin.copy(point);
@@ -1078,6 +1057,28 @@ class CameraControls extends Script {
   }
 
   /**
+   * Animate the camera's field of view.
+   *
+   * @param {number} targetFOV - The target field of view in degrees.
+   * @param {boolean} [smooth=true] - Whether to animate smoothly or set immediately.
+   */
+  animateFOV(targetFOV, smooth = true) {
+    if (!this._camera) {
+      return;
+    }
+
+    this._targetFOV = targetFOV;
+
+    if (!smooth) {
+      this._currentFOV = targetFOV;
+      this._camera.fov = targetFOV;
+      this._animatingFOV = false;
+    } else {
+      this._animatingFOV = true;
+    }
+  }
+
+  /**
    * @param {CameraComponent} camera - The camera component.
    */
   attach(camera) {
@@ -1109,6 +1110,7 @@ class CameraControls extends Script {
 
     this._cancelSmoothZoom();
     this._cancelSmoothTransform();
+    this._cancelSmoothFOV();
 
     this._pointerEvents.clear();
     this._lastPinchDist = -1;
@@ -1135,9 +1137,8 @@ class CameraControls extends Script {
 
     this._move(dt);
 
-    if (!this._flying) {
-      this._smoothZoom(dt);
-    }
+    this._smoothZoom(dt);
+    this._smoothFOV(dt);
 
     this._smoothTransform(dt);
     this._updateTransform();
