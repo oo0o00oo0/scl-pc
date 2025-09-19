@@ -1,5 +1,5 @@
 import { useApp, useAppEvent } from "@playcanvas/react/hooks";
-import { Entity as PcEntity, Mat4, Vec4 } from "playcanvas";
+import { Entity as PcEntity, Mat4, Vec3, Vec4 } from "playcanvas";
 import { useEffect, useRef } from "react";
 
 const nearlyEquals = (
@@ -26,6 +26,7 @@ export const useRenderOnCameraChange = (
     cameraRect: Vec4;
     canvasWidth: number;
     canvasHeight: number;
+    cameraPosition: Vec3;
   }) => void,
 ) => {
   const app = useApp();
@@ -94,6 +95,7 @@ export const useRenderOnCameraChange = (
           cameraRect: entity.camera.rect,
           canvasWidth: app.graphicsDevice.canvas.width,
           canvasHeight: app.graphicsDevice.canvas.height,
+          cameraPosition: entity.getPosition(),
         };
         callback(camData);
       }

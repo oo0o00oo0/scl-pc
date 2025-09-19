@@ -1,6 +1,6 @@
 import { Entity } from "@playcanvas/react";
 import { Camera, Script } from "@playcanvas/react/components";
-import { Mat4, Vec4 } from "playcanvas";
+import { Mat4, Vec3, Vec4 } from "playcanvas";
 import { useRenderOnCameraChange } from "@/libs/hooks/use-render-on-camera-change";
 import { CameraPath } from "@/libs/scripts/camerapath";
 import { useEffect, useRef } from "react";
@@ -21,6 +21,7 @@ interface SplineCameraProps {
     cameraRect: Vec4;
     canvasWidth: number;
     canvasHeight: number;
+    cameraPosition: Vec3;
   }) => void;
   layoutData?: any;
 }

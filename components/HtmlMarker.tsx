@@ -7,6 +7,7 @@ type CamData = {
   cameraRect: Vec4;
   canvasWidth: number;
   canvasHeight: number;
+  cameraPosition: Vec3;
 };
 
 export const HtmlMarker = (
@@ -19,6 +20,9 @@ export const HtmlMarker = (
     title,
     pending,
     children,
+    minScale = 0.5,
+    maxScale = 2.0,
+    scaleDistance = { min: 5, max: 50 },
   }: {
     worldPosition: Vec3;
     size: number;
@@ -28,6 +32,9 @@ export const HtmlMarker = (
     useCamStore: () => CamData;
     title?: string | React.ReactElement;
     children: React.ReactNode;
+    minScale?: number;
+    maxScale?: number;
+    scaleDistance?: { min: number; max: number };
   },
 ) => {
   const ref = useRef<HTMLDivElement>(null);
@@ -39,7 +46,13 @@ export const HtmlMarker = (
   useEffect(() => {
     if (!isActive || !ref.current) return;
 
-    const { viewProjMatrix, cameraRect, canvasWidth, canvasHeight } = camData;
+    const {
+      viewProjMatrix,
+      cameraRect,
+      canvasWidth,
+      canvasHeight,
+      cameraPosition,
+    } = camData;
 
     const result = worldToScreenStandalone(
       worldPosition,
@@ -56,11 +69,37 @@ export const HtmlMarker = (
       return;
     }
 
+    // Calculate distance from camera to marker
+    const distance = cameraPosition.distance(worldPosition);
+
+    // Calculate scale based on distance (closer = larger, farther = smaller)
+    // Invert the distance mapping so closer objects are larger
+    const normalizedDistance = Math.max(
+      0,
+      Math.min(
+        1,
+        (distance - scaleDistance.min) /
+          (scaleDistance.max - scaleDistance.min),
+      ),
+    );
+    const currentScale = minScale +
+      (maxScale - minScale) * (1 - normalizedDistance);
+
+    const scaledSize = size * currentScale;
+
     ref.current.style.display = "block";
     ref.current.style.transform = `translate(${
-      result.screenCoord.x - size / 2
-    }px, ${result.screenCoord.y - size / 2}px)`;
-  }, [worldPosition, isActive, camData]);
+      result.screenCoord.x - scaledSize / 2
+    }px, ${result.screenCoord.y - scaledSize / 2}px) scale(${currentScale})`;
+  }, [
+    worldPosition,
+    isActive,
+    camData,
+    size,
+    minScale,
+    maxScale,
+    scaleDistance,
+  ]);
 
   return (
     <div
@@ -76,7 +115,7 @@ export const HtmlMarker = (
       ref={ref}
       style={{
         opacity: pending ? 0.2 : 1,
-        transition: "opacity 0.3s ease-in-out",
+        transition: "opacity 0.3s ease-in-out, transform 0.1s ease-out",
         pointerEvents: isActive ? "auto" : "none",
         position: "absolute",
         top: 0,
