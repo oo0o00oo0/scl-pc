@@ -250,9 +250,13 @@ export class CameraPath extends Script {
   /** One-shot convenience */
   getPose(index: number, time: number) {
     const position = this.getCurvePoint(index, time);
-    const target = this.getTarget(index, time);
-    const up = this.getUp(index, time);
-    return { position, target, up };
+    const target = this.getTarget(index, time, 1);
+    // const up = this.getUp(index, time);
+    return {
+      position,
+      target,
+      // up
+    };
   }
 
   // ---------- tiny helpers ----------

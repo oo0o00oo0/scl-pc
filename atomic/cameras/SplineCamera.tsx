@@ -66,11 +66,11 @@ const SplineCamera = ({
         (scrollPosition: number) => {
           const currentSectionIndex = active;
 
-          console.log("scrollPosition", scrollPosition);
-
           if (
             currentSectionIndex === null || currentSectionIndex === undefined
           ) return;
+
+          console.log(scrollPosition);
 
           // const sectionProgress = getSectionProgress(
           //   scrollPosition,
@@ -83,8 +83,6 @@ const SplineCamera = ({
           // const t = scrollPosition; // 0..1
 
           const { position, target } = path.getPose(0, scrollPosition);
-
-          console.log(position, target);
 
           controls.focus(target, position, true);
 
