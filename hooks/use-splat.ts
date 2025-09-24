@@ -44,7 +44,7 @@ const instantiateAsset = async (
   asset.ready(() => {
     parent.addComponent("gsplat", { asset });
     script.initializeMaterial(vertex, () => {
-      script.animateToOpacity(1, 1800, () => {
+      script.animateToOpacity(1, 1000, () => {
         if (onReady) onReady();
       });
     });
@@ -52,7 +52,7 @@ const instantiateAsset = async (
 };
 
 const unmountAsset = (asset: any, _parent: any, script: any) => {
-  script.animateToOpacity(0, 1800, () => {
+  script.animateToOpacity(0, 1000, () => {
     _parent.removeComponent("gsplat");
     asset.unload();
   });

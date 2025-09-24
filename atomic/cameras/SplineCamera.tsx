@@ -6,8 +6,12 @@ import { CameraPath } from "@/libs/scripts/camerapath";
 import { useEffect, useRef } from "react";
 // @ts-ignore
 import { CameraControls } from "@/libs/scripts/camera-controls-scroll.mjs";
-// import { getSectionProgress } from "@/utils/scrollUtils";
+// import { getSectionProgress, getCameraTrackProgress } from "@/utils/scrollUtils";
 import sceneStore from "@/state/sceneState";
+import {
+  getCameraTrackProgress,
+  getSectionProgress,
+} from "@/utils/scrollUtils";
 
 interface SplineCameraProps {
   camStore: any;
@@ -16,6 +20,13 @@ interface SplineCameraProps {
   controlsSettings: any;
   points?: any;
   ghData?: any;
+  cameraTrackData?: Array<{
+    cameraTrack: number;
+    sections: any[];
+    span: number;
+    startIndex: number;
+    endIndex: number;
+  }>;
   onChange?: (camData: {
     viewProjMatrix: Mat4;
     cameraRect: Vec4;
@@ -32,6 +43,7 @@ const SplineCamera = ({
   camSettings,
   ghData,
   controlsSettings,
+  cameraTrackData,
   onChange = () => {},
 }: SplineCameraProps) => {
   const { entity } = useRenderOnCameraChange(onChange);
@@ -57,32 +69,59 @@ const SplineCamera = ({
 
       path.setPathFromGhChunks(ghData);
 
-      const t0 = camStore.getState().normalizedScrollPosition ?? 0;
-      const { position: pos0, target: tgt0 } = path.getPose(0, t0);
-      controls.focus(tgt0, pos0, true);
+      // const t0 = camStore.getState().normalizedScrollPosition ?? 0;
+      // const { position: pos0, target: tgt0 } = path.getPose(0, t0);
+      // controls.focus(tgt0, pos0, true);
+      // console.log("LayoutData", layoutData);
 
       const unsubscribe = camStore.subscribe(
-        (state: any) => state.normalizedScrollPosition,
+        (state: any) => state.scrollPosition,
         (scrollPosition: number) => {
           const currentSectionIndex = active;
 
           if (
             currentSectionIndex === null || currentSectionIndex === undefined
           ) return;
+          // Use camera track progress if available (for AlUla), otherwise use section progress
+          let sectionProgress;
+          let currentTrack = 0;
 
-          console.log(scrollPosition);
+          if (cameraTrackData && cameraTrackData.length > 0) {
+            const trackResult = getCameraTrackProgress(
+              scrollPosition,
+              currentSectionIndex,
+              layoutData,
+              cameraTrackData,
+            );
 
-          // const sectionProgress = getSectionProgress(
-          //   scrollPosition,
-          //   currentSectionIndex,
-          //   layoutData,
-          // );
+            console.log("Track Result: ", trackResult);
+            sectionProgress = trackResult.progress;
+            currentTrack = trackResult.trackNumber;
+          } else {
+            sectionProgress = getSectionProgress(
+              scrollPosition,
+              currentSectionIndex,
+              layoutData,
+            );
+            console.log("Section Progress: ", sectionProgress);
+          }
 
-          // const i = Number(currentSectionIndex.split("-")[1]); // which track/chunk you want
-          // const t = sectionProgress; // 0..1
-          // const t = scrollPosition; // 0..1
+          console.log("currentTrack: ", currentTrack);
 
-          const { position, target } = path.getPose(0, scrollPosition);
+          // Use camera track number if available, otherwise use section index
+          let i; // which track/chunk you want
+          if (cameraTrackData && cameraTrackData.length > 0) {
+            i = currentTrack; // Use the camera track number
+          } else {
+            i = Number(currentSectionIndex.split("-")[2]); // Use section index for non-track mode
+          }
+          const t = sectionProgress; // 0..1
+
+          // console.log("i", i);
+          // // console.log("t", t);
+          // // const t = scrollPosition; // 0..1
+
+          const { position, target } = path.getPose(i, t);
 
           controls.focus(target, position, true);
 
@@ -92,7 +131,10 @@ const SplineCamera = ({
         },
       );
 
-      return unsubscribe;
+      return () => {
+        // controls.off("clamp:angles", clampAnglesHandler);
+        unsubscribe();
+      };
     }
 
     // if (points) {

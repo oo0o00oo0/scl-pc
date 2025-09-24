@@ -71,7 +71,8 @@ void main(void) {
   w = mix(minVal, 1.0, w);
 
   vec2 blend = mix(normalizedOffset, corner.offset, w);
-  vec3 blendColor = mix(vec3(0.95, 0.95, 0.96), prepareOutputFromGamma(max(clr.xyz, 0.0)), w);
+  // vec3 blendColor = mix(vec3(0.95, 0.95, 0.96), prepareOutputFromGamma(max(clr.xyz, 0.0)), w);
+  vec3 blendColor = prepareOutputFromGamma(max(clr.xyz, 0.0));
 
   gl_Position = center.proj + vec4(blend, 0, 0);
   gaussianUV = corner.uv;
