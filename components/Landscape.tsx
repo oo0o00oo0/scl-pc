@@ -16,6 +16,7 @@ const Landscape = ({
   updateProgress,
   onReady,
   load = false,
+  scaleMult = 1,
   transform,
 }: {
   active: boolean;
@@ -25,6 +26,7 @@ const Landscape = ({
   onReady: (url: string) => void;
   //
   delay?: number;
+  scaleMult?: number;
   transform?: Transform | undefined;
   opacityOverride?: number;
 }) => {
@@ -34,6 +36,7 @@ const Landscape = ({
     updateProgress,
     onReady,
     active,
+    scaleMult,
   );
 
   const { position, rotation, scale } = transform || {};

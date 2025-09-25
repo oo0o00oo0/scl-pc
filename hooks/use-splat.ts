@@ -64,6 +64,7 @@ const useSplat = (
   updateProgress: (meta: AssetMeta, key: string) => void,
   onReady: (url: string) => void,
   active: boolean,
+  scaleMult: number,
 ) => {
   const parent_ref = useRef<PcEntity | null>(null);
   const script_ref = useRef<LandscapeScript | null>(null);
@@ -73,6 +74,15 @@ const useSplat = (
   const app = useApp();
 
   const { data: asset } = useDelayedSplat(url, load, updateProgress);
+
+  const t = useRef(null);
+
+  useEffect(() => {
+    if (active && t.current !== scaleMult) {
+      script_ref.current?.animateToScale(scaleMult, 400);
+      t.current == scaleMult;
+    }
+  }, [scaleMult, active]);
 
   useEffect(() => {
     if (!app || !parent_ref.current || !asset) return;

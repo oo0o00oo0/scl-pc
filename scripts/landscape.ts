@@ -3,43 +3,80 @@ import { easeInOutQuad } from "../utils";
 
 class LandscapeScript extends Script {
   private animating: boolean = false;
+  private animatingScale: boolean = false;
+
   private targetOpacity: number = 0;
   private currentOpacity: number = 0;
   private startOpacity: number = 0;
   private animationDuration: number = 50;
+  private scaleAnimationDuration: number = 50;
   private elapsedTime: number = 0;
   private onComplete: () => void = () => {};
   private material: any;
   private _opacityOverride: number = 1;
+  //
+
+  private targetScale: number = 0;
+  private currentScale: number = 0;
+  private startScale: number = 0;
 
   // initialize() {
   // }
 
   update(dt: number) {
-    if (!this.animating) return;
+    if (this.animating) {
+      this.elapsedTime += dt * 1000;
+      const progress = Math.min(this.elapsedTime / this.animationDuration, 1);
 
-    this.elapsedTime += dt * 1000;
-    const progress = Math.min(this.elapsedTime / this.animationDuration, 1);
+      const easedProgress = easeInOutQuad(progress);
 
-    const easedProgress = easeInOutQuad(progress);
+      this.currentOpacity = this.startOpacity +
+        (this.targetOpacity - this.startOpacity) * easedProgress;
 
-    this.currentOpacity = this.startOpacity +
-      (this.targetOpacity - this.startOpacity) * easedProgress;
+      const reachedTarget = progress >= 1;
 
-    const reachedTarget = progress >= 1;
+      if (reachedTarget) {
+        this.animating = false;
+        this.currentOpacity = this.targetOpacity;
 
-    if (reachedTarget) {
-      this.animating = false;
-      this.currentOpacity = this.targetOpacity;
-      this.onComplete?.();
+        this.onComplete?.();
+      }
+
+      this.material.setParameter(
+        "uSplatOpacity",
+        this.currentOpacity * this._opacityOverride,
+      );
+      this.app.renderNextFrame = true;
     }
 
-    this.material.setParameter(
-      "uSplatOpacity",
-      this.currentOpacity * this._opacityOverride,
-    );
+    if (this.animatingScale) {
+      this.elapsedTime += dt * 1000;
+      const progress = Math.min(
+        this.elapsedTime / this.scaleAnimationDuration,
+        1,
+      );
 
-    this.app.renderNextFrame = true;
+      const easedProgress = easeInOutQuad(progress);
+
+      this.currentScale = this.startScale +
+        (this.targetScale - this.startScale) * easedProgress;
+
+      const reachedTarget = progress >= 1;
+
+      if (reachedTarget) {
+        this.animatingScale = false;
+        this.currentScale = this.targetScale;
+
+        this.onComplete?.();
+      }
+
+      this.material.setParameter(
+        "uSplatScale",
+        this.currentScale,
+      );
+
+      this.app.renderNextFrame = true;
+    }
   }
 
   public animateToOpacity(
@@ -56,12 +93,28 @@ class LandscapeScript extends Script {
     this.animating = true;
   }
 
+  public animateToScale(
+    targetScale: number,
+    durationMs: number = 1000,
+  ): void {
+    if (!this.material) return;
+    if (this.currentScale === targetScale) return;
+
+    this.targetScale = Math.max(0, Math.min(1, targetScale));
+    this.scaleAnimationDuration = Math.max(16, durationMs);
+
+    this.startScale = this.currentScale;
+    this.elapsedTime = 0;
+    this.animatingScale = true;
+  }
+
   public initializeMaterial(vertex: string, onInitialize?: () => void): void {
     const gsplatComponent = this.entity.findComponent("gsplat") as any;
     const material = gsplatComponent?.material;
 
     material.getShaderChunks("glsl").set("gsplatVS", vertex);
     material.setParameter("uSplatOpacity", 0);
+    material.setParameter("uSplatOpacity", 1);
 
     this.material = material;
 

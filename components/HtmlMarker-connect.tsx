@@ -101,7 +101,7 @@ export const HtmlMarkerConnect = (
     worldPosition: Vec3;
     size?: number;
     isActive: boolean;
-    onClick: () => void;
+    onClick?: () => void;
     useCamStore: () => CamData;
     label: any;
     anchorPoint?: AnchorPoint;
@@ -317,7 +317,7 @@ export const HtmlMarkerConnect = (
             whiteSpace: "nowrap",
           }}
         >
-          {label.name}
+          {label}
         </div>
 
         {/* Marker SVG */}

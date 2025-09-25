@@ -1,11 +1,11 @@
 import { useEffect, useRef } from "react";
 import type { CamState } from "@/libs/types/camera";
 import { Script, Vec2, Vec3 } from "playcanvas";
-import camStore from "@/state/camStore";
 import { SCENE_CONFIG } from "@/data/articles/3DUXD/3DUXD-config";
 import { getCameraInterpolationData } from "@/utils/scrollUtils";
 
 import { clampAzimuthAngle } from "../utils/cameraUtils";
+import { scrollStore } from "@/components/ScrollListener";
 
 type ScrollCameraScript = Script & {
   focus: (target: Vec3, position: Vec3, immediate?: boolean) => void;
@@ -45,7 +45,7 @@ const useScrollCamera = (
     cameraControlsScript.on("clamp:angles", clampAnglesHandler);
 
     if (layoutData && isScrollTarget) {
-      const sub = camStore.subscribe(
+      const sub = scrollStore.subscribe(
         (state) => state.scrollPosition,
         (scrollPosition: number) => {
           const interpolationData = getCameraInterpolationData(

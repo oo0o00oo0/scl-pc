@@ -13,7 +13,8 @@ mediump vec4 discardVec = vec4(0.0, 0.0, 2.0, 1.0);
 varying float vLinearDepth;
 #endif
 
-uniform float uSplatOpacity;   
+uniform float uSplatOpacity;
+uniform float uSplatScale;   
 // Overall scaling factor for splat size
 // Normalized logistic S-curve in [0,1] with center m and slope k.
 // m in [0,1] sets where the curve is 0.5; k controls steepness (lower = softer).
@@ -62,15 +63,16 @@ void main(void) {
 
   clipCorner(corner, clr.w);
 
-  float normalizedSize = 0.0;
+  float normalizedSize = 0.1;
   vec2 normalizedOffset = normalize(corner.offset) * normalizedSize;
 
   float w = logistic01(uSplatOpacity, /*m*/ 0.9, /*k*/ 8.0);
 
   float minVal = 0.05;
+
   w = mix(minVal, 1.0, w);
 
-  vec2 blend = mix(normalizedOffset, corner.offset, w);
+  vec2 blend = mix(normalizedOffset, corner.offset, w * uSplatScale);
   // vec3 blendColor = mix(vec3(0.95, 0.95, 0.96), prepareOutputFromGamma(max(clr.xyz, 0.0)), w);
   vec3 blendColor = prepareOutputFromGamma(max(clr.xyz, 0.0));
 

@@ -586,7 +586,6 @@ class CameraControls extends Script {
   }
 
   customEvent(dirX, dirY) {
-    console.log("customEvent", dirX, dirY);
     if (this._orbiting) {
       return;
     }
