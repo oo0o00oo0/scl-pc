@@ -79,6 +79,7 @@ const useSplat = (
 
   useEffect(() => {
     if (active && t.current !== scaleMult) {
+      console.log();
       script_ref.current?.animateToScale(scaleMult, 400);
       t.current == scaleMult;
     }
