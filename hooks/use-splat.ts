@@ -75,13 +75,13 @@ const useSplat = (
 
   const { data: asset } = useDelayedSplat(url, load, updateProgress);
 
-  const t = useRef(null);
+  const t = useRef<number | null>(null);
 
   useEffect(() => {
     if (active && t.current !== scaleMult) {
       console.log();
       script_ref.current?.animateToScale(scaleMult, 400);
-      t.current == scaleMult;
+      t.current = scaleMult;
     }
   }, [scaleMult, active]);
 

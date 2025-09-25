@@ -317,7 +317,7 @@ export const HtmlMarkerConnect = (
             whiteSpace: "nowrap",
           }}
         >
-          {label}
+          {label?.name || label}
         </div>
 
         {/* Marker SVG */}
