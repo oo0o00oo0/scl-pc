@@ -8,7 +8,7 @@ import { useEffect, useRef } from "react";
 import { CameraControls } from "@/libs/scripts/camera-controls-scroll.mjs";
 // import { getSectionProgress, getCameraTrackProgress } from "@/utils/scrollUtils";
 import {
-  getCameraTrackProgress,
+  getCurrentSectionIndex,
   getSectionProgress,
 } from "@/utils/scrollUtils";
 import { scrollStore } from "@/components/ScrollListener";
@@ -42,13 +42,11 @@ const SplineCamera = ({
   camSettings,
   ghData,
   controlsSettings,
-  cameraTrackData,
   onChange = () => {},
 }: SplineCameraProps) => {
   const { entity } = useRenderOnCameraChange(onChange);
   const scriptRef = useRef<CameraPath | null>(null);
 
-  const currentSectionIndex = scrollStore((s) => s.currentSectionIndex);
   const layoutData = scrollStore((s) => s.layoutData);
 
   const controlsScriptRef = useRef<CameraControls | null>(null);
@@ -66,10 +64,14 @@ const SplineCamera = ({
   }, [camState]);
 
   useEffect(() => {
+    if (controlsScriptRef.current) {
+      setControlsScript(controlsScriptRef.current);
+    }
+  }, [controlsScriptRef.current]);
+
+  useEffect(() => {
     if (!layoutData) return;
     if (ghData) {
-      setControlsScript(controlsScriptRef.current);
-
       const controls = controlsScriptRef.current;
       const path = scriptRef.current;
       if (!controls || !path) return;
@@ -77,45 +79,21 @@ const SplineCamera = ({
       path.setPathFromGhChunks(ghData);
 
       const unsubscribe = scrollStore.subscribe(
-        (state: any) => state.scrollPosition,
-        (scrollPosition: number) => {
-          if (
-            currentSectionIndex === null || currentSectionIndex === undefined
-          ) return;
+        (s: any) => s.sectionProgress,
+        (sectionProgress: {
+          progress: number;
+          sectionIndex: string;
+        }) => {
+          const { progress, sectionIndex } = sectionProgress;
 
-          // Use camera track progress if available (for AlUla), otherwise use section progress
-          let sectionProgress;
-          let currentTrack = 0;
+          const i = sectionIndex.split("-")[2];
+          console.log("sectionIndex", sectionIndex);
+          console.log("progress", progress);
 
-          if (cameraTrackData && cameraTrackData.length > 0) {
-            const trackResult = getCameraTrackProgress(
-              scrollPosition,
-              currentSectionIndex,
-              layoutData,
-              cameraTrackData,
-            );
-
-            sectionProgress = trackResult.progress;
-            currentTrack = trackResult.trackNumber;
-          } else {
-            sectionProgress = getSectionProgress(
-              scrollPosition,
-              currentSectionIndex,
-              layoutData,
-            );
-            console.log("Section Progress: ", sectionProgress);
-          }
-
-          // Use camera track number if available, otherwise use section index
-          let i; // which track/chunk you want
-          if (cameraTrackData && cameraTrackData.length > 0) {
-            i = currentTrack; // Use the camera track number
-          } else {
-            i = Number(currentSectionIndex.split("-")[2]); // Use section index for non-track mode
-          }
-          const t = sectionProgress; // 0..1
-
-          const { position, target } = path.getPose(i, t);
+          const { position, target } = path.getPose(
+            Number(i),
+            progress,
+          );
 
           controls.focus(target, position, true);
         },
@@ -125,7 +103,7 @@ const SplineCamera = ({
         unsubscribe();
       };
     }
-  }, [camStore, setControlsScript, layoutData, currentSectionIndex]);
+  }, [camStore, layoutData]);
 
   return (
     <Entity

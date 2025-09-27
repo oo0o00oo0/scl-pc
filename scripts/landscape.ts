@@ -70,6 +70,7 @@ class LandscapeScript extends Script {
         this.onComplete?.();
       }
 
+      console.log();
       this.material.setParameter(
         "uSplatScale",
         this.currentScale,
@@ -79,26 +80,28 @@ class LandscapeScript extends Script {
     }
   }
 
-  public animateToOpacity(
+  //
+  public async animateToOpacity(
     targetOpacity: number,
     durationMs: number = 1000,
+    delayMs: number = 0,
     onComplete: () => void,
-  ): void {
+  ): Promise<void> {
     this.onComplete = onComplete;
     this.targetOpacity = Math.max(0, Math.min(1, targetOpacity));
     this.animationDuration = Math.max(16, durationMs);
-
+    await new Promise((resolve) => setTimeout(resolve, delayMs));
     this.startOpacity = this.currentOpacity;
     this.elapsedTime = 0;
     this.animating = true;
   }
+  //
 
   public animateToScale(
     targetScale: number,
     durationMs: number = 1000,
   ): void {
     if (!this.material) return;
-    if (this.currentScale === targetScale) return;
 
     this.targetScale = Math.max(0, Math.min(1, targetScale));
     this.scaleAnimationDuration = Math.max(16, durationMs);
@@ -108,13 +111,15 @@ class LandscapeScript extends Script {
     this.animatingScale = true;
   }
 
+  //
+
   public initializeMaterial(vertex: string, onInitialize?: () => void): void {
     const gsplatComponent = this.entity.findComponent("gsplat") as any;
     const material = gsplatComponent?.material;
 
     material.getShaderChunks("glsl").set("gsplatVS", vertex);
     material.setParameter("uSplatOpacity", 0);
-    material.setParameter("uSplatOpacity", 1);
+    material.setParameter("uSplatScale", 1);
 
     this.material = material;
 
