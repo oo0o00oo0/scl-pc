@@ -6,11 +6,6 @@ import { CameraPath } from "@/libs/scripts/camerapath";
 import { useEffect, useRef } from "react";
 // @ts-ignore
 import { CameraControls } from "@/libs/scripts/camera-controls-scroll.mjs";
-// import { getSectionProgress, getCameraTrackProgress } from "@/utils/scrollUtils";
-import {
-  getCurrentSectionIndex,
-  getSectionProgress,
-} from "@/utils/scrollUtils";
 import { scrollStore } from "@/components/ScrollListener";
 
 interface SplineCameraProps {
@@ -55,6 +50,8 @@ const SplineCamera = ({
   const setControlsScript = camStore((s: any) => s.setControlsScript);
 
   useEffect(() => {
+    console.log("camState", camState);
+
     if (camState) {
       const controls = controlsScriptRef.current;
       if (!controls) return;
@@ -87,8 +84,6 @@ const SplineCamera = ({
           const { progress, sectionIndex } = sectionProgress;
 
           const i = sectionIndex.split("-")[2];
-          console.log("sectionIndex", sectionIndex);
-          console.log("progress", progress);
 
           const { position, target } = path.getPose(
             Number(i),

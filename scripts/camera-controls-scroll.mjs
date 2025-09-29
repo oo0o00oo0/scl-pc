@@ -563,7 +563,6 @@ class CameraControls extends Script {
    * @private
    */
   _isStartOrbit(event) {
-    console.log("isStartOrbit", this.enableOrbit);
     if (!this.enableOrbit) {
       return false;
     }
