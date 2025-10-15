@@ -110,12 +110,6 @@ const useSplat = (
       isInstantiated.current = false;
     }
 
-    console.log(
-      "isInstantiated.current",
-      isInstantiated.current,
-      url.split("/").pop(),
-    );
-
     return () => {
       if (isInstantiated.current && asset) {
         unmountAsset(asset, parent, script);

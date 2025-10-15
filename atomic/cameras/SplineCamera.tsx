@@ -50,8 +50,9 @@ const SplineCamera = ({
   const setControlsScript = camStore((s: any) => s.setControlsScript);
 
   useEffect(() => {
-    console.log("camState", camState);
 
+
+    
     if (camState) {
       const controls = controlsScriptRef.current;
       if (!controls) return;

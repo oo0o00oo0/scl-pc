@@ -26,7 +26,6 @@ const CameraControls = (
       canvasWidth: number;
       canvasHeight: number;
     }) => void;
-    layoutData?: any;
     CameraControlsScript: PcScript;
   },
 ) => {

@@ -37,6 +37,8 @@ const Landscape = ({
     scriptKey,
   );
 
+  console.log("URL", url);
+
   return (
     <Entity
       position={position}
